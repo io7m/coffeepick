@@ -78,7 +78,7 @@ public final class CoffeePickShellCommandCatalogList implements CoffeePickShellC
         description.version(),
         description.vm(),
         Double.valueOf((double) description.archiveSize() / 1_000_000.0),
-        description.tags().stream().collect(Collectors.joining(" ")));
+        description.tags().stream().sorted().collect(Collectors.joining(" ")));
     }
   }
 

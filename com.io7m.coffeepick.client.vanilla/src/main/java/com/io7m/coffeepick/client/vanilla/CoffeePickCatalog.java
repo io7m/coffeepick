@@ -105,7 +105,7 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
   private void removeRepository(
     final RuntimeRepositoryType repository)
   {
-    LOG.debug("shutting down repository {} ({})", repository.name(), repository.uri());
+    LOG.info("shutting down repository {} ({})", repository.name(), repository.uri());
 
     final var uri = repository.uri();
     final var runtimes = this.repository_runtimes.getOrDefault(uri, Map.of());
@@ -121,7 +121,7 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
   private void addRepository(
     final RuntimeRepositoryType repository)
   {
-    LOG.debug("setting up repository {} ({})", repository.name(), repository.uri());
+    LOG.info("setting up repository {} ({})", repository.name(), repository.uri());
 
     final var uri = repository.uri();
 
