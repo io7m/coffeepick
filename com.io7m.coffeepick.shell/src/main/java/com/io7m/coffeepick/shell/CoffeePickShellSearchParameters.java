@@ -67,8 +67,8 @@ public final class CoffeePickShellSearchParameters
     final var separator = System.lineSeparator();
     final var builder = CoffeePickSearch.builder();
     for (final var parameter : parameters) {
-      final var pieces = List.of(parameter.split(":"));
-      if (pieces.size() != 2) {
+      final var colon = parameter.indexOf(':');
+      if (colon == -1 || parameter.length() <= colon) {
         throw new IllegalArgumentException(
           new StringBuilder(64)
             .append("Unparseable search parameter.")
@@ -81,8 +81,8 @@ public final class CoffeePickShellSearchParameters
             .toString());
       }
 
-      final var attribute = pieces.get(0);
-      final var value = pieces.get(1);
+      final var attribute = parameter.substring(0, colon);
+      final var value = parameter.substring(colon + 1);
 
       if (PARSERS_BY_NAME.containsKey(attribute)) {
         PARSERS_BY_NAME.get(attribute).parse(builder, value);
