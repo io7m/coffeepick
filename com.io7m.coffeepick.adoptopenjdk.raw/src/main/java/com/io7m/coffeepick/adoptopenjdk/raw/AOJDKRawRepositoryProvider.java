@@ -33,6 +33,20 @@ import java.util.Objects;
 public final class AOJDKRawRepositoryProvider implements RuntimeRepositoryProviderType
 {
   /**
+   * The URI of the provider.
+   */
+
+  public static final URI PROVIDER_URI =
+    URI.create("urn:net.adoptopenjdk.raw");
+
+  /**
+   * The name of the provider.
+   */
+
+  public static final String PROVIDER_NAME =
+    "net.adoptopenjdk.raw";
+
+  /**
    * Construct a provider.
    */
 
@@ -44,13 +58,13 @@ public final class AOJDKRawRepositoryProvider implements RuntimeRepositoryProvid
   @Override
   public URI uri()
   {
-    return URI.create("https://www.github.com/AdoptOpenJDK/");
+    return PROVIDER_URI;
   }
 
   @Override
   public String name()
   {
-    return "adoptopenjdk.raw";
+    return PROVIDER_NAME;
   }
 
   @Override

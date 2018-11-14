@@ -31,6 +31,12 @@ import java.util.Set;
 public interface RuntimeDescriptionType
 {
   /**
+   * @return The repository to which this runtime belongs
+   */
+
+  URI repository();
+
+  /**
    * @return The runtime version
    */
 

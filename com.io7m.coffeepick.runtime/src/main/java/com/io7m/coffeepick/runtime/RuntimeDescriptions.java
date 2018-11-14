@@ -32,6 +32,8 @@ public final class RuntimeDescriptions
 {
   private static final String COFFEEPICK_FORMAT_VERSION =
     "coffeepick.formatVersion";
+  private static final String COFFEEPICK_RUNTIME_REPOSITORY =
+    "coffeepick.runtimeRepository";
   private static final String COFFEEPICK_RUNTIME_VERSION =
     "coffeepick.runtimeVersion";
   private static final String COFFEEPICK_RUNTIME_PLATFORM =
@@ -105,6 +107,8 @@ public final class RuntimeDescriptions
       COFFEEPICK_RUNTIME_ARCHIVE_SIZE, Long.toUnsignedString(description.archiveSize()));
     properties.setProperty(
       COFFEEPICK_RUNTIME_ARCHIVE_URI, description.archiveURI().toString());
+    properties.setProperty(
+      COFFEEPICK_RUNTIME_REPOSITORY, description.repository().toString());
     properties.setProperty(
       COFFEEPICK_RUNTIME_TAGS, description.tags().stream().collect(Collectors.joining(" ")));
     properties.setProperty(
@@ -189,6 +193,13 @@ public final class RuntimeDescriptions
       exception = accumulateException(exception, e);
     }
 
+    URI repository = null;
+    try {
+      repository = parseRepositoryURI(properties);
+    } catch (final IOException e) {
+      exception = accumulateException(exception, e);
+    }
+
     String platform = null;
     try {
       platform = parsePlatform(properties);
@@ -222,6 +233,7 @@ public final class RuntimeDescriptions
       .setArchiveSize(archive_size)
       .setArchiveURI(archive_uri)
       .setPlatform(platform)
+      .setRepository(repository)
       .setTags(tags)
       .setVm(vm)
       .setVersion(version)
@@ -311,6 +323,33 @@ public final class RuntimeDescriptions
     throws IOException
   {
     return requireField(properties, COFFEEPICK_RUNTIME_VM);
+  }
+
+  private static URI parseRepositoryURI(
+    final Properties properties)
+    throws IOException
+  {
+    final var text = requireField(properties, COFFEEPICK_RUNTIME_REPOSITORY);
+
+    try {
+      return new URI(text);
+    } catch (final URISyntaxException e) {
+      final var separator = System.lineSeparator();
+      throw new IOException(
+        new StringBuilder(64)
+          .append("Unparseable URI")
+          .append(separator)
+          .append("  Field: ")
+          .append(COFFEEPICK_RUNTIME_REPOSITORY)
+          .append(separator)
+          .append("  Expected: A URI")
+          .append(separator)
+          .append("  Received: ")
+          .append(text)
+          .append(separator)
+          .toString(),
+        e);
+    }
   }
 
   private static URI parseArchiveURI(

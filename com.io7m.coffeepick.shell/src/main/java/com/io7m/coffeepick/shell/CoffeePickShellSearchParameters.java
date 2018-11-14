@@ -33,6 +33,7 @@ public final class CoffeePickShellSearchParameters
 {
   private static final List<AttributeParserType> PARSERS =
     List.of(
+      new AttributeRepository(),
       new AttributeArchitecture(),
       new AttributeArchiveSize(),
       new AttributeArchiveURI(),
@@ -175,6 +176,28 @@ public final class CoffeePickShellSearchParameters
       final String value)
     {
       builder.setVm(value);
+    }
+  }
+
+  private static final class AttributeRepository implements AttributeParserType
+  {
+    AttributeRepository()
+    {
+
+    }
+
+    @Override
+    public String name()
+    {
+      return "repository";
+    }
+
+    @Override
+    public void parse(
+      final CoffeePickSearch.Builder builder,
+      final String value)
+    {
+      builder.setRepository(URI.create(value));
     }
   }
 

@@ -60,13 +60,14 @@ public final class CoffeePickShellCommandCatalogList implements CoffeePickShellC
     final Map<String, RuntimeDescription> runtimes)
   {
     writer.printf(
-      "%-70s | %-8s | %-8s | %-8s | %-8s | %-10s | %s\n",
+      "%-70s | %-8s | %-8s | %-8s | %-8s | %-10s | %-32s | %s\n",
       "ID",
       "Arch",
       "Platform",
       "Version",
       "VM",
       "Size",
+      "Repository",
       "Tags");
 
     runtimes.values()
@@ -76,13 +77,14 @@ public final class CoffeePickShellCommandCatalogList implements CoffeePickShellC
                 .thenComparing(RuntimeDescription::platform))
       .forEach(description -> {
         writer.printf(
-          "%-70s | %-8s | %-8s | %-8s | %-8s | %-8.2fMB | %s\n",
+          "%-70s | %-8s | %-8s | %-8s | %-8s | %-8.2fMB | %-32s | %s\n",
           description.id(),
           description.architecture(),
           description.platform(),
           description.version(),
           description.vm(),
           Double.valueOf((double) description.archiveSize() / 1_000_000.0),
+          description.repository(),
           description.tags().stream().sorted().collect(Collectors.joining(" ")));
       });
   }

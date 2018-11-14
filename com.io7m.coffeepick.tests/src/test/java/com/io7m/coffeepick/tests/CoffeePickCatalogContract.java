@@ -92,6 +92,7 @@ public abstract class CoffeePickCatalogContract
 
     final var description =
       RuntimeDescription.builder()
+        .setRepository(URI.create("urn:example"))
         .setArchitecture("x64")
         .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
         .setArchiveSize(100L)
@@ -129,6 +130,7 @@ public abstract class CoffeePickCatalogContract
 
     final var description =
       RuntimeDescription.builder()
+        .setRepository(URI.create("urn:example"))
         .setArchitecture("x64")
         .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
         .setArchiveSize(100L)

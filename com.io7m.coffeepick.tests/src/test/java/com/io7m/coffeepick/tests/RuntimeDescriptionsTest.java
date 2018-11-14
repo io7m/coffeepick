@@ -63,6 +63,8 @@ public final class RuntimeDescriptionsTest
         "SHA-256", description_0.archiveHash().algorithm());
       Assertions.assertEquals(
         "https://www.io7m.com/", description_0.archiveURI().toString());
+      Assertions.assertEquals(
+        "urn:example", description_0.repository().toString());
 
       final var output =
         RuntimeDescriptions.serializeToProperties(description_0);
@@ -127,6 +129,44 @@ public final class RuntimeDescriptionsTest
           () -> RuntimeDescriptions.parseFromProperties(properties));
 
       Assertions.assertTrue(ex.getMessage().contains("URI"));
+    }
+  }
+
+  @Test
+  public void testMissingRepositoryURI()
+    throws Exception
+  {
+    try (var stream = resource("trivial.properties")) {
+      final var properties = new Properties();
+      properties.load(stream);
+
+      properties.remove("coffeepick.runtimeRepository");
+
+      final var ex =
+        Assertions.assertThrows(
+          IOException.class,
+          () -> RuntimeDescriptions.parseFromProperties(properties));
+
+      Assertions.assertTrue(ex.getMessage().contains("Repository"));
+    }
+  }
+
+  @Test
+  public void testBrokenRepositoryURI()
+    throws Exception
+  {
+    try (var stream = resource("trivial.properties")) {
+      final var properties = new Properties();
+      properties.load(stream);
+
+      properties.setProperty("coffeepick.runtimeRepository", " ");
+
+      final var ex =
+        Assertions.assertThrows(
+          IOException.class,
+          () -> RuntimeDescriptions.parseFromProperties(properties));
+
+      Assertions.assertTrue(ex.getMessage().contains("Repository"));
     }
   }
 

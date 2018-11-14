@@ -29,6 +29,8 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Objects;
 
+import static com.io7m.coffeepick.adoptopenjdk.raw.AOJDKRawRepositoryProvider.PROVIDER_URI;
+
 /**
  * Resolve a list of archives. A resolver takes a list of archive descriptions parsed from the
  * AdoptOpenJDK git repository and turns them into runtime descriptions by transforming
@@ -141,6 +143,7 @@ public final class AOJDKArchiveResolver
       final var hash = this.fetchHash(archive.archiveChecksumURI());
 
       final var builder = RuntimeDescription.builder();
+      builder.setRepository(PROVIDER_URI);
       builder.setArchitecture(archive.metadata().architecture());
       builder.setArchiveHash(hash);
       builder.setArchiveSize(archive.archiveSize());

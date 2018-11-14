@@ -32,7 +32,7 @@ import java.util.Objects;
 @Component(service = RuntimeRepositoryProviderType.class)
 public final class OJNRepositoryProvider implements RuntimeRepositoryProviderType
 {
-  private static final URI URI = java.net.URI.create("https://jdk.openjdk.net");
+  private static final URI URI = java.net.URI.create("urn:net.java.jdk");
 
   /**
    * Construct a provider.
@@ -52,7 +52,7 @@ public final class OJNRepositoryProvider implements RuntimeRepositoryProviderTyp
   @Override
   public String name()
   {
-    return "jdk.java.net";
+    return "net.java.jdk";
   }
 
   @Override

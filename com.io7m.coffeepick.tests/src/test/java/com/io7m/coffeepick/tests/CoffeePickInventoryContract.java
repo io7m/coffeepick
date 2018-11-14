@@ -108,6 +108,7 @@ public abstract class CoffeePickInventoryContract
 
     final var description =
       RuntimeDescription.builder()
+        .setRepository(URI.create("urn:example"))
         .setArchitecture("x64")
         .setArchiveHash(RuntimeHash.of("SHA-256", HASH_VALUE))
         .setArchiveSize(100L)
@@ -142,6 +143,7 @@ public abstract class CoffeePickInventoryContract
               String.format("%d+%d", Integer.valueOf(major), Integer.valueOf(minor));
 
             return RuntimeDescription.builder()
+              .setRepository(URI.create("urn:example"))
               .setArchitecture("x64")
               .setArchiveHash(RuntimeHash.of("SHA-256",  hashOf(version_name)))
               .setArchiveSize(100L)
@@ -213,6 +215,7 @@ public abstract class CoffeePickInventoryContract
               String.format("%d+%d", Integer.valueOf(major), Integer.valueOf(minor));
 
             return RuntimeDescription.builder()
+              .setRepository(URI.create("urn:example"))
               .setArchitecture("x64")
               .setArchiveHash(RuntimeHash.of("SHA-256",  hashOf(version_name)))
               .setArchiveSize(100L)
@@ -269,6 +272,7 @@ public abstract class CoffeePickInventoryContract
 
     final var description =
       RuntimeDescription.builder()
+        .setRepository(URI.create("urn:example"))
         .setArchitecture("x64")
         .setArchiveHash(RuntimeHash.of("SHA-256", HASH_VALUE))
         .setArchiveSize(100L)

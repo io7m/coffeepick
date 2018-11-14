@@ -35,6 +35,12 @@ import java.util.Set;
 public interface CoffeePickSearchType
 {
   /**
+   * @return The repository URI
+   */
+
+  Optional<URI> repository();
+
+  /**
    * @return The range of acceptable runtime versions
    */
 
