@@ -78,7 +78,7 @@ public final class CoffeePickShellCommandRepositoryUpdate implements CoffeePickS
       case RUNNING: {
         final var ee = (RuntimeRepositoryEventUpdateRunning) event.event();
         this.writer.printf(
-          "[ %3.2f %% ] |%-60s|\n",
+          "[ %-6.2f %% ] |%-60s|\n",
           Double.valueOf(ee.progress() * 100.0),
           progressBar(60, ee.progress()));
         break;

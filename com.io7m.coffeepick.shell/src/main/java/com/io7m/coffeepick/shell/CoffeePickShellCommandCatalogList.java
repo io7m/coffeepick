@@ -22,6 +22,7 @@ import com.io7m.coffeepick.runtime.RuntimeDescription;
 import org.jline.builtins.Completers;
 
 import java.io.PrintWriter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -68,18 +69,22 @@ public final class CoffeePickShellCommandCatalogList implements CoffeePickShellC
       "Size",
       "Tags");
 
-    for (final var entry : runtimes.entrySet()) {
-      final var description = entry.getValue();
-      writer.printf(
-        "%-70s | %-8s | %-8s | %-8s | %-8s | %-8.2fMB | %s\n",
-        description.id(),
-        description.architecture(),
-        description.platform(),
-        description.version(),
-        description.vm(),
-        Double.valueOf((double) description.archiveSize() / 1_000_000.0),
-        description.tags().stream().sorted().collect(Collectors.joining(" ")));
-    }
+    runtimes.values()
+      .stream()
+      .sorted(Comparator.comparing(RuntimeDescription::version)
+                .thenComparing(RuntimeDescription::architecture)
+                .thenComparing(RuntimeDescription::platform))
+      .forEach(description -> {
+        writer.printf(
+          "%-70s | %-8s | %-8s | %-8s | %-8s | %-8.2fMB | %s\n",
+          description.id(),
+          description.architecture(),
+          description.platform(),
+          description.version(),
+          description.vm(),
+          Double.valueOf((double) description.archiveSize() / 1_000_000.0),
+          description.tags().stream().sorted().collect(Collectors.joining(" ")));
+      });
   }
 
   @Override
