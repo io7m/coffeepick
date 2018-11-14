@@ -122,10 +122,20 @@ public final class AOJDKFilenameMetadataParsing
     parseVersion(ts_or_version, builder);
     parseJRE(type, builder);
     builder.setNumber(number);
-    builder.setArchitecture(arch);
+    builder.setArchitecture(mapArch(arch));
     builder.setPlatform(mapOS(os));
     builder.setVm(impl);
     return Optional.of(builder.build());
+  }
+
+  private static String mapArch(final String arch)
+  {
+    switch (arch) {
+      case "x86-32":
+        return "x32";
+      default:
+        return arch;
+    }
   }
 
   private static void parseJRE(
