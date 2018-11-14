@@ -110,6 +110,9 @@ public final class AOJDKRuntimeDescriptionDatabase
       final var props = new Properties();
       props.load(stream);
       return RuntimeDescriptions.parseFromProperties(props);
+    } catch (final IOException e) {
+      Files.deleteIfExists(file);
+      throw e;
     }
   }
 
