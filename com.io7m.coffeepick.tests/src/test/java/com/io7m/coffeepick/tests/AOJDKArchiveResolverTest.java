@@ -16,8 +16,10 @@
 
 package com.io7m.coffeepick.tests;
 
+import com.io7m.coffeepick.adoptopenjdk.raw.AOJDKArchive;
 import com.io7m.coffeepick.adoptopenjdk.raw.AOJDKArchiveResolver;
 import com.io7m.coffeepick.adoptopenjdk.raw.AOJDKDataParser;
+import com.io7m.coffeepick.runtime.RuntimeDescription;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -25,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class AOJDKArchiveResolverTest
 {
@@ -39,10 +43,25 @@ public final class AOJDKArchiveResolverTest
 
     final var resolver = AOJDKArchiveResolver.create();
     final var archives = parser.parse();
-    final var releases = resolver.resolve(archives);
+    final var releases =
+      archives.stream()
+        .flatMap(archive -> resolveArchive(resolver, archive))
+        .collect(Collectors.toList());
 
     releases.forEach(release -> LOG.debug("release: {}", release));
     Assertions.assertEquals(archives.size(), releases.size());
+  }
+
+  private static Stream<? extends RuntimeDescription> resolveArchive(
+    final AOJDKArchiveResolver resolver,
+    final AOJDKArchive archive)
+  {
+    try {
+      return Stream.of(resolver.resolveOne(archive));
+    } catch (final IOException e) {
+      LOG.error("error: {}: ", archive.archiveURI(), e);
+      return Stream.empty();
+    }
   }
 
   @Test
@@ -54,7 +73,10 @@ public final class AOJDKArchiveResolverTest
 
     final var resolver = AOJDKArchiveResolver.create();
     final var archives = parser.parse();
-    final var releases = resolver.resolve(archives);
+    final var releases =
+      archives.stream()
+        .flatMap(archive -> resolveArchive(resolver, archive))
+        .collect(Collectors.toList());
 
     releases.forEach(release -> LOG.debug("release: {}", release));
     Assertions.assertEquals(archives.size(), releases.size());
@@ -69,7 +91,10 @@ public final class AOJDKArchiveResolverTest
 
     final var resolver = AOJDKArchiveResolver.create();
     final var archives = parser.parse();
-    final var releases = resolver.resolve(archives);
+    final var releases =
+      archives.stream()
+        .flatMap(archive -> resolveArchive(resolver, archive))
+        .collect(Collectors.toList());
 
     releases.forEach(release -> LOG.debug("release: {}", release));
     Assertions.assertEquals(archives.size(), releases.size());

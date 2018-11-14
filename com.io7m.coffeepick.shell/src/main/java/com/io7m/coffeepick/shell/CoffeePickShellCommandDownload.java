@@ -67,7 +67,7 @@ public final class CoffeePickShellCommandDownload implements CoffeePickShellComm
     return String.format("%.2fMB/s", Double.valueOf(octetsPerSecond / 1_000_000.0));
   }
 
-  private static String progressBar(
+  static String progressBar(
     final int length,
     final double progress)
   {
@@ -95,7 +95,7 @@ public final class CoffeePickShellCommandDownload implements CoffeePickShellComm
       final var expected_mb = (double) downloading.expected() / 1_000_000.0;
 
       this.writer.printf(
-        "[%8.2f MB / %8.2f MB] %-60s %-8s\n",
+        "[%8.2f MB / %8.2f MB] |%-60s| %-8s\n",
         Double.valueOf(received_mb),
         Double.valueOf(expected_mb),
         progressBar(60, downloading.progress()),

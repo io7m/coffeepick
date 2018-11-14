@@ -22,6 +22,7 @@ import io.reactivex.Observable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -117,4 +118,16 @@ public interface CoffeePickCatalogType
   InputStream fetch(
     String id)
     throws IOException;
+
+  /**
+   * Update the repository with the given URI.
+   *
+   * @param uri The URI
+   *
+   * @throws Exception On errors
+   */
+
+  void updateRepository(
+    URI uri)
+    throws Exception;
 }

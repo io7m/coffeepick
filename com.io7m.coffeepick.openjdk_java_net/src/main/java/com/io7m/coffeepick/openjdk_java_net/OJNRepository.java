@@ -16,20 +16,28 @@
 
 package com.io7m.coffeepick.openjdk_java_net;
 
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateFinished;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateStarted;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.RuntimeDescriptionType;
 import com.io7m.coffeepick.runtime.RuntimeDescriptions;
-import org.osgi.service.component.annotations.Component;
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URI;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,54 +45,25 @@ import java.util.stream.Stream;
  * A repository based on https://jdk.openjdk.net
  */
 
-@Component(service = RuntimeRepositoryType.class)
 public final class OJNRepository implements RuntimeRepositoryType
 {
   private static final Logger LOG = LoggerFactory.getLogger(OJNRepository.class);
 
-  private static final URI URI = java.net.URI.create("https://jdk.openjdk.net");
   private static final String BUILDS = "/com/io7m/coffeepick/openjdk_java_net/build.properties";
+  private final ConcurrentHashMap<String, RuntimeDescription> runtimes;
+  private final Map<String, RuntimeDescription> runtimes_read;
+  private final OJNRepositoryProvider provider;
+  private final Subject<RuntimeRepositoryEventType> events;
 
-  /**
-   * Construct a repository.
-   */
-
-  public OJNRepository()
-  {
-
-  }
-
-  @Override
-  public URI uri()
-  {
-    return URI;
-  }
-
-  @Override
-  public String name()
-  {
-    return "jdk.java.net";
-  }
-
-  @Override
-  public List<RuntimeDescription> availableRuntimes(
-    final RuntimeRepositoryContextType context)
+  OJNRepository(
+    final OJNRepositoryProvider in_provider)
     throws IOException
   {
-    Objects.requireNonNull(context, "context");
-
-    try {
-      try (var stream = OJNRepository.class.getResourceAsStream(BUILDS)) {
-        final var builds = new Properties();
-        builds.load(stream);
-
-        return Stream.of(builds.getProperty("coffeepick.builds").split(" "))
-          .map(OJNRepository::loadBuild)
-          .collect(Collectors.toList());
-      }
-    } catch (final UncheckedIOException e) {
-      throw e.getCause();
-    }
+    this.provider = Objects.requireNonNull(in_provider, "provider");
+    this.runtimes = new ConcurrentHashMap<>(128);
+    this.runtimes_read = Collections.unmodifiableMap(this.runtimes);
+    this.events = PublishSubject.<RuntimeRepositoryEventType>create().toSerialized();
+    this.update();
   }
 
   private static RuntimeDescription loadBuild(
@@ -101,4 +80,56 @@ public final class OJNRepository implements RuntimeRepositoryType
     }
   }
 
+  @Override
+  public Observable<RuntimeRepositoryEventType> events()
+  {
+    return this.events;
+  }
+
+  @Override
+  public RuntimeRepositoryProviderType provider()
+  {
+    return this.provider;
+  }
+
+  @Override
+  public void update()
+    throws IOException
+  {
+    try {
+      try (var stream = OJNRepository.class.getResourceAsStream(BUILDS)) {
+        final var builds = new Properties();
+        builds.load(stream);
+
+        final var names =
+          builds.getProperty("coffeepick.builds").split(" ");
+
+        this.events.onNext(
+          RuntimeRepositoryEventUpdateStarted.builder()
+            .setRepository(this.provider.uri())
+            .build());
+
+        final var next_runtimes =
+          Stream.of(names)
+            .map(OJNRepository::loadBuild)
+            .collect(Collectors.toMap(RuntimeDescriptionType::id, Function.identity()));
+
+        this.runtimes.clear();
+        this.runtimes.putAll(next_runtimes);
+
+        this.events.onNext(
+          RuntimeRepositoryEventUpdateFinished.builder()
+            .setRepository(this.provider.uri())
+            .build());
+      }
+    } catch (final UncheckedIOException e) {
+      throw e.getCause();
+    }
+  }
+
+  @Override
+  public Map<String, RuntimeDescription> runtimes()
+  {
+    return this.runtimes_read;
+  }
 }

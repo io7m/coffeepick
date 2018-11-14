@@ -16,49 +16,41 @@
 
 package com.io7m.coffeepick.repository.spi;
 
-import com.io7m.coffeepick.runtime.RuntimeDescription;
-import io.reactivex.Observable;
-import net.jcip.annotations.ThreadSafe;
 import org.osgi.annotation.versioning.ProviderType;
 
-import java.util.Map;
+import java.io.IOException;
+import java.net.URI;
 
 /**
- * A repository of runtimes.
- *
- * Implementations are required to be thread-safe.
+ * The type of providers for runtime repositories.
  */
 
-@ThreadSafe
 @ProviderType
-public interface RuntimeRepositoryType
+public interface RuntimeRepositoryProviderType
 {
   /**
-   * @return A stream of events from the repository
+   * @return The URI that uniquely identifies this repository
    */
 
-  Observable<RuntimeRepositoryEventType> events();
+  URI uri();
 
   /**
-   * @return The repository provider
+   * @return The name of the repository
    */
 
-  RuntimeRepositoryProviderType provider();
+  String name();
 
   /**
-   * Update the repository.
+   * Create a new repository.
    *
-   * @throws Exception On errors
-   */
-
-  void update()
-    throws Exception;
-
-  /**
-   * Obtain a read-only map of the available runtimes in the repository.
+   * @param context The runtime repository context
    *
-   * @return The available runtimes
+   * @return A new repository
+   *
+   * @throws IOException On I/O errors
    */
 
-  Map<String, RuntimeDescription> runtimes();
+  RuntimeRepositoryType openRepository(
+    RuntimeRepositoryContextType context)
+    throws IOException;
 }

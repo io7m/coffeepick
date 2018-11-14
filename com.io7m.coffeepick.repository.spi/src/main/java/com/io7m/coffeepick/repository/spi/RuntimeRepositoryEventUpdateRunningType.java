@@ -16,49 +16,31 @@
 
 package com.io7m.coffeepick.repository.spi;
 
-import com.io7m.coffeepick.runtime.RuntimeDescription;
-import io.reactivex.Observable;
-import net.jcip.annotations.ThreadSafe;
-import org.osgi.annotation.versioning.ProviderType;
+import com.io7m.immutables.styles.ImmutablesStyleType;
+import org.immutables.value.Value;
 
-import java.util.Map;
+import java.net.URI;
 
 /**
- * A repository of runtimes.
- *
- * Implementations are required to be thread-safe.
+ * A repository update is running.
  */
 
-@ThreadSafe
-@ProviderType
-public interface RuntimeRepositoryType
+@ImmutablesStyleType
+@Value.Immutable
+public interface RuntimeRepositoryEventUpdateRunningType extends RuntimeRepositoryEventUpdateType
 {
-  /**
-   * @return A stream of events from the repository
-   */
+  @Override
+  URI repository();
 
-  Observable<RuntimeRepositoryEventType> events();
-
-  /**
-   * @return The repository provider
-   */
-
-  RuntimeRepositoryProviderType provider();
+  @Override
+  default Kind kind()
+  {
+    return Kind.RUNNING;
+  }
 
   /**
-   * Update the repository.
-   *
-   * @throws Exception On errors
+   * @return The update progress in the range [0, 1]
    */
 
-  void update()
-    throws Exception;
-
-  /**
-   * Obtain a read-only map of the available runtimes in the repository.
-   *
-   * @return The available runtimes
-   */
-
-  Map<String, RuntimeDescription> runtimes();
+  double progress();
 }

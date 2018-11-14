@@ -14,28 +14,41 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.repository.spi;
+package com.io7m.coffeepick.api;
 
-import io.reactivex.Observable;
-
-import java.net.URI;
-import java.util.Map;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateType;
+import com.io7m.immutables.styles.ImmutablesStyleType;
+import org.immutables.value.Value;
 
 /**
- * A registry of runtime repositories.
+ * An update of the catalog failed.
  */
 
-public interface RuntimeRepositoryRegistryType
+@ImmutablesStyleType
+@Value.Immutable
+public interface CoffeePickCatalogEventRepositoryUpdateType extends CoffeePickCatalogEventType
 {
+  @Override
+  default Severity severity()
+  {
+    switch (this.event().kind()) {
+      case STARTED:
+        return Severity.INFO;
+      case RUNNING:
+        return Severity.INFO;
+      case FAILED:
+        return Severity.ERROR;
+      case FINISHED:
+        return Severity.INFO;
+    }
+
+    throw new IllegalStateException("Unreachable code!");
+  }
+
   /**
-   * @return A stream of events indicating repository changes
+   * @return The repository event
    */
 
-  Observable<RuntimeRepositoryRegistryEventType> events();
-
-  /**
-   * @return The currently available repositories
-   */
-
-  Map<URI, RuntimeRepositoryType> repositories();
+  @Value.Parameter
+  RuntimeRepositoryEventUpdateType event();
 }

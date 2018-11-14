@@ -16,6 +16,8 @@
 
 package com.io7m.coffeepick.repository.spi;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 import java.nio.file.Path;
 
 /**
@@ -26,6 +28,7 @@ import java.nio.file.Path;
  * means to avoid a circular dependency between the client API and repository SPI.
  */
 
+@ConsumerType
 public interface RuntimeRepositoryContextType
 {
   /**

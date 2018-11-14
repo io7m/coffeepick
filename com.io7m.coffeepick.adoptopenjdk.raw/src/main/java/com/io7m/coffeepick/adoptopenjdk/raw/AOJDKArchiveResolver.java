@@ -26,14 +26,13 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * Resolve a list of archives. A resolver takes a list of archive descriptions parsed from the
- * AdoptOpenJDK git repository and turns them into runtime descriptions by transforming metadata and
- * fetching checksums from the remote server.
+ * AdoptOpenJDK git repository and turns them into runtime descriptions by transforming
+ * metadata and fetching checksums from the remote server.
  */
 
 public final class AOJDKArchiveResolver
@@ -95,6 +94,21 @@ public final class AOJDKArchiveResolver
         .build();
 
     final var response = this.http.send(request, HttpResponse.BodyHandlers.ofString());
+    if (response.statusCode() >= 400) {
+      final var separator = System.lineSeparator();
+      throw new IOException(
+        new StringBuilder(128)
+          .append("HTTP error")
+          .append(separator)
+          .append("  URI:         ")
+          .append(link)
+          .append(separator)
+          .append("  Status code: ")
+          .append(response.statusCode())
+          .append(separator)
+          .toString());
+    }
+
     final var body_text = response.body();
     final var sections = List.of(body_text.split(" "));
     if (sections.size() >= 1) {
@@ -108,48 +122,44 @@ public final class AOJDKArchiveResolver
   }
 
   /**
-   * Resolve a list of archives.
+   * Resolve a single archive.
    *
-   * @param archives The archives
+   * @param archive The archive
    *
-   * @return A list of runtime descriptions
+   * @return A runtime description
+   *
+   * @throws IOException On I/O errors
    */
 
-  public List<RuntimeDescription> resolve(
-    final List<AOJDKArchive> archives)
+  public RuntimeDescription resolveOne(
+    final AOJDKArchive archive)
+    throws IOException
   {
-    Objects.requireNonNull(archives, "archives");
+    Objects.requireNonNull(archive, "archive");
 
-    final var results = new ArrayList<RuntimeDescription>(archives.size());
-    for (final var archive : archives) {
-      try {
-        final var hash = this.fetchHash(archive.archiveChecksumURI());
+    try {
+      final var hash = this.fetchHash(archive.archiveChecksumURI());
 
-        final var builder = RuntimeDescription.builder();
-        builder.setArchitecture(archive.metadata().architecture());
-        builder.setArchiveHash(hash);
-        builder.setArchiveSize(archive.archiveSize());
-        builder.setArchiveURI(archive.archiveURI());
-        builder.setPlatform(archive.metadata().platform());
-        builder.setVersion(Runtime.Version.parse(archive.metadata().number()));
-        builder.setVm(archive.metadata().vm());
+      final var builder = RuntimeDescription.builder();
+      builder.setArchitecture(archive.metadata().architecture());
+      builder.setArchiveHash(hash);
+      builder.setArchiveSize(archive.archiveSize());
+      builder.setArchiveURI(archive.archiveURI());
+      builder.setPlatform(archive.metadata().platform());
+      builder.setVersion(Runtime.Version.parse(archive.metadata().number()));
+      builder.setVm(archive.metadata().vm());
 
-        if (archive.metadata().isJRE()) {
-          builder.addTags("jre");
-        }
-        if (archive.metadata().isLargeHeap()) {
-          builder.addTags("large-heap");
-        }
-
-        builder.addTags("production");
-
-        final var description = builder.build();
-        results.add(description);
-      } catch (final Exception e) {
-        LOG.error("unable to resolve release: ", e);
+      if (archive.metadata().isJRE()) {
+        builder.addTags("jre");
       }
-    }
+      if (archive.metadata().isLargeHeap()) {
+        builder.addTags("large-heap");
+      }
 
-    return results;
+      builder.addTags("production");
+      return builder.build();
+    } catch (final InterruptedException e) {
+      throw new IOException(e);
+    }
   }
 }

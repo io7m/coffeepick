@@ -16,47 +16,51 @@
 
 package com.io7m.coffeepick.repository.spi;
 
-import com.io7m.immutables.styles.ImmutablesStyleType;
-import org.immutables.value.Value;
+import java.net.URI;
 
 /**
- * The repository registry changed.
+ * A repository update event.
  */
 
-@ImmutablesStyleType
-@Value.Immutable
-public interface RuntimeRepositoryRegistryEventType
+public interface RuntimeRepositoryEventUpdateType extends RuntimeRepositoryEventType
 {
   /**
-   * The type of change.
+   * The kind of event.
    */
 
-  enum Change
+  enum Kind
   {
     /**
-     * A repository was added.
+     * An update has started running.
      */
 
-    ADDED,
+    STARTED,
 
     /**
-     * A repository was removed.
+     * An update is in progress.
      */
 
-    REMOVED
+    RUNNING,
+
+    /**
+     * An update has started failed.
+     */
+
+    FAILED,
+
+    /**
+     * An update has started finished.
+     */
+
+    FINISHED
   }
 
-  /**
-   * @return The type of change
-   */
-
-  @Value.Parameter
-  Change change();
+  @Override
+  URI repository();
 
   /**
-   * @return The repository
+   * @return The kind of event
    */
 
-  @Value.Parameter
-  RuntimeRepositoryType repository();
+  Kind kind();
 }

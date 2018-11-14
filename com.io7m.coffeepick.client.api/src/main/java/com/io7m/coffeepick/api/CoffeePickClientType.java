@@ -20,6 +20,7 @@ import com.io7m.coffeepick.runtime.RuntimeDescription;
 import io.reactivex.Observable;
 
 import java.io.Closeable;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
@@ -128,4 +129,15 @@ public interface CoffeePickClientType extends Closeable
 
   CoffeePickOperation<Path> catalogDownload(
     String id);
+
+  /**
+   * Update the repository with the given URI.
+   *
+   * @param uri The URI
+   *
+   * @return The operation in progress
+   */
+
+  CoffeePickOperation<Void> repositoryUpdate(
+    URI uri);
 }

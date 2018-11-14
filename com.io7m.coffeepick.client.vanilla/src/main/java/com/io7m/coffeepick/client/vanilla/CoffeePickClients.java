@@ -26,9 +26,9 @@ import com.io7m.coffeepick.api.CoffeePickInventoryType;
 import com.io7m.coffeepick.api.CoffeePickOperation;
 import com.io7m.coffeepick.api.CoffeePickSearch;
 import com.io7m.coffeepick.api.CoffeePickVerification;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoader;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoaderProvider;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
@@ -36,6 +36,7 @@ import io.reactivex.subjects.Subject;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -55,10 +56,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class CoffeePickClients implements CoffeePickClientProviderType
 {
-  private final RuntimeRepositoryRegistryType repositories;
+  private final RuntimeRepositoryProviderRegistryType repositories;
 
   private CoffeePickClients(
-    final RuntimeRepositoryRegistryType in_repositories)
+    final RuntimeRepositoryProviderRegistryType in_repositories)
   {
     this.repositories = Objects.requireNonNull(in_repositories, "repositories");
   }
@@ -71,7 +72,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
 
   public static CoffeePickClientProviderType create()
   {
-    return createWith(RuntimeRepositoriesServiceLoader.create());
+    return createWith(RuntimeRepositoriesServiceLoaderProvider.create());
   }
 
   /**
@@ -83,7 +84,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
    */
 
   public static CoffeePickClientProviderType createWith(
-    final RuntimeRepositoryRegistryType repositories)
+    final RuntimeRepositoryProviderRegistryType repositories)
   {
     return new CoffeePickClients(repositories);
   }
@@ -120,7 +121,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     private final CoffeePickCatalogType catalog;
     private final RuntimeRepositoryContextType context;
     private final Path base_directory;
-    private final RuntimeRepositoryRegistryType repositories;
+    private final RuntimeRepositoryProviderRegistryType repositories;
     private final ExecutorService executor;
     private final AtomicBoolean closed;
     private final Subject<CoffeePickEventType> events;
@@ -132,7 +133,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       final CoffeePickInventoryType in_inventory,
       final CoffeePickCatalogType in_catalog,
       final RuntimeRepositoryContextType in_context,
-      final RuntimeRepositoryRegistryType in_repositories,
+      final RuntimeRepositoryProviderRegistryType in_repositories,
       final Path in_base_directory)
     {
       this.events =
@@ -252,10 +253,37 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
         final var response =
           this.http.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
+        if (response.statusCode() >= 400) {
+          final var separator = System.lineSeparator();
+          throw new IOException(
+            new StringBuilder(128)
+              .append("HTTP error")
+              .append(separator)
+              .append("  URI:         ")
+              .append(description.archiveURI())
+              .append(separator)
+              .append("  Status code: ")
+              .append(response.statusCode())
+              .append(separator)
+              .toString());
+        }
+
         try (var input = response.body()) {
           return this.inventory.write(
             description, CoffeePickCatalog.publishingWriter(description, catalog_events, input));
         }
+      });
+    }
+
+    @Override
+    public CoffeePickOperation<Void> repositoryUpdate(
+      final URI uri)
+    {
+      Objects.requireNonNull(uri, "uri");
+
+      return this.submit(() -> {
+        this.catalog.updateRepository(uri);
+        return null;
       });
     }
 

@@ -16,7 +16,7 @@
 
 package com.io7m.coffeepick.tests;
 
-import com.io7m.coffeepick.openjdk_java_net.OJNRepository;
+import com.io7m.coffeepick.openjdk_java_net.OJNRepositoryProvider;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ import static com.io7m.coffeepick.runtime.RuntimePlatforms.PLATFORM_MACOS;
 import static com.io7m.coffeepick.runtime.RuntimePlatforms.PLATFORM_WINDOWS;
 
 /**
- * Tests for the OpenJDK repository.
+ * Tests for the OpenJDK repository provider.
  */
 
 public final class OJNRepositoryTests
@@ -43,23 +43,24 @@ public final class OJNRepositoryTests
   public void testRuntimes()
   {
     final var context = Mockito.mock(RuntimeRepositoryContextType.class);
+    final var provider = new OJNRepositoryProvider();
 
     Assertions.assertTimeout(Duration.ofSeconds(60L), () -> {
-      final var repository = new OJNRepository();
-      final var runtimes = repository.availableRuntimes(context);
-      runtimes.forEach(runtimeDescription -> LOG.debug("runtime: {}", runtimeDescription));
+      final var repository = provider.openRepository(context);
+      final var runtimes = repository.runtimes();
+      runtimes.values().forEach(description -> LOG.debug("runtime: {}", description));
 
       Assertions.assertEquals(8, runtimes.size());
       Assertions.assertTrue(
-        runtimes.stream()
+        runtimes.values().stream()
           .anyMatch(run -> Objects.equals(run.platform(), PLATFORM_LINUX.platformName())),
         "Linux present");
       Assertions.assertTrue(
-        runtimes.stream()
+        runtimes.values().stream()
           .anyMatch(run -> Objects.equals(run.platform(), PLATFORM_MACOS.platformName())),
         "MacOS present");
       Assertions.assertTrue(
-        runtimes.stream()
+        runtimes.values().stream()
           .anyMatch(run -> Objects.equals(run.platform(), PLATFORM_WINDOWS.platformName())),
         "Windows present");
     });

@@ -18,7 +18,7 @@ package com.io7m.coffeepick.tests;
 
 import com.io7m.coffeepick.api.CoffeePickClientProviderType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -36,13 +36,13 @@ public abstract class CoffeePickClientsContract
   protected abstract Logger log();
 
   protected abstract CoffeePickClientProviderType provider(
-    RuntimeRepositoryRegistryType repositories);
+    RuntimeRepositoryProviderRegistryType repositories);
 
   @Test
   public final void testCreateNotInventoryDirectory()
     throws Exception
   {
-    final var registry = Mockito.mock(RuntimeRepositoryRegistryType.class);
+    final var registry = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
     Mockito.when(registry.events())
       .thenReturn(PublishSubject.create());
 
@@ -62,7 +62,7 @@ public abstract class CoffeePickClientsContract
   public final void testCreateEmpty()
     throws Exception
   {
-    final var registry = Mockito.mock(RuntimeRepositoryRegistryType.class);
+    final var registry = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
     Mockito.when(registry.events())
       .thenReturn(PublishSubject.create());
 

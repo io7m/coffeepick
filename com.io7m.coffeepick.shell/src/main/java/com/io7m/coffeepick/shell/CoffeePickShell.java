@@ -18,7 +18,7 @@ package com.io7m.coffeepick.shell;
 
 import com.io7m.coffeepick.api.CoffeePickUserDirectory;
 import com.io7m.coffeepick.client.vanilla.CoffeePickClients;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoader;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoaderProvider;
 import org.jline.builtins.Completers.TreeCompleter;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReaderBuilder;
@@ -66,13 +66,14 @@ public final class CoffeePickShell
         writer.printf("Loading repositories…\n");
         writer.flush();
 
-        final var repositories = RuntimeRepositoriesServiceLoader.create();
+        final var repositories = RuntimeRepositoriesServiceLoaderProvider.create();
         final var clients = CoffeePickClients.createWith(repositories);
 
         try (final var client = clients.newClient(directory)) {
 
           final var commands =
             List.of(
+              new CoffeePickShellCommandRepositoryUpdate(client, writer),
               new CoffeePickShellCommandInventoryList(client, writer),
               new CoffeePickShellCommandDelete(client, writer),
               new CoffeePickShellCommandVerify(client, writer),

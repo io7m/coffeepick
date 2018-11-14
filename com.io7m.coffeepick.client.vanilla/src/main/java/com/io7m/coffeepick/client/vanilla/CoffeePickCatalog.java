@@ -16,9 +16,7 @@
 
 package com.io7m.coffeepick.client.vanilla;
 
-import com.io7m.coffeepick.api.CoffeePickCatalogEventRepositoryAdded;
-import com.io7m.coffeepick.api.CoffeePickCatalogEventRepositoryRemoved;
-import com.io7m.coffeepick.api.CoffeePickCatalogEventRepositoryUpdateFailed;
+import com.io7m.coffeepick.api.CoffeePickCatalogEventRepositoryUpdate;
 import com.io7m.coffeepick.api.CoffeePickCatalogEventRuntimeDownloadFinished;
 import com.io7m.coffeepick.api.CoffeePickCatalogEventRuntimeDownloading;
 import com.io7m.coffeepick.api.CoffeePickCatalogEventType;
@@ -27,8 +25,10 @@ import com.io7m.coffeepick.api.CoffeePickInventoryType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
 import com.io7m.coffeepick.api.CoffeePickSearches;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEventType;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEventType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeDescriptionType;
@@ -46,10 +46,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -65,24 +65,24 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
   private static final Logger LOG = LoggerFactory.getLogger(CoffeePickCatalog.class);
 
   private final RuntimeRepositoryContextType context;
-  private final RuntimeRepositoryRegistryType repositories;
+  private final RuntimeRepositoryProviderRegistryType repository_providers;
   private final Disposable subscription;
   private final Subject<CoffeePickCatalogEventType> events;
-  private final Map<String, URI> runtime_repositories;
-  private final Map<URI, Map<String, RuntimeDescription>> repository_runtimes;
+  private final Map<URI, RuntimeRepositoryType> runtime_repositories;
+  private final Map<URI, Disposable> runtime_repository_subscriptions;
   private final HttpClient http;
 
   private CoffeePickCatalog(
     final Subject<CoffeePickCatalogEventType> in_events,
     final RuntimeRepositoryContextType in_context,
-    final RuntimeRepositoryRegistryType in_repositories)
+    final RuntimeRepositoryProviderRegistryType in_repository_providers)
   {
     this.events =
       Objects.requireNonNull(in_events, "events");
     this.context =
       Objects.requireNonNull(in_context, "context");
-    this.repositories =
-      Objects.requireNonNull(in_repositories, "repositories");
+    this.repository_providers =
+      Objects.requireNonNull(in_repository_providers, "repository_providers");
 
     this.http =
       HttpClient.newBuilder()
@@ -90,72 +90,17 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
         .build();
 
     this.runtime_repositories =
-      new HashMap<>(128);
-    this.repository_runtimes =
-      new HashMap<>(16);
+      new ConcurrentHashMap<>(128);
+    this.runtime_repository_subscriptions =
+      new ConcurrentHashMap<>(128);
 
-    this.repositories.repositories()
+    this.repository_providers.repositoryProviders()
       .values()
-      .forEach(this::addRepository);
+      .forEach(this::addRepositoryProvider);
 
     this.subscription =
-      this.repositories.events()
+      this.repository_providers.events()
         .subscribe(this::onRepositoriesChanged);
-  }
-
-  private void onRepositoriesChanged(
-    final RuntimeRepositoryRegistryEventType event)
-  {
-    switch (event.change()) {
-      case ADDED: {
-        this.addRepository(event.repository());
-        break;
-      }
-      case REMOVED: {
-        this.removeRepository(event.repository());
-        break;
-      }
-    }
-  }
-
-  private void removeRepository(
-    final RuntimeRepositoryType repository)
-  {
-    LOG.info("shutting down repository {} ({})", repository.name(), repository.uri());
-
-    final var uri = repository.uri();
-    final var runtimes = this.repository_runtimes.getOrDefault(uri, Map.of());
-
-    for (final var entry : runtimes.entrySet()) {
-      this.runtime_repositories.remove(entry.getKey());
-    }
-
-    this.repository_runtimes.remove(uri);
-    this.events.onNext(CoffeePickCatalogEventRepositoryRemoved.of(uri));
-  }
-
-  private void addRepository(
-    final RuntimeRepositoryType repository)
-  {
-    LOG.info("setting up repository {} ({})", repository.name(), repository.uri());
-
-    final var uri = repository.uri();
-
-    try {
-      final var runtimes = repository.availableRuntimes(this.context);
-      for (final var description : runtimes) {
-        this.runtime_repositories.put(description.id(), uri);
-      }
-
-      final var runtimes_map =
-        runtimes.stream()
-          .collect(Collectors.toMap(RuntimeDescriptionType::id, Function.identity()));
-
-      this.repository_runtimes.put(uri, runtimes_map);
-      this.events.onNext(CoffeePickCatalogEventRepositoryAdded.of(uri));
-    } catch (final IOException e) {
-      this.events.onNext(CoffeePickCatalogEventRepositoryUpdateFailed.of(uri, e));
-    }
   }
 
   /**
@@ -171,66 +116,9 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
   public static CoffeePickCatalogType create(
     final Subject<CoffeePickCatalogEventType> events,
     final RuntimeRepositoryContextType context,
-    final RuntimeRepositoryRegistryType repositories)
+    final RuntimeRepositoryProviderRegistryType repositories)
   {
     return new CoffeePickCatalog(events, context, repositories);
-  }
-
-  @Override
-  public Observable<CoffeePickCatalogEventType> events()
-  {
-    return this.events;
-  }
-
-  @Override
-  public Map<String, RuntimeDescription> search(
-    final CoffeePickSearch parameters)
-  {
-    Objects.requireNonNull(parameters, "parameters");
-
-    return this.repository_runtimes.values()
-      .stream()
-      .flatMap(m -> m.values().stream())
-      .filter(r -> CoffeePickSearches.matches(r, parameters))
-      .collect(Collectors.toMap(RuntimeDescriptionType::id, Function.identity()));
-  }
-
-  @Override
-  public Optional<RuntimeDescription> searchExact(
-    final String id)
-  {
-    Objects.requireNonNull(id, "id");
-
-    return Optional.ofNullable(this.runtime_repositories.get(id))
-      .flatMap(uri -> Optional.ofNullable(this.repository_runtimes.get(uri)))
-      .flatMap(map -> Optional.ofNullable(map.get(id)));
-  }
-
-  @Override
-  public InputStream fetch(
-    final String id)
-    throws IOException
-  {
-    Objects.requireNonNull(id, "id");
-
-    final var description =
-      this.searchExact(id).orElseThrow(() -> new FileNotFoundException(
-        new StringBuilder("No archive available with the given ID")
-          .append(System.lineSeparator())
-          .append("  ID: ")
-          .append(id)
-          .toString()));
-
-    final var request =
-      HttpRequest.newBuilder(description.archiveURI())
-        .GET()
-        .build();
-
-    try {
-      return this.http.send(request, ofInputStream()).body();
-    } catch (final InterruptedException e) {
-      throw new IOException(e);
-    }
   }
 
   /**
@@ -286,5 +174,144 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
 
       events.onNext(CoffeePickCatalogEventRuntimeDownloadFinished.of(description.id()));
     };
+  }
+
+  private void addRepositoryProvider(
+    final RuntimeRepositoryProviderType provider)
+  {
+    final var uri = provider.uri();
+    LOG.info("setting up repository from provider {} ({})", provider.name(), uri);
+
+    try {
+      final var repos = provider.openRepository(this.context);
+      this.runtime_repositories.put(uri, repos);
+      this.runtime_repository_subscriptions.put(
+        uri,
+        repos.events()
+          .filter(event -> event instanceof RuntimeRepositoryEventUpdateType)
+          .cast(RuntimeRepositoryEventUpdateType.class)
+          .subscribe(event -> this.events.onNext(CoffeePickCatalogEventRepositoryUpdate.of(event))));
+
+    } catch (final IOException e) {
+      LOG.error("could not open repository {}: ", uri, e);
+    }
+  }
+
+  private void onRepositoriesChanged(
+    final RuntimeRepositoryProviderRegistryEventType event)
+  {
+    final var provider = event.repositoryProvider();
+    switch (event.change()) {
+      case ADDED: {
+        this.addRepositoryProvider(provider);
+        break;
+      }
+      case REMOVED: {
+        this.removeRepository(provider);
+        break;
+      }
+    }
+  }
+
+  private void removeRepository(
+    final RuntimeRepositoryProviderType provider)
+  {
+    final var uri = provider.uri();
+    LOG.info("shutting down repository from provider {} ({})", provider.name(), uri);
+    this.runtime_repositories.remove(uri);
+    final var sub = this.runtime_repository_subscriptions.remove(uri);
+    if (sub != null) {
+      sub.dispose();
+    }
+  }
+
+  @Override
+  public Observable<CoffeePickCatalogEventType> events()
+  {
+    return this.events;
+  }
+
+  @Override
+  public Map<String, RuntimeDescription> search(
+    final CoffeePickSearch parameters)
+  {
+    Objects.requireNonNull(parameters, "parameters");
+
+    return this.runtime_repositories.values()
+      .stream()
+      .flatMap(m -> m.runtimes().values().stream())
+      .filter(r -> CoffeePickSearches.matches(r, parameters))
+      .collect(Collectors.toMap(RuntimeDescriptionType::id, Function.identity()));
+  }
+
+  @Override
+  public Optional<RuntimeDescription> searchExact(
+    final String id)
+  {
+    Objects.requireNonNull(id, "id");
+
+    for (final var repository : this.runtime_repositories.values()) {
+      final var runtimes = repository.runtimes();
+      final var description = runtimes.get(id);
+      if (description != null) {
+        return Optional.of(description);
+      }
+    }
+    return Optional.empty();
+  }
+
+  @Override
+  public InputStream fetch(
+    final String id)
+    throws IOException
+  {
+    Objects.requireNonNull(id, "id");
+
+    final var description =
+      this.searchExact(id).orElseThrow(() -> new FileNotFoundException(
+        new StringBuilder("No archive available with the given ID")
+          .append(System.lineSeparator())
+          .append("  ID: ")
+          .append(id)
+          .toString()));
+
+    final var request =
+      HttpRequest.newBuilder(description.archiveURI())
+        .GET()
+        .build();
+
+    try {
+      final var response = this.http.send(request, ofInputStream());
+      if (response.statusCode() >= 400) {
+        final var separator = System.lineSeparator();
+        throw new IOException(
+          new StringBuilder(128)
+            .append("HTTP error")
+            .append(separator)
+            .append("  URI:         ")
+            .append(description.archiveURI())
+            .append(separator)
+            .append("  Status code: ")
+            .append(response.statusCode())
+            .append(separator)
+            .toString());
+      }
+
+      return response.body();
+    } catch (final InterruptedException e) {
+      throw new IOException(e);
+    }
+  }
+
+  @Override
+  public void updateRepository(final URI uri)
+    throws Exception
+  {
+    Objects.requireNonNull(uri, "uri");
+
+    final var repository = this.runtime_repositories.get(uri);
+    if (repository != null) {
+      repository.update();
+    }
   }
 }

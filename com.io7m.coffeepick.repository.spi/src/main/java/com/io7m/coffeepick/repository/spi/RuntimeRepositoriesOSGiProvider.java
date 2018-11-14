@@ -26,84 +26,79 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 import java.net.URI;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEventType.Change.ADDED;
-import static com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEventType.Change.REMOVED;
+import static com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEventType.Change.ADDED;
+import static com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEventType.Change.REMOVED;
 
 /**
  * An OSGi-based repository registry.
  */
 
-@Component(service = RuntimeRepositoryRegistryType.class)
-public final class RuntimeRepositoriesOSGi implements RuntimeRepositoryRegistryType
+@Component(service = RuntimeRepositoryProviderRegistryType.class)
+public final class RuntimeRepositoriesOSGiProvider implements RuntimeRepositoryProviderRegistryType
 {
-  private final Object repository_lock;
-  private final Map<URI, RuntimeRepositoryType> repositories;
-  private final Subject<RuntimeRepositoryRegistryEventType> events;
+  private final Map<URI, RuntimeRepositoryProviderType> providers;
+  private final Subject<RuntimeRepositoryProviderRegistryEventType> events;
+  private final Map<URI, RuntimeRepositoryProviderType> providers_read;
 
   /**
    * Construct an empty registry.
    */
 
-  public RuntimeRepositoriesOSGi()
+  public RuntimeRepositoriesOSGiProvider()
   {
-    this.repository_lock = new Object();
-    this.repositories = new HashMap<>(8);
-    this.events = PublishSubject.<RuntimeRepositoryRegistryEventType>create().toSerialized();
+    this.providers = new ConcurrentHashMap<>(8);
+    this.providers_read = Collections.unmodifiableMap(this.providers);
+    this.events = PublishSubject.<RuntimeRepositoryProviderRegistryEventType>create().toSerialized();
   }
 
   /**
-   * A repository became available.
+   * A repository provider became available.
    *
-   * @param repository The repository
+   * @param provider The repository provider
    */
 
   @Reference(
-    service = RuntimeRepositoryType.class,
+    service = RuntimeRepositoryProviderType.class,
     cardinality = ReferenceCardinality.MULTIPLE,
     policy = ReferencePolicy.DYNAMIC,
     policyOption = ReferencePolicyOption.GREEDY,
     unbind = "onRepositoryRemoved")
   public void onRepositoryAdded(
-    final RuntimeRepositoryType repository)
+    final RuntimeRepositoryProviderType provider)
   {
-    Objects.requireNonNull(repository, "repository");
+    Objects.requireNonNull(provider, "repositoryProvider");
 
-    synchronized (this.repository_lock) {
-      this.repositories.put(repository.uri(), repository);
-    }
-    this.events.onNext(RuntimeRepositoryRegistryEvent.of(ADDED, repository));
+    this.providers.put(provider.uri(), provider);
+    this.events.onNext(RuntimeRepositoryProviderRegistryEvent.of(ADDED, provider));
   }
 
   /**
-   * A repository became unavailable.
+   * A repository provider became unavailable.
    *
-   * @param repository The repository
+   * @param provider The repository provider
    */
 
   public void onRepositoryRemoved(
-    final RuntimeRepositoryType repository)
+    final RuntimeRepositoryProviderType provider)
   {
-    synchronized (this.repository_lock) {
-      this.repositories.remove(repository.uri());
-    }
-    this.events.onNext(RuntimeRepositoryRegistryEvent.of(REMOVED, repository));
+    this.providers.remove(provider.uri());
+    this.events.onNext(RuntimeRepositoryProviderRegistryEvent.of(REMOVED, provider));
   }
 
   @Override
-  public Observable<RuntimeRepositoryRegistryEventType> events()
+  public Observable<RuntimeRepositoryProviderRegistryEventType> events()
   {
     return this.events;
   }
 
   @Override
-  public Map<URI, RuntimeRepositoryType> repositories()
+  public Map<URI, RuntimeRepositoryProviderType> repositoryProviders()
   {
-    synchronized (this.repository_lock) {
-      return Map.copyOf(this.repositories);
-    }
+    return this.providers_read;
   }
 }

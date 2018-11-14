@@ -169,6 +169,11 @@
         <artifactId>equalsverifier</artifactId>
         <version>3.0.2</version>
       </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.annotation</artifactId>
+        <version>6.0.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

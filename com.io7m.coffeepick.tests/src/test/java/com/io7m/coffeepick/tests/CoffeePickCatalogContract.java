@@ -19,9 +19,10 @@ package com.io7m.coffeepick.tests;
 import com.io7m.coffeepick.api.CoffeePickCatalogEventType;
 import com.io7m.coffeepick.api.CoffeePickCatalogType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEvent;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEventType;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEvent;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEventType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
@@ -36,10 +37,10 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
-import static com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEventType.Change.ADDED;
-import static com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEventType.Change.REMOVED;
+import static com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEventType.Change.ADDED;
+import static com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEventType.Change.REMOVED;
 
 public abstract class CoffeePickCatalogContract
 {
@@ -51,7 +52,7 @@ public abstract class CoffeePickCatalogContract
   protected abstract CoffeePickCatalogType catalog(
     Subject<CoffeePickCatalogEventType> events,
     RuntimeRepositoryContextType context,
-    RuntimeRepositoryRegistryType repositories);
+    RuntimeRepositoryProviderRegistryType repositories);
 
   @BeforeEach
   public final void setup()
@@ -68,10 +69,10 @@ public abstract class CoffeePickCatalogContract
   public final void testEmpty()
   {
     final var repo_events =
-      PublishSubject.<RuntimeRepositoryRegistryEventType>create();
+      PublishSubject.<RuntimeRepositoryProviderRegistryEventType>create();
 
     final var context = Mockito.mock(RuntimeRepositoryContextType.class);
-    final var repositories = Mockito.mock(RuntimeRepositoryRegistryType.class);
+    final var repositories = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
     final var catalog = this.catalog(this.events, context, repositories);
@@ -83,10 +84,10 @@ public abstract class CoffeePickCatalogContract
     throws IOException
   {
     final var repo_events =
-      PublishSubject.<RuntimeRepositoryRegistryEventType>create();
+      PublishSubject.<RuntimeRepositoryProviderRegistryEventType>create();
 
     final var context = Mockito.mock(RuntimeRepositoryContextType.class);
-    final var repositories = Mockito.mock(RuntimeRepositoryRegistryType.class);
+    final var repositories = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
     final var description =
@@ -100,12 +101,17 @@ public abstract class CoffeePickCatalogContract
         .setVm("hotspot")
         .build();
 
+    final var provider = Mockito.mock(RuntimeRepositoryProviderType.class);
     final var repository = Mockito.mock(RuntimeRepositoryType.class);
-    Mockito.when(repository.uri()).thenReturn(URI.create("urn:example:0.0"));
-    Mockito.when(repository.availableRuntimes(context)).thenReturn(List.of(description));
+
+    Mockito.when(provider.uri()).thenReturn(URI.create("urn:example:0.0"));
+    Mockito.when(provider.openRepository(context)).thenReturn(repository);
+
+    Mockito.when(repository.provider()).thenReturn(provider);
+    Mockito.when(repository.runtimes()).thenReturn(Map.of(description.id(), description));
 
     final var catalog = this.catalog(this.events, context, repositories);
-    repo_events.onNext(RuntimeRepositoryRegistryEvent.of(ADDED, repository));
+    repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(ADDED, provider));
 
     Assertions.assertEquals(1L, (long) catalog.searchAll().size());
     Assertions.assertEquals(description, catalog.searchExact(description.id()).get());
@@ -115,10 +121,10 @@ public abstract class CoffeePickCatalogContract
   public final void testRepositoryAddedRemoved()
     throws IOException
   {
-    final var repo_events = PublishSubject.<RuntimeRepositoryRegistryEventType>create();
+    final var repo_events = PublishSubject.<RuntimeRepositoryProviderRegistryEventType>create();
 
     final var context = Mockito.mock(RuntimeRepositoryContextType.class);
-    final var repositories = Mockito.mock(RuntimeRepositoryRegistryType.class);
+    final var repositories = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
     final var description =
@@ -132,13 +138,16 @@ public abstract class CoffeePickCatalogContract
         .setVm("hotspot")
         .build();
 
+    final var provider = Mockito.mock(RuntimeRepositoryProviderType.class);
+    Mockito.when(provider.uri()).thenReturn(URI.create("urn:example:0.0"));
+
     final var repository = Mockito.mock(RuntimeRepositoryType.class);
-    Mockito.when(repository.uri()).thenReturn(URI.create("urn:example:0.0"));
-    Mockito.when(repository.availableRuntimes(context)).thenReturn(List.of(description));
+    Mockito.when(repository.provider()).thenReturn(provider);
+    Mockito.when(repository.runtimes()).thenReturn(Map.of(description.id(), description));
 
     final var catalog = this.catalog(this.events, context, repositories);
-    repo_events.onNext(RuntimeRepositoryRegistryEvent.of(ADDED, repository));
-    repo_events.onNext(RuntimeRepositoryRegistryEvent.of(REMOVED, repository));
+    repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(ADDED, provider));
+    repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(REMOVED, provider));
     Assertions.assertEquals(0L, (long) catalog.searchAll().size());
   }
 }

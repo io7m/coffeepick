@@ -18,7 +18,7 @@ package com.io7m.coffeepick.tests;
 
 import com.io7m.coffeepick.api.CoffeePickClientProviderType;
 import com.io7m.coffeepick.client.vanilla.CoffeePickClients;
-import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public final class CoffeePickClientsTest extends CoffeePickClientsContract
 
   @Override
   protected CoffeePickClientProviderType provider(
-    final RuntimeRepositoryRegistryType repositories)
+    final RuntimeRepositoryProviderRegistryType repositories)
   {
     return CoffeePickClients.createWith(repositories);
   }
