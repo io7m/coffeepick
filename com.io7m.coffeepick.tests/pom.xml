@@ -29,6 +29,11 @@
       <artifactId>com.io7m.coffeepick.openjdk_java_net</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>com.io7m.coffeepick.adoptopenjdk.raw</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>nl.jqno.equalsverifier</groupId>

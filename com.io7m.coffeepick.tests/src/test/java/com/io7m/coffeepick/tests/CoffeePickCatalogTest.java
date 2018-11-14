@@ -19,8 +19,10 @@ package com.io7m.coffeepick.tests;
 import com.io7m.coffeepick.api.CoffeePickCatalogEventType;
 import com.io7m.coffeepick.api.CoffeePickCatalogType;
 import com.io7m.coffeepick.client.vanilla.CoffeePickCatalog;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryType;
 import io.reactivex.subjects.Subject;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +37,9 @@ public final class CoffeePickCatalogTest extends CoffeePickCatalogContract
   @Override
   protected CoffeePickCatalogType catalog(
     final Subject<CoffeePickCatalogEventType> events,
+    final RuntimeRepositoryContextType context,
     final RuntimeRepositoryRegistryType repositories)
   {
-    return CoffeePickCatalog.create(events, repositories);
+    return CoffeePickCatalog.create(events, context, repositories);
   }
 }

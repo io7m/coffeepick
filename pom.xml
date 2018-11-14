@@ -28,7 +28,7 @@
     <module>com.io7m.coffeepick.tests</module>
     <module>com.io7m.coffeepick.runtime</module>
     <module>com.io7m.coffeepick.shell</module>
-    <module>com.io7m.coffeepick.adoptopenjdk.v1</module>
+    <module>com.io7m.coffeepick.adoptopenjdk.raw</module>
   </modules>
 
   <properties>
@@ -125,14 +125,19 @@
         <version>2.23.0</version>
       </dependency>
       <dependency>
-        <groupId>net.adoptopenjdk</groupId>
-        <artifactId>net.adoptopenjdk.api</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.9.7</version>
       </dependency>
       <dependency>
-        <groupId>net.adoptopenjdk</groupId>
-        <artifactId>net.adoptopenjdk.v1</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.9.7</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.jcip</groupId>
+        <artifactId>jcip-annotations</artifactId>
+        <version>1.0.2</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>

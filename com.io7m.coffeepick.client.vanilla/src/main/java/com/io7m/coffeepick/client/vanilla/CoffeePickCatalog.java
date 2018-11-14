@@ -26,6 +26,7 @@ import com.io7m.coffeepick.api.CoffeePickCatalogType;
 import com.io7m.coffeepick.api.CoffeePickInventoryType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
 import com.io7m.coffeepick.api.CoffeePickSearches;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEventType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
@@ -41,6 +42,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -50,6 +53,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.net.http.HttpClient.Redirect.NORMAL;
+import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
+
 /**
  * The default catalog implementation.
  */
@@ -58,20 +64,30 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
 {
   private static final Logger LOG = LoggerFactory.getLogger(CoffeePickCatalog.class);
 
+  private final RuntimeRepositoryContextType context;
   private final RuntimeRepositoryRegistryType repositories;
   private final Disposable subscription;
   private final Subject<CoffeePickCatalogEventType> events;
   private final Map<String, URI> runtime_repositories;
   private final Map<URI, Map<String, RuntimeDescription>> repository_runtimes;
+  private final HttpClient http;
 
   private CoffeePickCatalog(
     final Subject<CoffeePickCatalogEventType> in_events,
+    final RuntimeRepositoryContextType in_context,
     final RuntimeRepositoryRegistryType in_repositories)
   {
     this.events =
       Objects.requireNonNull(in_events, "events");
+    this.context =
+      Objects.requireNonNull(in_context, "context");
     this.repositories =
       Objects.requireNonNull(in_repositories, "repositories");
+
+    this.http =
+      HttpClient.newBuilder()
+        .followRedirects(NORMAL)
+        .build();
 
     this.runtime_repositories =
       new HashMap<>(128);
@@ -126,7 +142,7 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
     final var uri = repository.uri();
 
     try {
-      final var runtimes = repository.availableRuntimes();
+      final var runtimes = repository.availableRuntimes(this.context);
       for (final var description : runtimes) {
         this.runtime_repositories.put(description.id(), uri);
       }
@@ -146,6 +162,7 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
    * Create a new catalog.
    *
    * @param events       A subject to which events will be published
+   * @param context      The runtime repository context
    * @param repositories A repository registry
    *
    * @return A new catalog
@@ -153,9 +170,10 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
 
   public static CoffeePickCatalogType create(
     final Subject<CoffeePickCatalogEventType> events,
+    final RuntimeRepositoryContextType context,
     final RuntimeRepositoryRegistryType repositories)
   {
-    return new CoffeePickCatalog(events, repositories);
+    return new CoffeePickCatalog(events, context, repositories);
   }
 
   @Override
@@ -203,9 +221,16 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
           .append(id)
           .toString()));
 
-    return description.archiveURI()
-      .toURL()
-      .openStream();
+    final var request =
+      HttpRequest.newBuilder(description.archiveURI())
+        .GET()
+        .build();
+
+    try {
+      return this.http.send(request, ofInputStream()).body();
+    } catch (final InterruptedException e) {
+      throw new IOException(e);
+    }
   }
 
   /**

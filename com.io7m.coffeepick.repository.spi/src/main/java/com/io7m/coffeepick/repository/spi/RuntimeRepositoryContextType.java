@@ -14,9 +14,23 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+package com.io7m.coffeepick.repository.spi;
+
+import java.nio.file.Path;
+
 /**
- * Java runtime retrieval (AdoptOpenJDK V1 Provider)
+ * A context interface passed to repositories.
+ *
+ * This is used to provide configuration and other information to repositories at runtime, and
+ * is typically filled in by the client implementation. This interface essentially serves as a
+ * means to avoid a circular dependency between the client API and repository SPI.
  */
 
-@org.osgi.annotation.bundle.Export
-package com.io7m.coffeepick.adoptopenjdk.v1;
+public interface RuntimeRepositoryContextType
+{
+  /**
+   * @return The base cache directory
+   */
+
+  Path cacheDirectory();
+}

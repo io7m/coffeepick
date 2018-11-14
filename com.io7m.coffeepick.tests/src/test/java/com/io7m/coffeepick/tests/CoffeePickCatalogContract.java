@@ -18,6 +18,7 @@ package com.io7m.coffeepick.tests;
 
 import com.io7m.coffeepick.api.CoffeePickCatalogEventType;
 import com.io7m.coffeepick.api.CoffeePickCatalogType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEvent;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryEventType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryType;
@@ -49,6 +50,7 @@ public abstract class CoffeePickCatalogContract
 
   protected abstract CoffeePickCatalogType catalog(
     Subject<CoffeePickCatalogEventType> events,
+    RuntimeRepositoryContextType context,
     RuntimeRepositoryRegistryType repositories);
 
   @BeforeEach
@@ -68,10 +70,11 @@ public abstract class CoffeePickCatalogContract
     final var repo_events =
       PublishSubject.<RuntimeRepositoryRegistryEventType>create();
 
+    final var context = Mockito.mock(RuntimeRepositoryContextType.class);
     final var repositories = Mockito.mock(RuntimeRepositoryRegistryType.class);
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
-    final var catalog = this.catalog(this.events, repositories);
+    final var catalog = this.catalog(this.events, context, repositories);
     Assertions.assertEquals(0L, (long) catalog.searchAll().size());
   }
 
@@ -82,6 +85,7 @@ public abstract class CoffeePickCatalogContract
     final var repo_events =
       PublishSubject.<RuntimeRepositoryRegistryEventType>create();
 
+    final var context = Mockito.mock(RuntimeRepositoryContextType.class);
     final var repositories = Mockito.mock(RuntimeRepositoryRegistryType.class);
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
@@ -98,9 +102,9 @@ public abstract class CoffeePickCatalogContract
 
     final var repository = Mockito.mock(RuntimeRepositoryType.class);
     Mockito.when(repository.uri()).thenReturn(URI.create("urn:example:0.0"));
-    Mockito.when(repository.availableRuntimes()).thenReturn(List.of(description));
+    Mockito.when(repository.availableRuntimes(context)).thenReturn(List.of(description));
 
-    final var catalog = this.catalog(this.events, repositories);
+    final var catalog = this.catalog(this.events, context, repositories);
     repo_events.onNext(RuntimeRepositoryRegistryEvent.of(ADDED, repository));
 
     Assertions.assertEquals(1L, (long) catalog.searchAll().size());
@@ -111,9 +115,9 @@ public abstract class CoffeePickCatalogContract
   public final void testRepositoryAddedRemoved()
     throws IOException
   {
-    final var repo_events =
-      PublishSubject.<RuntimeRepositoryRegistryEventType>create();
+    final var repo_events = PublishSubject.<RuntimeRepositoryRegistryEventType>create();
 
+    final var context = Mockito.mock(RuntimeRepositoryContextType.class);
     final var repositories = Mockito.mock(RuntimeRepositoryRegistryType.class);
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
@@ -130,9 +134,9 @@ public abstract class CoffeePickCatalogContract
 
     final var repository = Mockito.mock(RuntimeRepositoryType.class);
     Mockito.when(repository.uri()).thenReturn(URI.create("urn:example:0.0"));
-    Mockito.when(repository.availableRuntimes()).thenReturn(List.of(description));
+    Mockito.when(repository.availableRuntimes(context)).thenReturn(List.of(description));
 
-    final var catalog = this.catalog(this.events, repositories);
+    final var catalog = this.catalog(this.events, context, repositories);
     repo_events.onNext(RuntimeRepositoryRegistryEvent.of(ADDED, repository));
     repo_events.onNext(RuntimeRepositoryRegistryEvent.of(REMOVED, repository));
     Assertions.assertEquals(0L, (long) catalog.searchAll().size());

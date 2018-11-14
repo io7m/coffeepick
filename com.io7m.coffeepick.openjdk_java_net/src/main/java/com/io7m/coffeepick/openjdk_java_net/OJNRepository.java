@@ -16,6 +16,7 @@
 
 package com.io7m.coffeepick.openjdk_java_net;
 
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeDescriptions;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,9 +67,12 @@ public final class OJNRepository implements RuntimeRepositoryType
   }
 
   @Override
-  public List<RuntimeDescription> availableRuntimes()
+  public List<RuntimeDescription> availableRuntimes(
+    final RuntimeRepositoryContextType context)
     throws IOException
   {
+    Objects.requireNonNull(context, "context");
+
     try {
       try (var stream = OJNRepository.class.getResourceAsStream(BUILDS)) {
         final var builds = new Properties();

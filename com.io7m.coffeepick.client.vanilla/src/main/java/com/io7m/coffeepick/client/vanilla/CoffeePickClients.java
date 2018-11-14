@@ -27,6 +27,7 @@ import com.io7m.coffeepick.api.CoffeePickOperation;
 import com.io7m.coffeepick.api.CoffeePickSearch;
 import com.io7m.coffeepick.api.CoffeePickVerification;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoader;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryRegistryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import io.reactivex.Observable;
@@ -35,6 +36,9 @@ import io.reactivex.subjects.Subject;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
@@ -94,34 +98,40 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       BehaviorSubject.<CoffeePickEventType>create()
         .toSerialized();
 
+    final var context =
+      CoffeePickRuntimeRepositoryContext.open(base_directory);
+
     @SuppressWarnings("unchecked") final var catalog_events =
       (Subject<CoffeePickCatalogEventType>) (Object) events;
     final var catalog =
-      CoffeePickCatalog.create(catalog_events, this.repositories);
+      CoffeePickCatalog.create(catalog_events, context, this.repositories);
 
     @SuppressWarnings("unchecked") final var inventory_events =
       (Subject<CoffeePickInventoryEventType>) (Object) events;
     final var inventory =
       CoffeePickInventory.open(inventory_events, base_directory.resolve("inventory"));
 
-    return new Client(events, inventory, catalog, this.repositories, base_directory);
+    return new Client(events, inventory, catalog, context, this.repositories, base_directory);
   }
 
   private static final class Client implements CoffeePickClientType
   {
     private final CoffeePickInventoryType inventory;
     private final CoffeePickCatalogType catalog;
+    private final RuntimeRepositoryContextType context;
     private final Path base_directory;
     private final RuntimeRepositoryRegistryType repositories;
     private final ExecutorService executor;
     private final AtomicBoolean closed;
     private final Subject<CoffeePickEventType> events;
+    private final HttpClient http;
     private volatile BigInteger command_id;
 
     Client(
       final Subject<CoffeePickEventType> in_events,
       final CoffeePickInventoryType in_inventory,
       final CoffeePickCatalogType in_catalog,
+      final RuntimeRepositoryContextType in_context,
       final RuntimeRepositoryRegistryType in_repositories,
       final Path in_base_directory)
     {
@@ -131,10 +141,17 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
         Objects.requireNonNull(in_inventory, "inventory");
       this.catalog =
         Objects.requireNonNull(in_catalog, "catalog");
+      this.context =
+        Objects.requireNonNull(in_context, "context");
       this.base_directory =
         Objects.requireNonNull(in_base_directory, "base_directory");
       this.repositories =
         Objects.requireNonNull(in_repositories, "repositories");
+
+      this.http =
+        HttpClient.newBuilder()
+          .followRedirects(HttpClient.Redirect.NORMAL)
+          .build();
 
       this.executor = Executors.newFixedThreadPool(1, runnable -> {
         final var thread = new Thread(runnable);
@@ -226,7 +243,16 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       return this.submit(() -> {
         final var description = this.catalog.searchExactOrFail(id);
         final var uri = description.archiveURI();
-        try (var input = uri.toURL().openStream()) {
+
+        final var request =
+          HttpRequest.newBuilder(uri)
+            .GET()
+            .build();
+
+        final var response =
+          this.http.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+        try (var input = response.body()) {
           return this.inventory.write(
             description, CoffeePickCatalog.publishingWriter(description, catalog_events, input));
         }

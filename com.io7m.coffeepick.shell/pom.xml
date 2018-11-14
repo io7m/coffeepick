@@ -36,7 +36,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>com.io7m.coffeepick.adoptopenjdk.v1</artifactId>
+      <artifactId>com.io7m.coffeepick.adoptopenjdk.raw</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

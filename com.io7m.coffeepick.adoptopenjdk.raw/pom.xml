@@ -11,11 +11,11 @@
     <version>0.0.1</version>
   </parent>
 
-  <artifactId>com.io7m.coffeepick.adoptopenjdk.v1</artifactId>
+  <artifactId>com.io7m.coffeepick.adoptopenjdk.raw</artifactId>
 
   <packaging>jar</packaging>
-  <name>com.io7m.coffeepick.adoptopenjdk.v1</name>
-  <description>Java runtime retrieval (AdoptOpenJDK v1 provider)</description>
+  <name>com.io7m.coffeepick.adoptopenjdk.raw</name>
+  <description>Java runtime retrieval (AdoptOpenJDK Raw provider)</description>
   <url>http://github.com/io7m/coffeepick</url>
 
   <dependencies>
@@ -30,12 +30,27 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.adoptopenjdk</groupId>
-      <artifactId>net.adoptopenjdk.api</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.adoptopenjdk</groupId>
-      <artifactId>net.adoptopenjdk.v1</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.io7m.jcip</groupId>
+      <artifactId>jcip-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.immutables</groupId>
+      <artifactId>value</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.immutables.style</groupId>
+      <artifactId>com.io7m.immutables.style</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>

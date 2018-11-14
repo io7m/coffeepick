@@ -14,43 +14,42 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.repository.spi;
+package com.io7m.coffeepick.adoptopenjdk.raw;
 
-import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.immutables.styles.ImmutablesStyleType;
+import org.immutables.value.Value;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 
 /**
- * A repository of runtimes.
+ * Information parsed from AdoptOpenJDK metadata.
  */
 
-public interface RuntimeRepositoryType
+@ImmutablesStyleType
+@Value.Immutable
+public interface AOJDKArchiveType
 {
   /**
-   * @return The URI that uniquely identifies this repository
+   * @return The metadata extracted from the filename
    */
 
-  URI uri();
+  AOJDKFilenameMetadata metadata();
 
   /**
-   * @return The name of the repository
+   * @return The archive URI
    */
 
-  String name();
+  URI archiveURI();
 
   /**
-   * Obtain a read-only, immutable list of the available runtimes in the repository.
-   *
-   * @param context The current context
-   *
-   * @return The available runtimes
-   *
-   * @throws IOException On I/O errors
+   * @return The archive size
    */
 
-  List<RuntimeDescription> availableRuntimes(
-    RuntimeRepositoryContextType context)
-    throws IOException;
+  long archiveSize();
+
+  /**
+   * @return The URI of the archive checksum
+   */
+
+  URI archiveChecksumURI();
 }

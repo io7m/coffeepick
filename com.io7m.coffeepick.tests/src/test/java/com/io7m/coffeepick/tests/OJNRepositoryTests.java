@@ -17,8 +17,10 @@
 package com.io7m.coffeepick.tests;
 
 import com.io7m.coffeepick.openjdk_java_net.OJNRepository;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +42,11 @@ public final class OJNRepositoryTests
   @Test
   public void testRuntimes()
   {
+    final var context = Mockito.mock(RuntimeRepositoryContextType.class);
+
     Assertions.assertTimeout(Duration.ofSeconds(60L), () -> {
       final var repository = new OJNRepository();
-      final var runtimes = repository.availableRuntimes();
+      final var runtimes = repository.availableRuntimes(context);
       runtimes.forEach(runtimeDescription -> LOG.debug("runtime: {}", runtimeDescription));
 
       Assertions.assertEquals(8, runtimes.size());
