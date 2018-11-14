@@ -16,6 +16,7 @@
 
 package com.io7m.coffeepick.adoptopenjdk.raw;
 
+import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import org.slf4j.Logger;
@@ -85,6 +86,15 @@ public final class AOJDKArchiveResolver
       e);
   }
 
+  private static RuntimeConfiguration mapConfiguration(
+    final AOJDKFilenameMetadata metadata)
+  {
+    if (metadata.isJRE()) {
+      return RuntimeConfiguration.JRE;
+    }
+    return RuntimeConfiguration.JDK;
+  }
+
   private RuntimeHash fetchHash(final URI link)
     throws IOException, InterruptedException
   {
@@ -144,6 +154,7 @@ public final class AOJDKArchiveResolver
 
       final var builder = RuntimeDescription.builder();
       builder.setRepository(PROVIDER_URI);
+      builder.setConfiguration(mapConfiguration(archive.metadata()));
       builder.setArchitecture(archive.metadata().architecture());
       builder.setArchiveHash(hash);
       builder.setArchiveSize(archive.archiveSize());
@@ -152,9 +163,6 @@ public final class AOJDKArchiveResolver
       builder.setVersion(Runtime.Version.parse(archive.metadata().number()));
       builder.setVm(archive.metadata().vm());
 
-      if (archive.metadata().isJRE()) {
-        builder.addTags("jre");
-      }
       if (archive.metadata().isLargeHeap()) {
         builder.addTags("large-heap");
       }

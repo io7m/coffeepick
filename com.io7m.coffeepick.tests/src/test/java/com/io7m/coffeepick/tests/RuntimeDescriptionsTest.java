@@ -303,7 +303,6 @@ public final class RuntimeDescriptionsTest
     }
   }
 
-
   @Test
   public void testBrokenFormat()
     throws Exception
@@ -330,6 +329,42 @@ public final class RuntimeDescriptionsTest
       properties.load(stream);
 
       properties.remove("coffeepick.formatVersion");
+
+      final var ex =
+        Assertions.assertThrows(
+          IOException.class,
+          () -> RuntimeDescriptions.parseFromProperties(properties));
+
+      Assertions.assertTrue(ex.getMessage().contains("Missing"));
+    }
+  }
+
+  @Test
+  public void testBrokenConfiguration()
+    throws Exception
+  {
+    try (var stream = resource("trivial.properties")) {
+      final var properties = new Properties();
+      properties.load(stream);
+
+      properties.setProperty("coffeepick.runtimeConfiguration", "z");
+
+      final var ex =
+        Assertions.assertThrows(
+          IOException.class,
+          () -> RuntimeDescriptions.parseFromProperties(properties));
+    }
+  }
+
+  @Test
+  public void testMissingConfiguration()
+    throws Exception
+  {
+    try (var stream = resource("trivial.properties")) {
+      final var properties = new Properties();
+      properties.load(stream);
+
+      properties.remove("coffeepick.runtimeConfiguration");
 
       final var ex =
         Assertions.assertThrows(

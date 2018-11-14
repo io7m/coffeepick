@@ -19,59 +19,54 @@ package com.io7m.coffeepick.runtime;
 import java.util.Objects;
 
 /**
- * Standard names for architectures.
+ * A JVM configuration.
  */
 
-public enum RuntimeArchitectures
+public enum RuntimeConfiguration
 {
   /**
-   * 32-bit x86
+   * A simple runtime environment.
    */
 
-  X32("x32"),
+  JRE("jre"),
 
   /**
-   * 64-bit x86
+   * A full JDK.
    */
 
-  X64("x64"),
-
-  /**
-   * S390X
-   */
-
-  S390X("s390x"),
-
-  /**
-   * PowerPC 64-bit Little-Endian
-   */
-
-  PPC64_LE("ppc64le"),
-
-  /**
-   * PowerPC 64-bit Big-Endian
-   */
-
-  PPC64_BE("ppc64"),
-
-  /**
-   * 64-bit ARM
-   */
-
-  AARCH_64("aarch64");
+  JDK("jdk");
 
   private final String name;
 
   /**
-   * @return The name of the architecture
+   * @param name The configuration name
+   *
+   * @return The value for the given name
    */
 
-  public String architectureName()
+  public static RuntimeConfiguration ofName(
+    final String name)
+  {
+    switch (Objects.requireNonNull(name, "name")) {
+      case "jre":
+        return JRE;
+      case "jdk":
+        return JDK;
+      default:
+        throw new IllegalArgumentException("Unrecognized value: " + name);
+    }
+  }
+
+  /**
+   * @return The name of the configuration
+   */
+
+  public String configurationName()
   {
     return this.name;
   }
 
-  RuntimeArchitectures(
+  RuntimeConfiguration(
     final String in_name)
   {
     this.name = Objects.requireNonNull(in_name, "name");

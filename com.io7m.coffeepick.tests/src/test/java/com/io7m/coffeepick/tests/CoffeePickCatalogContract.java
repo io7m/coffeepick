@@ -24,6 +24,7 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEvent
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
+import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import io.reactivex.subjects.PublishSubject;
@@ -97,6 +98,7 @@ public abstract class CoffeePickCatalogContract
         .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
         .setArchiveSize(100L)
         .setArchiveURI(URI.create("https://www.example.com"))
+        .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
         .setVersion(Runtime.Version.parse("11.0.1"))
         .setVm("hotspot")
@@ -135,6 +137,7 @@ public abstract class CoffeePickCatalogContract
         .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
         .setArchiveSize(100L)
         .setArchiveURI(URI.create("https://www.example.com"))
+        .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
         .setVersion(Runtime.Version.parse("11.0.1"))
         .setVm("hotspot")

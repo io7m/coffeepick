@@ -43,6 +43,12 @@ public interface RuntimeDescriptionType
   Runtime.Version version();
 
   /**
+   * @return The JVM configuration
+   */
+
+  RuntimeConfiguration configuration();
+
+  /**
    * @return The name of the platform upon which this runtime will run
    *
    * @see RuntimePlatforms

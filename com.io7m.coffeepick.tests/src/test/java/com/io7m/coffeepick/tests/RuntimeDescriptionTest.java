@@ -34,6 +34,7 @@ public final class RuntimeDescriptionTest
         "architecture",
         "archiveHash",
         "archiveURI",
+        "configuration",
         "platform",
         "repository",
         "tags",

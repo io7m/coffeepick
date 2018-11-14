@@ -22,6 +22,7 @@ import com.io7m.coffeepick.api.CoffeePickInventoryEventRuntimeLoaded;
 import com.io7m.coffeepick.api.CoffeePickInventoryEventType;
 import com.io7m.coffeepick.api.CoffeePickInventoryType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
+import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.coffeepick.runtime.RuntimeVersionRange;
@@ -113,6 +114,7 @@ public abstract class CoffeePickInventoryContract
         .setArchiveHash(RuntimeHash.of("SHA-256", HASH_VALUE))
         .setArchiveSize(100L)
         .setArchiveURI(URI.create("https://www.example.com"))
+        .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
         .setVersion(Runtime.Version.parse("11.0.1"))
         .setVm("hotspot")
@@ -148,6 +150,7 @@ public abstract class CoffeePickInventoryContract
               .setArchiveHash(RuntimeHash.of("SHA-256",  hashOf(version_name)))
               .setArchiveSize(100L)
               .setArchiveURI(URI.create("https://www.example.com"))
+              .setConfiguration(RuntimeConfiguration.JDK)
               .setPlatform("linux")
               .setVersion(Runtime.Version.parse(version_name))
               .setVm("hotspot")
@@ -220,6 +223,7 @@ public abstract class CoffeePickInventoryContract
               .setArchiveHash(RuntimeHash.of("SHA-256",  hashOf(version_name)))
               .setArchiveSize(100L)
               .setArchiveURI(URI.create("https://www.example.com"))
+              .setConfiguration(RuntimeConfiguration.JDK)
               .setPlatform("linux")
               .setVersion(Runtime.Version.parse(version_name))
               .setVm("hotspot")
@@ -277,6 +281,7 @@ public abstract class CoffeePickInventoryContract
         .setArchiveHash(RuntimeHash.of("SHA-256", HASH_VALUE))
         .setArchiveSize(100L)
         .setArchiveURI(URI.create("https://www.example.com"))
+        .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
         .setVersion(Runtime.Version.parse("11.0.1"))
         .setVm("hotspot")

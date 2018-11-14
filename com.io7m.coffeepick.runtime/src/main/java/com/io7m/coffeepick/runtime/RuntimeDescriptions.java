@@ -36,6 +36,8 @@ public final class RuntimeDescriptions
     "coffeepick.runtimeRepository";
   private static final String COFFEEPICK_RUNTIME_VERSION =
     "coffeepick.runtimeVersion";
+  private static final String COFFEEPICK_RUNTIME_CONFIGURATION =
+    "coffeepick.runtimeConfiguration";
   private static final String COFFEEPICK_RUNTIME_PLATFORM =
     "coffeepick.runtimePlatform";
   private static final String COFFEEPICK_RUNTIME_VM =
@@ -99,6 +101,8 @@ public final class RuntimeDescriptions
       COFFEEPICK_RUNTIME_ARCHIVE_HASH_ALGORITHM, description.archiveHash().algorithm());
     properties.setProperty(
       COFFEEPICK_RUNTIME_ARCHIVE_HASH_VALUE, description.archiveHash().value());
+    properties.setProperty(
+      COFFEEPICK_RUNTIME_CONFIGURATION, description.configuration().configurationName());
     properties.setProperty(
       COFFEEPICK_RUNTIME_PLATFORM, description.platform());
     properties.setProperty(
@@ -221,6 +225,13 @@ public final class RuntimeDescriptions
       exception = accumulateException(exception, e);
     }
 
+    RuntimeConfiguration configuration = null;
+    try {
+      configuration = parseConfiguration(properties);
+    } catch (final IOException e) {
+      exception = accumulateException(exception, e);
+    }
+
     final var tags = parseTags(properties);
 
     if (exception != null) {
@@ -232,6 +243,7 @@ public final class RuntimeDescriptions
       .setArchiveHash(archive_hash)
       .setArchiveSize(archive_size)
       .setArchiveURI(archive_uri)
+      .setConfiguration(configuration)
       .setPlatform(platform)
       .setRepository(repository)
       .setTags(tags)
@@ -239,6 +251,7 @@ public final class RuntimeDescriptions
       .setVersion(version)
       .build();
   }
+
   // CHECKSTYLE:ON
 
   private static Set<String> parseTags(
@@ -262,6 +275,33 @@ public final class RuntimeDescriptions
     }
     exception.addSuppressed(next);
     return exception;
+  }
+
+  private static RuntimeConfiguration parseConfiguration(
+    final Properties properties)
+    throws IOException
+  {
+    final var text = requireField(properties, COFFEEPICK_RUNTIME_CONFIGURATION);
+
+    try {
+      return RuntimeConfiguration.ofName(text);
+    } catch (final Exception e) {
+      final var separator = System.lineSeparator();
+      throw new IOException(
+        new StringBuilder(64)
+          .append("Unparseable configuration")
+          .append(separator)
+          .append("  Field: ")
+          .append(COFFEEPICK_RUNTIME_CONFIGURATION)
+          .append(separator)
+          .append("  Expected: A configuration value")
+          .append(separator)
+          .append("  Received: ")
+          .append(text)
+          .append(separator)
+          .toString(),
+        e);
+    }
   }
 
   private static Runtime.Version parseVersion(
