@@ -107,6 +107,7 @@
                   <resource>.SF</resource>
                   <resource>.RSA</resource>
                 </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
               </transformers>
             </configuration>
           </execution>
