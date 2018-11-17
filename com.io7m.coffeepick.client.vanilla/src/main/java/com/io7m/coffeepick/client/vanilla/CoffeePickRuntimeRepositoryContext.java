@@ -47,8 +47,8 @@ public final class CoffeePickRuntimeRepositoryContext implements RuntimeReposito
    * Open a new context.
    *
    * @param base_directory The base directory against which repositories will resolve paths
+   * @param http           The HTTP client used for requests
    *
-   * @param http
    * @return A new context
    *
    * @throws IOException On I/O errors

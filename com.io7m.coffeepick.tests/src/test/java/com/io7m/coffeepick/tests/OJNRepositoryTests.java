@@ -16,7 +16,7 @@
 
 package com.io7m.coffeepick.tests;
 
-import com.io7m.coffeepick.openjdk_java_net.OJNRepositoryProvider;
+import com.io7m.coffeepick.jdk_java_net.OJNRepositoryProvider;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -19,4 +19,4 @@
  */
 
 @org.osgi.annotation.bundle.Export
-package com.io7m.coffeepick.openjdk_java_net;
+package com.io7m.coffeepick.jdk_java_net;

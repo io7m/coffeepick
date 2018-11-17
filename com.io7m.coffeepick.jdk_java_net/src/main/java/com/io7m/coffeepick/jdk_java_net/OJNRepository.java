@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.openjdk_java_net;
+package com.io7m.coffeepick.jdk_java_net;
 
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateFinished;
@@ -49,7 +49,7 @@ public final class OJNRepository implements RuntimeRepositoryType
 {
   private static final Logger LOG = LoggerFactory.getLogger(OJNRepository.class);
 
-  private static final String BUILDS = "/com/io7m/coffeepick/openjdk_java_net/build.properties";
+  private static final String BUILDS = "/com/io7m/coffeepick/jdk_java_net/build.properties";
   private final ConcurrentHashMap<String, RuntimeDescription> runtimes;
   private final Map<String, RuntimeDescription> runtimes_read;
   private final OJNRepositoryProvider provider;

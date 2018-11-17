@@ -11,10 +11,10 @@
     <version>0.0.1</version>
   </parent>
 
-  <artifactId>com.io7m.coffeepick.openjdk_java_net</artifactId>
+  <artifactId>com.io7m.coffeepick.jdk_java_net</artifactId>
 
   <packaging>jar</packaging>
-  <name>com.io7m.coffeepick.openjdk_java_net</name>
+  <name>com.io7m.coffeepick.jdk_java_net</name>
   <description>Java runtime retrieval (openjdk.java.net provider)</description>
   <url>http://github.com/io7m/coffeepick</url>
 

@@ -23,7 +23,7 @@
   <modules>
     <module>com.io7m.coffeepick.client.api</module>
     <module>com.io7m.coffeepick.client.vanilla</module>
-    <module>com.io7m.coffeepick.openjdk_java_net</module>
+    <module>com.io7m.coffeepick.jdk_java_net</module>
     <module>com.io7m.coffeepick.repository.spi</module>
     <module>com.io7m.coffeepick.tests</module>
     <module>com.io7m.coffeepick.runtime</module>
