@@ -17,10 +17,13 @@
 package com.io7m.coffeepick.tests;
 
 import com.io7m.coffeepick.api.CoffeePickClientProviderType;
+import com.io7m.coffeepick.api.CoffeePickEventType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEventType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
 import io.reactivex.subjects.PublishSubject;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -33,18 +36,26 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class CoffeePickClientsContract
 {
+  private PublishSubject<RuntimeRepositoryProviderRegistryEventType> repos_events;
+
   protected abstract Logger log();
 
   protected abstract CoffeePickClientProviderType provider(
     RuntimeRepositoryProviderRegistryType repositories);
+
+  @BeforeEach
+  public void setup()
+  {
+    this.repos_events = PublishSubject.create();
+  }
 
   @Test
   public final void testCreateNotInventoryDirectory()
     throws Exception
   {
     final var registry = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
-    Mockito.when(registry.events())
-      .thenReturn(PublishSubject.create());
+
+    Mockito.when(registry.events()).thenReturn(this.repos_events);
 
     final var clients = this.provider(registry);
     final var tmp = Files.createTempDirectory("coffeepick-");
@@ -63,8 +74,8 @@ public abstract class CoffeePickClientsContract
     throws Exception
   {
     final var registry = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
-    Mockito.when(registry.events())
-      .thenReturn(PublishSubject.create());
+
+    Mockito.when(registry.events()).thenReturn(this.repos_events);
 
     final var clients = this.provider(registry);
     final var tmp = Files.createTempDirectory("coffeepick-");
@@ -79,5 +90,24 @@ public abstract class CoffeePickClientsContract
       op.future().get(60L, TimeUnit.SECONDS);
 
     Assertions.assertEquals(0L, (long) runtimes.size());
+  }
+
+  @Test
+  public final void testDeleteEmpty()
+    throws Exception
+  {
+    final var registry = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
+
+    Mockito.when(registry.events()).thenReturn(this.repos_events);
+
+    final var clients = this.provider(registry);
+    final var tmp = Files.createTempDirectory("coffeepick-");
+    final var client = clients.newClient(tmp);
+
+    final var op =
+      client.inventoryDelete("abcd");
+
+    final var runtimes =
+      op.future().get(60L, TimeUnit.SECONDS);
   }
 }

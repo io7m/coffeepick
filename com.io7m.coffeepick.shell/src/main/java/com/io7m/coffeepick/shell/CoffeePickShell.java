@@ -75,6 +75,7 @@ public final class CoffeePickShell
             List.of(
               new CoffeePickShellCommandRepositoryUpdate(client, writer),
               new CoffeePickShellCommandInventoryList(client, writer),
+              new CoffeePickShellCommandInventoryPathOf(client, writer),
               new CoffeePickShellCommandDelete(client, writer),
               new CoffeePickShellCommandVerify(client, writer),
               new CoffeePickShellCommandCatalogList(client, writer),

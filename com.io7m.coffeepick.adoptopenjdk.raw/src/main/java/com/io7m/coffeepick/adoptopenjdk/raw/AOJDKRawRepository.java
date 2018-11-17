@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.net.http.HttpClient.Redirect.NORMAL;
 import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
 
 /**
@@ -71,28 +70,28 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
   /**
    * Construct a repository.
    *
+   * @param in_http     The HTTP client used for requests
    * @param in_provider The owning provider
    * @param context     The runtime context
    */
 
   AOJDKRawRepository(
+    final HttpClient in_http,
     final AOJDKRawRepositoryProvider in_provider,
     final RuntimeRepositoryContextType context)
     throws IOException
   {
-    this.provider = Objects.requireNonNull(in_provider, "provider");
-    Objects.requireNonNull(context, "context");
-
     this.http =
-      HttpClient.newBuilder()
-        .followRedirects(NORMAL)
-        .build();
+      Objects.requireNonNull(in_http, "http");
+    this.provider =
+      Objects.requireNonNull(in_provider, "provider");
+    Objects.requireNonNull(context, "context");
 
     this.database =
       AOJDKRuntimeDescriptionDatabase.open(context.cacheDirectory().resolve("adoptopenjdk.raw"));
 
     this.events = PublishSubject.<RuntimeRepositoryEventType>create().toSerialized();
-    this.resolver = AOJDKArchiveResolver.create();
+    this.resolver = AOJDKArchiveResolver.create(in_http);
   }
 
   @Override

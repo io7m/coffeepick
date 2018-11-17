@@ -90,29 +90,32 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
   }
 
   @Override
-  public CoffeePickClientType newClient(final Path base_directory)
+  public CoffeePickClientType newClient(
+    final Path base_directory,
+    final HttpClient http)
     throws IOException
   {
     Objects.requireNonNull(base_directory, "base_directory");
+    Objects.requireNonNull(http, "http");
 
     final var events =
       BehaviorSubject.<CoffeePickEventType>create()
         .toSerialized();
 
     final var context =
-      CoffeePickRuntimeRepositoryContext.open(base_directory);
+      CoffeePickRuntimeRepositoryContext.open(base_directory, http);
 
     @SuppressWarnings("unchecked") final var catalog_events =
       (Subject<CoffeePickCatalogEventType>) (Object) events;
     final var catalog =
-      CoffeePickCatalog.create(catalog_events, context, this.repositories);
+      CoffeePickCatalog.create(catalog_events, http, context, this.repositories);
 
     @SuppressWarnings("unchecked") final var inventory_events =
       (Subject<CoffeePickInventoryEventType>) (Object) events;
     final var inventory =
       CoffeePickInventory.open(inventory_events, base_directory.resolve("inventory"));
 
-    return new Client(events, inventory, catalog, context, this.repositories, base_directory);
+    return new Client(events, inventory, catalog, context, this.repositories, base_directory, http);
   }
 
   private static final class Client implements CoffeePickClientType
@@ -134,7 +137,8 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       final CoffeePickCatalogType in_catalog,
       final RuntimeRepositoryContextType in_context,
       final RuntimeRepositoryProviderRegistryType in_repositories,
-      final Path in_base_directory)
+      final Path in_base_directory,
+      final HttpClient in_http)
     {
       this.events =
         Objects.requireNonNull(in_events, "events");
@@ -148,11 +152,8 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
         Objects.requireNonNull(in_base_directory, "base_directory");
       this.repositories =
         Objects.requireNonNull(in_repositories, "repositories");
-
       this.http =
-        HttpClient.newBuilder()
-          .followRedirects(HttpClient.Redirect.NORMAL)
-          .build();
+        Objects.requireNonNull(in_http, "http");
 
       this.executor = Executors.newFixedThreadPool(1, runnable -> {
         final var thread = new Thread(runnable);
@@ -241,38 +242,73 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       @SuppressWarnings("unchecked") final var catalog_events =
         (Subject<CoffeePickCatalogEventType>) (Object) this.events;
 
+      return this.submit(() -> this.doDownload(id, catalog_events));
+    }
+
+    private Path doDownload(
+      final String id,
+      final Subject<CoffeePickCatalogEventType> catalog_events)
+      throws IOException, InterruptedException
+    {
+      final var description = this.catalog.searchExactOrFail(id);
+      final var uri = description.archiveURI();
+
+      final var request =
+        HttpRequest.newBuilder(uri)
+          .GET()
+          .build();
+
+      final var response =
+        this.http.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+      if (response.statusCode() >= 400) {
+        final var separator = System.lineSeparator();
+        throw new IOException(
+          new StringBuilder(128)
+            .append("HTTP error")
+            .append(separator)
+            .append("  URI:         ")
+            .append(description.archiveURI())
+            .append(separator)
+            .append("  Status code: ")
+            .append(response.statusCode())
+            .append(separator)
+            .toString());
+      }
+
+      try (var input = response.body()) {
+        return this.inventory.write(
+          description, CoffeePickCatalog.publishingWriter(description, catalog_events, input));
+      }
+    }
+
+    @Override
+    public CoffeePickOperation<Path> catalogDownloadIfNecessary(
+      final String id)
+    {
+      Objects.requireNonNull(id, "id");
+      this.checkNotClosed();
+
+      @SuppressWarnings("unchecked") final var catalog_events =
+        (Subject<CoffeePickCatalogEventType>) (Object) this.events;
+
       return this.submit(() -> {
-        final var description = this.catalog.searchExactOrFail(id);
-        final var uri = description.archiveURI();
-
-        final var request =
-          HttpRequest.newBuilder(uri)
-            .GET()
-            .build();
-
-        final var response =
-          this.http.send(request, HttpResponse.BodyHandlers.ofInputStream());
-
-        if (response.statusCode() >= 400) {
-          final var separator = System.lineSeparator();
-          throw new IOException(
-            new StringBuilder(128)
-              .append("HTTP error")
-              .append(separator)
-              .append("  URI:         ")
-              .append(description.archiveURI())
-              .append(separator)
-              .append("  Status code: ")
-              .append(response.statusCode())
-              .append(separator)
-              .toString());
+        final var result = this.inventory.pathOf(id);
+        if (result.isPresent()) {
+          return result.get();
         }
-
-        try (var input = response.body()) {
-          return this.inventory.write(
-            description, CoffeePickCatalog.publishingWriter(description, catalog_events, input));
-        }
+        return this.doDownload(id, catalog_events);
       });
+    }
+
+    @Override
+    public CoffeePickOperation<Optional<Path>> inventoryPathOf(
+      final String id)
+    {
+      Objects.requireNonNull(id, "id");
+      this.checkNotClosed();
+
+      return this.submit(() -> this.inventory.pathOf(id));
     }
 
     @Override
@@ -280,6 +316,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       final URI uri)
     {
       Objects.requireNonNull(uri, "uri");
+      this.checkNotClosed();
 
       return this.submit(() -> {
         this.catalog.updateRepository(uri);

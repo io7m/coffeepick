@@ -67,6 +67,7 @@ public final class CoffeePickSearches
     final CoffeePickSearch parameters)
   {
     return matchesField(runtime.repository(), parameters.repository())
+      && matchesField(runtime.configuration(), parameters.configuration())
       && matchesField(runtime.id(), parameters.id())
       && matchesField(runtime.platform(), parameters.platform())
       && matchesField(runtime.architecture(), parameters.architecture())

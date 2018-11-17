@@ -19,6 +19,7 @@ package com.io7m.coffeepick.client.vanilla;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 
 import java.io.IOException;
+import java.net.http.HttpClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -30,11 +31,16 @@ import java.util.Objects;
 public final class CoffeePickRuntimeRepositoryContext implements RuntimeRepositoryContextType
 {
   private final Path cache_directory;
+  private final HttpClient http;
 
   private CoffeePickRuntimeRepositoryContext(
-    final Path in_cache_directory)
+    final Path in_cache_directory,
+    final HttpClient in_http)
   {
-    this.cache_directory = Objects.requireNonNull(in_cache_directory, "cache_directory");
+    this.cache_directory =
+      Objects.requireNonNull(in_cache_directory, "cache_directory");
+    this.http =
+      Objects.requireNonNull(in_http, "http");
   }
 
   /**
@@ -42,25 +48,34 @@ public final class CoffeePickRuntimeRepositoryContext implements RuntimeReposito
    *
    * @param base_directory The base directory against which repositories will resolve paths
    *
+   * @param http
    * @return A new context
    *
    * @throws IOException On I/O errors
    */
 
   public static RuntimeRepositoryContextType open(
-    final Path base_directory)
+    final Path base_directory,
+    final HttpClient http)
     throws IOException
   {
     Objects.requireNonNull(base_directory, "base_directory");
+    Objects.requireNonNull(http, "http");
 
     final var cache = base_directory.resolve("cache").toAbsolutePath();
     Files.createDirectories(cache);
-    return new CoffeePickRuntimeRepositoryContext(cache);
+    return new CoffeePickRuntimeRepositoryContext(cache, http);
   }
 
   @Override
   public Path cacheDirectory()
   {
     return this.cache_directory;
+  }
+
+  @Override
+  public HttpClient httpClient()
+  {
+    return this.http;
   }
 }

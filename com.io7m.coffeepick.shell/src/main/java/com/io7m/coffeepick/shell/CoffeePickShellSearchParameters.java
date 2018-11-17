@@ -17,6 +17,7 @@
 package com.io7m.coffeepick.shell;
 
 import com.io7m.coffeepick.api.CoffeePickSearch;
+import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 
 import java.net.URI;
 import java.util.List;
@@ -33,15 +34,17 @@ public final class CoffeePickShellSearchParameters
 {
   private static final List<AttributeParserType> PARSERS =
     List.of(
-      new AttributeRepository(),
       new AttributeArchitecture(),
       new AttributeArchiveSize(),
       new AttributeArchiveURI(),
+      new AttributeConfiguration(),
       new AttributeID(),
       new AttributePlatform(),
+      new AttributeRepository(),
       new AttributeRequireTag(),
       new AttributeVersion(),
-      new AttributeVM());
+      new AttributeVM()
+    );
 
   private static final Map<String, AttributeParserType> PARSERS_BY_NAME =
     PARSERS.stream().collect(Collectors.toMap(AttributeParserType::name, Function.identity()));
@@ -92,7 +95,10 @@ public final class CoffeePickShellSearchParameters
             .append("Unrecognized search parameter.")
             .append(separator)
             .append("  Expected: One of ")
-            .append(PARSERS_BY_NAME.keySet().stream().collect(Collectors.joining("|")))
+            .append(PARSERS_BY_NAME.keySet()
+                      .stream()
+                      .sorted()
+                      .collect(Collectors.joining("|")))
             .append(separator)
             .append("  Received: ")
             .append(parameter)
@@ -154,6 +160,28 @@ public final class CoffeePickShellSearchParameters
       final String value)
     {
       builder.setArchitecture(value);
+    }
+  }
+
+  private static final class AttributeConfiguration implements AttributeParserType
+  {
+    AttributeConfiguration()
+    {
+
+    }
+
+    @Override
+    public String name()
+    {
+      return "configuration";
+    }
+
+    @Override
+    public void parse(
+      final CoffeePickSearch.Builder builder,
+      final String value)
+    {
+      builder.setConfiguration(RuntimeConfiguration.ofName(value));
     }
   }
 

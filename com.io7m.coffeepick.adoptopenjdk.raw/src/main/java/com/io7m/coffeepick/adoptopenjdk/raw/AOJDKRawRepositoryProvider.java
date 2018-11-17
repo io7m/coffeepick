@@ -73,6 +73,6 @@ public final class AOJDKRawRepositoryProvider implements RuntimeRepositoryProvid
     throws IOException
   {
     Objects.requireNonNull(context, "context");
-    return new AOJDKRawRepository(this, context);
+    return new AOJDKRawRepository(context.httpClient(), this, context);
   }
 }

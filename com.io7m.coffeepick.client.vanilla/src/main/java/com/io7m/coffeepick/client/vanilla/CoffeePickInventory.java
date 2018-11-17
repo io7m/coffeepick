@@ -320,6 +320,33 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
   }
 
   @Override
+  public Optional<Path> pathOf(
+    final String id)
+    throws IOException
+  {
+    Objects.requireNonNull(id, "ID");
+
+    final var directory =
+      this.path.resolve(id)
+        .toAbsolutePath();
+
+    if (Files.isDirectory(directory)) {
+      final var lock =
+        directory.resolve(LOCK)
+          .toAbsolutePath();
+
+      LOG.debug("lock {}", lock);
+      try (var channel = FileChannel.open(lock, CREATE, WRITE)) {
+        try (var ignored = channel.lock()) {
+          return Optional.of(directory.resolve(ARCHIVE).toAbsolutePath());
+        }
+      }
+    }
+
+    return Optional.empty();
+  }
+
+  @Override
   public void delete(final String id)
     throws IOException
   {

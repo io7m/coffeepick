@@ -53,7 +53,7 @@ public enum RuntimeConfiguration
       case "jdk":
         return JDK;
       default:
-        throw new IllegalArgumentException("Unrecognized value: " + name);
+        throw new IllegalArgumentException("Unrecognized configuration name: " + name);
     }
   }
 

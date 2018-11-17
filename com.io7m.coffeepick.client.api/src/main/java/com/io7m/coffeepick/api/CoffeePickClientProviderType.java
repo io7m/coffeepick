@@ -17,6 +17,7 @@
 package com.io7m.coffeepick.api;
 
 import java.io.IOException;
+import java.net.http.HttpClient;
 import java.nio.file.Path;
 
 /**
@@ -36,7 +37,31 @@ public interface CoffeePickClientProviderType
    * @throws IOException On errors
    */
 
+  default CoffeePickClientType newClient(
+    final Path base_directory)
+    throws IOException
+  {
+    return this.newClient(
+      base_directory,
+      HttpClient.newBuilder()
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .build());
+  }
+
+  /**
+   * Create a new client. The client will use the given directory for configuration data and
+   * inventory.
+   *
+   * @param base_directory The base directory
+   * @param http           The HTTP client that will be used
+   *
+   * @return A new client
+   *
+   * @throws IOException On errors
+   */
+
   CoffeePickClientType newClient(
-    Path base_directory)
+    Path base_directory,
+    HttpClient http)
     throws IOException;
 }

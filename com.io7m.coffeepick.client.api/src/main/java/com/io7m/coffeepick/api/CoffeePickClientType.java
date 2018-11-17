@@ -95,6 +95,18 @@ public interface CoffeePickClientType extends Closeable
     String id);
 
   /**
+   * Return the path of the archive of the runtime in the inventory, or nothing if the runtime
+   * isn't installed.
+   *
+   * @param id The ID
+   *
+   * @return The operation in progress
+   */
+
+  CoffeePickOperation<Optional<Path>> inventoryPathOf(
+    String id);
+
+  /**
    * Search for runtimes matching the given parameters in the catalog.
    *
    * @param parameters The search parameters
@@ -128,6 +140,19 @@ public interface CoffeePickClientType extends Closeable
    */
 
   CoffeePickOperation<Path> catalogDownload(
+    String id);
+
+  /**
+   * Download the runtime with the given ID from the catalog, installing it into the inventory if
+   * the download succeeds and the data is correctly verified. If the runtime is already in the
+   * inventory, then skip the download.
+   *
+   * @param id The ID
+   *
+   * @return The operation in progress
+   */
+
+  CoffeePickOperation<Path> catalogDownloadIfNecessary(
     String id);
 
   /**

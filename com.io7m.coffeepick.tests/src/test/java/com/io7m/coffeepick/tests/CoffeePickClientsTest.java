@@ -22,6 +22,8 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.http.HttpClient;
+
 public final class CoffeePickClientsTest extends CoffeePickClientsContract
 {
   @Override

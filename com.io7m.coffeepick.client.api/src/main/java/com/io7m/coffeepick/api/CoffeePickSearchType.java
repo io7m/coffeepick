@@ -16,6 +16,7 @@
 
 package com.io7m.coffeepick.api;
 
+import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.coffeepick.runtime.RuntimeVersionRange;
 import com.io7m.immutables.styles.ImmutablesStyleType;
@@ -63,6 +64,12 @@ public interface CoffeePickSearchType
    */
 
   Optional<String> vm();
+
+  /**
+   * @return The configuration of the runtime
+   */
+
+  Optional<RuntimeConfiguration> configuration();
 
   /**
    * @return A URI that can be used to fetch an archive of the runtime

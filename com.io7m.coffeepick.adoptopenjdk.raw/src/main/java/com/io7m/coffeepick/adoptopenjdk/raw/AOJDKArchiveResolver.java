@@ -34,8 +34,8 @@ import static com.io7m.coffeepick.adoptopenjdk.raw.AOJDKRawRepositoryProvider.PR
 
 /**
  * Resolve a list of archives. A resolver takes a list of archive descriptions parsed from the
- * AdoptOpenJDK git repository and turns them into runtime descriptions by transforming
- * metadata and fetching checksums from the remote server.
+ * AdoptOpenJDK git repository and turns them into runtime descriptions by transforming metadata and
+ * fetching checksums from the remote server.
  */
 
 public final class AOJDKArchiveResolver
@@ -44,23 +44,24 @@ public final class AOJDKArchiveResolver
 
   private final HttpClient http;
 
-  private AOJDKArchiveResolver()
+  private AOJDKArchiveResolver(
+    final HttpClient in_http)
   {
-    this.http =
-      HttpClient.newBuilder()
-        .followRedirects(HttpClient.Redirect.NORMAL)
-        .build();
+    this.http = Objects.requireNonNull(in_http, "http");
   }
 
   /**
    * Create a new resolver.
    *
+   * @param http The HTTP client used for requests
+   *
    * @return A resolver
    */
 
-  public static AOJDKArchiveResolver create()
+  public static AOJDKArchiveResolver create(
+    final HttpClient http)
   {
-    return new AOJDKArchiveResolver();
+    return new AOJDKArchiveResolver(http);
   }
 
   private static RuntimeHash unparseableHash(

@@ -18,14 +18,15 @@ package com.io7m.coffeepick.repository.spi;
 
 import org.osgi.annotation.versioning.ConsumerType;
 
+import java.net.http.HttpClient;
 import java.nio.file.Path;
 
 /**
  * A context interface passed to repositories.
  *
- * This is used to provide configuration and other information to repositories at runtime, and
- * is typically filled in by the client implementation. This interface essentially serves as a
- * means to avoid a circular dependency between the client API and repository SPI.
+ * This is used to provide configuration and other information to repositories at runtime, and is
+ * typically filled in by the client implementation. This interface essentially serves as a means to
+ * avoid a circular dependency between the client API and repository SPI.
  */
 
 @ConsumerType
@@ -36,4 +37,10 @@ public interface RuntimeRepositoryContextType
    */
 
   Path cacheDirectory();
+
+  /**
+   * @return An HTTP client to be used for requests
+   */
+
+  HttpClient httpClient();
 }

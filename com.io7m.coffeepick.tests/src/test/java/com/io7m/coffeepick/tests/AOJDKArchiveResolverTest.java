@@ -21,18 +21,30 @@ import com.io7m.coffeepick.adoptopenjdk.raw.AOJDKArchiveResolver;
 import com.io7m.coffeepick.adoptopenjdk.raw.AOJDKDataParser;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.http.HttpClient;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class AOJDKArchiveResolverTest
 {
   private static final Logger LOG = LoggerFactory.getLogger(AOJDKArchiveResolverTest.class);
+  private HttpClient http;
+
+  @BeforeEach
+  public void setup()
+  {
+    this.http =
+      HttpClient.newBuilder()
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .build();
+  }
 
   @Test
   public void testParsingOpenJDK8()
@@ -41,7 +53,7 @@ public final class AOJDKArchiveResolverTest
     final var parser =
       AOJDKDataParser.create(new URL("https://raw.githubusercontent.com/AdoptOpenJDK/openjdk8-binaries/master/releases.json").openStream());
 
-    final var resolver = AOJDKArchiveResolver.create();
+    final var resolver = AOJDKArchiveResolver.create(this.http);
     final var archives = parser.parse();
     final var releases =
       archives.stream()
@@ -71,7 +83,7 @@ public final class AOJDKArchiveResolverTest
     final var parser =
       AOJDKDataParser.create(new URL("https://raw.githubusercontent.com/AdoptOpenJDK/openjdk9-binaries/master/releases.json").openStream());
 
-    final var resolver = AOJDKArchiveResolver.create();
+    final var resolver = AOJDKArchiveResolver.create(this.http);
     final var archives = parser.parse();
     final var releases =
       archives.stream()
@@ -89,7 +101,7 @@ public final class AOJDKArchiveResolverTest
     final var parser =
       AOJDKDataParser.create(new URL("https://raw.githubusercontent.com/AdoptOpenJDK/openjdk11-binaries/master/releases.json").openStream());
 
-    final var resolver = AOJDKArchiveResolver.create();
+    final var resolver = AOJDKArchiveResolver.create(this.http);
     final var archives = parser.parse();
     final var releases =
       archives.stream()

@@ -126,6 +126,10 @@ public abstract class CoffeePickInventoryContract
     Assertions.assertEquals(1L, (long) results.size());
     Assertions.assertTrue(results.containsKey(HASH_VALUE));
 
+    Assertions.assertEquals(
+      this.directory.resolve(HASH_VALUE).resolve("archive"),
+      inventory.pathOf(HASH_VALUE).get());
+
     Assertions.assertEquals(1L, (long) this.event_log.size());
     final var event = this.eventFor(CoffeePickInventoryEventRuntimeLoaded.class, 0);
     Assertions.assertEquals(HASH_VALUE, event.id());

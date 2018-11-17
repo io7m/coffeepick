@@ -53,7 +53,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.net.http.HttpClient.Redirect.NORMAL;
 import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
 
 /**
@@ -74,20 +73,18 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
 
   private CoffeePickCatalog(
     final Subject<CoffeePickCatalogEventType> in_events,
+    final HttpClient in_client,
     final RuntimeRepositoryContextType in_context,
     final RuntimeRepositoryProviderRegistryType in_repository_providers)
   {
     this.events =
       Objects.requireNonNull(in_events, "events");
+    this.http =
+      Objects.requireNonNull(in_client, "client");
     this.context =
       Objects.requireNonNull(in_context, "context");
     this.repository_providers =
       Objects.requireNonNull(in_repository_providers, "repository_providers");
-
-    this.http =
-      HttpClient.newBuilder()
-        .followRedirects(NORMAL)
-        .build();
 
     this.runtime_repositories =
       new ConcurrentHashMap<>(128);
@@ -107,6 +104,7 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
    * Create a new catalog.
    *
    * @param events       A subject to which events will be published
+   * @param client       The HTTP client that will be used
    * @param context      The runtime repository context
    * @param repositories A repository registry
    *
@@ -115,10 +113,11 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
 
   public static CoffeePickCatalogType create(
     final Subject<CoffeePickCatalogEventType> events,
+    final HttpClient client,
     final RuntimeRepositoryContextType context,
     final RuntimeRepositoryProviderRegistryType repositories)
   {
-    return new CoffeePickCatalog(events, context, repositories);
+    return new CoffeePickCatalog(events, client, context, repositories);
   }
 
   /**

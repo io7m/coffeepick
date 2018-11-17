@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -52,6 +53,7 @@ public abstract class CoffeePickCatalogContract
 
   protected abstract CoffeePickCatalogType catalog(
     Subject<CoffeePickCatalogEventType> events,
+    HttpClient client,
     RuntimeRepositoryContextType context,
     RuntimeRepositoryProviderRegistryType repositories);
 
@@ -74,9 +76,10 @@ public abstract class CoffeePickCatalogContract
 
     final var context = Mockito.mock(RuntimeRepositoryContextType.class);
     final var repositories = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
+    final var http = Mockito.mock(HttpClient.class);
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
-    final var catalog = this.catalog(this.events, context, repositories);
+    final var catalog = this.catalog(this.events, http, context, repositories);
     Assertions.assertEquals(0L, (long) catalog.searchAll().size());
   }
 
@@ -89,6 +92,8 @@ public abstract class CoffeePickCatalogContract
 
     final var context = Mockito.mock(RuntimeRepositoryContextType.class);
     final var repositories = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
+    final var http = Mockito.mock(HttpClient.class);
+
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
     final var description =
@@ -113,7 +118,7 @@ public abstract class CoffeePickCatalogContract
     Mockito.when(repository.provider()).thenReturn(provider);
     Mockito.when(repository.runtimes()).thenReturn(Map.of(description.id(), description));
 
-    final var catalog = this.catalog(this.events, context, repositories);
+    final var catalog = this.catalog(this.events, http, context, repositories);
     repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(ADDED, provider));
 
     Assertions.assertEquals(1L, (long) catalog.searchAll().size());
@@ -122,12 +127,13 @@ public abstract class CoffeePickCatalogContract
 
   @Test
   public final void testRepositoryAddedRemoved()
-    throws IOException
   {
     final var repo_events = PublishSubject.<RuntimeRepositoryProviderRegistryEventType>create();
 
     final var context = Mockito.mock(RuntimeRepositoryContextType.class);
     final var repositories = Mockito.mock(RuntimeRepositoryProviderRegistryType.class);
+    final var http = Mockito.mock(HttpClient.class);
+
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
     final var description =
@@ -150,7 +156,7 @@ public abstract class CoffeePickCatalogContract
     Mockito.when(repository.provider()).thenReturn(provider);
     Mockito.when(repository.runtimes()).thenReturn(Map.of(description.id(), description));
 
-    final var catalog = this.catalog(this.events, context, repositories);
+    final var catalog = this.catalog(this.events, http, context, repositories);
     repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(ADDED, provider));
     repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(REMOVED, provider));
     Assertions.assertEquals(0L, (long) catalog.searchAll().size());

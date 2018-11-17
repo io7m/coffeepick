@@ -85,24 +85,6 @@ public interface CoffeePickInventoryType
   }
 
   /**
-   * A function for writing archive data.
-   */
-
-  interface RuntimeArchiveWriterType
-  {
-    /**
-     * Write data to the given stream.
-     *
-     * @param stream An output stream
-     *
-     * @throws IOException On I/O errors
-     */
-
-    void write(OutputStream stream)
-      throws IOException;
-  }
-
-  /**
    * Save a runtime. The method calls the given writer method when it needs to write an archive of
    * the runtime to disk.
    *
@@ -117,6 +99,19 @@ public interface CoffeePickInventoryType
   Path write(
     RuntimeDescription description,
     RuntimeArchiveWriterType writer)
+    throws IOException;
+
+  /**
+   * Return the path of the given runtime in the inventory if it exists, or nothing if it does not.
+   *
+   * @param id The identifier
+   *
+   * @return The path to the runtime if it is installed
+   *
+   * @throws IOException On I/O errors
+   */
+
+  Optional<Path> pathOf(String id)
     throws IOException;
 
   /**
@@ -143,4 +138,22 @@ public interface CoffeePickInventoryType
 
   CoffeePickVerification verify(String id)
     throws IOException;
+
+  /**
+   * A function for writing archive data.
+   */
+
+  interface RuntimeArchiveWriterType
+  {
+    /**
+     * Write data to the given stream.
+     *
+     * @param stream An output stream
+     *
+     * @throws IOException On I/O errors
+     */
+
+    void write(OutputStream stream)
+      throws IOException;
+  }
 }

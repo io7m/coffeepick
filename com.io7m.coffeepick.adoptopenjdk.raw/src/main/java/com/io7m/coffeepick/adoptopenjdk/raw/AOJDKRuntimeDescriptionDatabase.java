@@ -97,7 +97,7 @@ public final class AOJDKRuntimeDescriptionDatabase
     try {
       return Stream.of(parse(file));
     } catch (final IOException e) {
-      LOG.error("could not parse {}: ", file, e);
+      LOG.debug("could not parse {}: ", file, e);
       return Stream.empty();
     }
   }
@@ -131,7 +131,7 @@ public final class AOJDKRuntimeDescriptionDatabase
     try {
       this.write(description);
     } catch (final IOException e) {
-      LOG.error("could not cache {}: ", description.id(), e);
+      LOG.debug("could not cache {}: ", description.id(), e);
     }
   }
 

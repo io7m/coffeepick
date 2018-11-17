@@ -25,6 +25,8 @@ import io.reactivex.subjects.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.http.HttpClient;
+
 public final class CoffeePickCatalogTest extends CoffeePickCatalogContract
 {
   @Override
@@ -36,9 +38,10 @@ public final class CoffeePickCatalogTest extends CoffeePickCatalogContract
   @Override
   protected CoffeePickCatalogType catalog(
     final Subject<CoffeePickCatalogEventType> events,
+    final HttpClient client,
     final RuntimeRepositoryContextType context,
     final RuntimeRepositoryProviderRegistryType repositories)
   {
-    return CoffeePickCatalog.create(events, context, repositories);
+    return CoffeePickCatalog.create(events, client, context, repositories);
   }
 }
