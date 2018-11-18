@@ -116,7 +116,7 @@ public final class CoffeePickShellCommandRepositoryUpdate implements CoffeePickS
     }
 
     try {
-      return this.client.repositoryUpdate(new URI(arguments.get(1))).future();
+      return this.client.repositoryUpdate(new URI(arguments.get(1)));
     } catch (final URISyntaxException e) {
       return CompletableFuture.failedFuture(e);
     }

@@ -31,28 +31,41 @@ import com.io7m.coffeepick.runtime.RuntimeHash;
 import io.reactivex.Observable;
 import io.reactivex.subjects.Subject;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.security.DigestInputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 
@@ -77,19 +90,27 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
 
   private final Map<String, RuntimeDescription> runtimes;
   private final Subject<CoffeePickInventoryEventType> events;
+  private final CompressorStreamFactory compressors;
   private final Path path;
+  private final ArchiveStreamFactory archives;
 
   private CoffeePickInventory(
     final Subject<CoffeePickInventoryEventType> in_events,
     final Map<String, RuntimeDescription> in_runtimes,
+    final ArchiveStreamFactory in_archives,
+    final CompressorStreamFactory in_compressors,
     final Path in_path)
   {
     this.runtimes =
       new TreeMap<>(Objects.requireNonNull(in_runtimes, "runtimes"));
     this.events =
       Objects.requireNonNull(in_events, "events");
+    this.compressors =
+      Objects.requireNonNull(in_compressors, "compressors");
     this.path =
       Objects.requireNonNull(in_path, "path");
+    this.archives =
+      Objects.requireNonNull(in_archives, "archives");
   }
 
   /**
@@ -108,7 +129,32 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
     final Path path)
     throws IOException
   {
+    return open(events, new ArchiveStreamFactory(), new CompressorStreamFactory(), path);
+  }
+
+  /**
+   * Open an inventory.
+   *
+   * @param events      The receiver of events
+   * @param archives    A factory for archive streams
+   * @param compressors A factory for compressors
+   * @param path        The path of the inventory
+   *
+   * @return An inventory
+   *
+   * @throws IOException On I/O errors
+   */
+
+  public static CoffeePickInventoryType open(
+    final Subject<CoffeePickInventoryEventType> events,
+    final ArchiveStreamFactory archives,
+    final CompressorStreamFactory compressors,
+    final Path path)
+    throws IOException
+  {
     Objects.requireNonNull(path, "path");
+    Objects.requireNonNull(archives, "archives");
+    Objects.requireNonNull(compressors, "compressors");
     Objects.requireNonNull(events, "events");
 
     Files.createDirectories(path);
@@ -122,7 +168,7 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
         .map(Optional::get)
         .collect(Collectors.toMap(o -> o.archiveHash().value(), o -> o));
 
-    return new CoffeePickInventory(events, runtimes, path);
+    return new CoffeePickInventory(events, runtimes, archives, compressors, path);
   }
 
   private static Optional<RuntimeDescription> load(
@@ -344,6 +390,195 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
     }
 
     return Optional.empty();
+  }
+
+  @Override
+  public Path unpack(
+    final String id,
+    final Path target_path,
+    final Set<UnpackOption> options)
+    throws IOException
+  {
+    Objects.requireNonNull(id, "id");
+    Objects.requireNonNull(target_path, "path");
+    Objects.requireNonNull(options, "options");
+
+    final var target_abs =
+      target_path.toAbsolutePath();
+
+    final var directory =
+      this.path.resolve(id)
+        .toAbsolutePath();
+
+    Files.createDirectories(directory);
+
+    final var lock =
+      directory.resolve(LOCK).toAbsolutePath();
+    final var archive =
+      directory.resolve(ARCHIVE).toAbsolutePath();
+
+    LOG.debug("lock {}", lock);
+    try (var channel = FileChannel.open(lock, CREATE, WRITE)) {
+      try (var ignored = channel.lock()) {
+        this.unpackLocked(target_abs, archive, options);
+      }
+    }
+
+    return target_path;
+  }
+
+  private static BufferedInputStream open(final Path file)
+    throws IOException
+  {
+    return new BufferedInputStream(Files.newInputStream(file, READ));
+  }
+
+  private BufferedInputStream openCompressed(final Path file)
+    throws IOException, CompressorException
+  {
+    return new BufferedInputStream(this.compressors.createCompressorInputStream(open(file)));
+  }
+
+  private void unpackLocked(
+    final Path target_path,
+    final Path archive,
+    final Set<UnpackOption> options)
+    throws IOException
+  {
+    final CompressorException compressor_exception;
+
+    /*
+     * Try to treat the file as if it was a compressed archive. If a compressor exception is
+     * raised, then the archive probably isn't compressed. Retry using a plain archive stream.
+     */
+
+    try (var uncompressed = this.openCompressed(archive)) {
+      try (var archive_stream = this.archives.createArchiveInputStream(uncompressed)) {
+        unpackArchiveLocked(this.events, archive, target_path, archive_stream, options);
+        return;
+      }
+    } catch (final ArchiveException e) {
+      throw new IOException(e);
+    } catch (final CompressorException e) {
+      compressor_exception = e;
+    }
+
+    try (var archive_stream = this.archives.createArchiveInputStream(open(archive))) {
+      unpackArchiveLocked(this.events, archive, target_path, archive_stream, options);
+    } catch (final ArchiveException e) {
+      final var ex = new IOException(e);
+      ex.addSuppressed(compressor_exception);
+      throw ex;
+    }
+  }
+
+  private static void unpackArchiveLocked(
+    final Subject<CoffeePickInventoryEventType> events,
+    final Path archive,
+    final Path target_path,
+    final ArchiveInputStream archive_stream,
+    final Set<UnpackOption> options)
+    throws IOException
+  {
+    LOG.debug("unpacking {}", archive_stream.getClass().getCanonicalName());
+
+    while (true) {
+      final var entry = archive_stream.getNextEntry();
+      if (entry == null) {
+        break;
+      }
+
+      final var entry_name =
+        stripLeadingDirectoryIfRequested(options, entry, Paths.get(entry.getName()).normalize());
+      if (entry_name.isEmpty()) {
+        continue;
+      }
+
+      final var name = entry_name.get();
+      final var output = target_path.resolve(name).toAbsolutePath();
+
+      LOG.debug("unpack {} -> {}", name, output);
+      if (!output.startsWith(target_path)) {
+        throw pathTraversalException(archive, name, output);
+      }
+
+      if (entry.isDirectory()) {
+        Files.createDirectories(output);
+      } else {
+        final var parent = output.getParent();
+        if (parent != null) {
+          Files.createDirectories(parent);
+        }
+        try (var output_stream = Files.newOutputStream(output, CREATE, WRITE, TRUNCATE_EXISTING)) {
+          archive_stream.transferTo(output_stream);
+        }
+      }
+
+      final var mode_opt =
+        CoffeePickArchiveEntries.posixFilePermissionsFor(entry)
+          .map(perms -> stripPermsIfNecessary(perms, options));
+
+      if (mode_opt.isPresent()) {
+        final var mode = mode_opt.get();
+
+        try {
+          Files.setPosixFilePermissions(output, mode);
+        } catch (final UnsupportedOperationException e) {
+          // Not a POSIX filesystem
+        }
+      }
+    }
+  }
+
+  private static Set<PosixFilePermission> stripPermsIfNecessary(
+    final Set<PosixFilePermission> perms,
+    final Collection<UnpackOption> options)
+  {
+    if (options.contains(UnpackOption.STRIP_NON_OWNER_WRITABLE)) {
+      final var results = new HashSet<>(perms);
+      results.remove(PosixFilePermission.GROUP_WRITE);
+      results.remove(PosixFilePermission.OTHERS_WRITE);
+      return results;
+    }
+    return perms;
+  }
+
+  private static IOException pathTraversalException(
+    final Path archive,
+    final Path name,
+    final Path output)
+  {
+    final var separator = System.lineSeparator();
+    return new IOException(
+      new StringBuilder(128)
+        .append("Refusing to unpack files above target directory.")
+        .append(separator)
+        .append("  Archive: ")
+        .append(archive)
+        .append(separator)
+        .append("  Entry:   ")
+        .append(name)
+        .append(separator)
+        .append("  Output:  ")
+        .append(output)
+        .append(separator)
+        .toString());
+  }
+
+  private static Optional<Path> stripLeadingDirectoryIfRequested(
+    final Collection<UnpackOption> options,
+    final ArchiveEntry entry,
+    final Path path)
+  {
+    if (options.contains(UnpackOption.STRIP_LEADING_DIRECTORY)) {
+      if (path.getNameCount() > 1) {
+        return Optional.of(path.subpath(1, path.getNameCount()));
+      }
+      if (entry.isDirectory()) {
+        return Optional.empty();
+      }
+    }
+    return Optional.of(path);
   }
 
   @Override

@@ -23,7 +23,6 @@ import com.io7m.coffeepick.api.CoffeePickClientType;
 import com.io7m.coffeepick.api.CoffeePickEventType;
 import com.io7m.coffeepick.api.CoffeePickInventoryEventType;
 import com.io7m.coffeepick.api.CoffeePickInventoryType;
-import com.io7m.coffeepick.api.CoffeePickOperation;
 import com.io7m.coffeepick.api.CoffeePickSearch;
 import com.io7m.coffeepick.api.CoffeePickVerification;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoaderProvider;
@@ -35,7 +34,6 @@ import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.Subject;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -44,6 +42,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -129,7 +128,6 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     private final AtomicBoolean closed;
     private final Subject<CoffeePickEventType> events;
     private final HttpClient http;
-    private volatile BigInteger command_id;
 
     Client(
       final Subject<CoffeePickEventType> in_events,
@@ -166,7 +164,6 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       });
 
       this.closed = new AtomicBoolean(false);
-      this.command_id = BigInteger.ZERO;
     }
 
     @Override
@@ -185,7 +182,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     @Override
-    public CoffeePickOperation<Void> inventoryDelete(
+    public CompletableFuture<Void> inventoryDelete(
       final String id)
     {
       Objects.requireNonNull(id, "id");
@@ -197,7 +194,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     @Override
-    public CoffeePickOperation<CoffeePickVerification> inventoryVerify(
+    public CompletableFuture<CoffeePickVerification> inventoryVerify(
       final String id)
     {
       Objects.requireNonNull(id, "id");
@@ -206,7 +203,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     @Override
-    public CoffeePickOperation<Map<String, RuntimeDescription>> inventorySearch(
+    public CompletableFuture<Map<String, RuntimeDescription>> inventorySearch(
       final CoffeePickSearch parameters)
     {
       Objects.requireNonNull(parameters, "parameters");
@@ -215,7 +212,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     @Override
-    public CoffeePickOperation<Optional<RuntimeDescription>> inventorySearchExact(
+    public CompletableFuture<Optional<RuntimeDescription>> inventorySearchExact(
       final String id)
     {
       Objects.requireNonNull(id, "id");
@@ -224,7 +221,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     @Override
-    public CoffeePickOperation<Map<String, RuntimeDescription>> catalogSearch(
+    public CompletableFuture<Map<String, RuntimeDescription>> catalogSearch(
       final CoffeePickSearch parameters)
     {
       Objects.requireNonNull(parameters, "parameters");
@@ -233,7 +230,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     @Override
-    public CoffeePickOperation<Path> catalogDownload(
+    public CompletableFuture<Path> catalogDownload(
       final String id)
     {
       Objects.requireNonNull(id, "id");
@@ -283,7 +280,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     @Override
-    public CoffeePickOperation<Path> catalogDownloadIfNecessary(
+    public CompletableFuture<Path> catalogDownloadIfNecessary(
       final String id)
     {
       Objects.requireNonNull(id, "id");
@@ -302,7 +299,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     @Override
-    public CoffeePickOperation<Optional<Path>> inventoryPathOf(
+    public CompletableFuture<Optional<Path>> inventoryPathOf(
       final String id)
     {
       Objects.requireNonNull(id, "id");
@@ -312,7 +309,21 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     @Override
-    public CoffeePickOperation<Void> repositoryUpdate(
+    public CompletableFuture<Path> inventoryUnpack(
+      final String id,
+      final Path path,
+      final Set<CoffeePickInventoryType.UnpackOption> options)
+    {
+      Objects.requireNonNull(id, "id");
+      Objects.requireNonNull(path, "path");
+      Objects.requireNonNull(options, "options");
+      this.checkNotClosed();
+
+      return this.submit(() -> this.inventory.unpack(id, path, options));
+    }
+
+    @Override
+    public CompletableFuture<Void> repositoryUpdate(
       final URI uri)
     {
       Objects.requireNonNull(uri, "uri");
@@ -324,13 +335,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       });
     }
 
-    private <T> CoffeePickOperation<T> submit(
+    private <T> CompletableFuture<T> submit(
       final Callable<T> callable)
     {
       Objects.requireNonNull(callable, "callable");
-
-      final var id = this.command_id;
-      this.command_id = id.add(BigInteger.ONE);
 
       final var future = new CompletableFuture<T>();
       this.executor.execute(() -> {
@@ -341,7 +349,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
         }
       });
 
-      return CoffeePickOperation.of(id, future);
+      return future;
     }
 
     private void checkNotClosed()

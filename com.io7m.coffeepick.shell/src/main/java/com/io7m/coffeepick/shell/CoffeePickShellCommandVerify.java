@@ -66,7 +66,7 @@ public final class CoffeePickShellCommandVerify implements CoffeePickShellComman
       return CompletableFuture.completedFuture(null);
     }
 
-    return this.client.inventoryVerify(arguments.get(1)).future().thenAccept(results -> {
+    return this.client.inventoryVerify(arguments.get(1)).thenAccept(results -> {
       final var received = results.receivedHash();
       final var expected = results.expectedHash();
       if (results.isVerified()) {

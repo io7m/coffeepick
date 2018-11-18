@@ -14,35 +14,41 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.api;
+package com.io7m.coffeepick.shell;
 
-import com.io7m.immutables.styles.ImmutablesStyleType;
-import org.immutables.value.Value;
+import com.beust.jcommander.IStringConverter;
+import com.beust.jcommander.ParameterException;
+import org.slf4j.event.Level;
 
-import java.math.BigInteger;
-import java.util.concurrent.CompletableFuture;
+import java.util.Objects;
 
 /**
- * An operation in progress.
- *
- * @param <R> The type of returned values
+ * A converter for log level values.
  */
 
-@ImmutablesStyleType
-@Value.Immutable
-public interface CoffeePickOperationType<R>
+public final class CoffeePickShellLogLevelConverter implements IStringConverter<Level>
 {
   /**
-   * @return The command execution ID
+   * Construct a converter.
    */
 
-  @Value.Parameter
-  BigInteger id();
+  public CoffeePickShellLogLevelConverter()
+  {
 
-  /**
-   * @return A future representing the execution of the operation in progress
-   */
+  }
 
-  @Value.Parameter
-  CompletableFuture<R> future();
+  @Override
+  public Level convert(final String value)
+  {
+    Objects.requireNonNull(value, "value");
+
+    for (final var level : Level.values()) {
+      if (level.name().equalsIgnoreCase(value)) {
+        return level;
+      }
+    }
+
+    throw new ParameterException(
+      "Unrecognized log level: " + value);
+  }
 }

@@ -73,7 +73,7 @@ public final class CoffeePickShellCommandInventoryPathOf implements CoffeePickSh
       return CompletableFuture.completedFuture(null);
     }
 
-    return this.client.inventoryPathOf(arguments.get(1)).future().thenApply(path_opt -> {
+    return this.client.inventoryPathOf(arguments.get(1)).thenApply(path_opt -> {
       path_opt.ifPresentOrElse(
         path -> this.writer.printf("%s\n", path),
         () -> LOG.error("No runtime installed with the given ID"));

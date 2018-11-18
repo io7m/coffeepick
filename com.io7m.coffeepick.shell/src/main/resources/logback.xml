@@ -9,7 +9,8 @@
     <target>System.err</target>
   </appender>
 
-  <root level="INFO">
+  <!-- This log level is reconfigured programatically and therefore ignored -->
+  <root level="TRACE">
     <appender-ref ref="STDERR"/>
   </root>
 

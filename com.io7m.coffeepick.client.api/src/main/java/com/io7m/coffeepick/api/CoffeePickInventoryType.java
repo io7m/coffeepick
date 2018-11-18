@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The interface exposed by the <i>inventory</i>. An <i>inventory</i> represents the set of runtimes
@@ -113,6 +114,62 @@ public interface CoffeePickInventoryType
 
   Optional<Path> pathOf(String id)
     throws IOException;
+
+  /**
+   * Unpack the runtime with the given ID to {@code path}.
+   *
+   * @param id      The runtime ID
+   * @param path    The target path
+   * @param options The unpacking options
+   *
+   * @return The path of the unpacked archive
+   *
+   * @throws IOException On I/O errors
+   */
+
+  Path unpack(
+    String id,
+    Path path,
+    Set<UnpackOption> options)
+    throws IOException;
+
+  /**
+   * Options for unpacking.
+   */
+
+  enum UnpackOption
+  {
+    /**
+     * Strip the leading directory from archive files.
+     */
+
+    STRIP_LEADING_DIRECTORY,
+
+    /**
+     * On POSIX filesystems, remove write permissions for anything other than the owner.
+     */
+
+    STRIP_NON_OWNER_WRITABLE
+  }
+
+  /**
+   * Unpack the runtime with the given ID to {@code path}.
+   *
+   * @param id   The runtime ID
+   * @param path The target path
+   *
+   * @return The path of the unpacked archive
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default Path unpack(
+    final String id,
+    final Path path)
+    throws IOException
+  {
+    return this.unpack(id, path, Set.of(UnpackOption.STRIP_NON_OWNER_WRITABLE));
+  }
 
   /**
    * Delete the runtime with the given identifier. Does nothing if no runtime has the given

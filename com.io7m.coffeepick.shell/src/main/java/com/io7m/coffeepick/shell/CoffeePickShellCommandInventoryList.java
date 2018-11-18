@@ -72,7 +72,6 @@ public final class CoffeePickShellCommandInventoryList implements CoffeePickShel
       }
 
       return this.client.inventorySearch(params)
-        .future()
         .thenAccept(runtimes -> showRuntimes(this.writer, runtimes));
     } catch (final Exception e) {
       return CompletableFuture.failedFuture(e);

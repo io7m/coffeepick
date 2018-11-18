@@ -111,7 +111,6 @@ public final class CoffeePickShellCommandCatalogList implements CoffeePickShellC
       }
 
       return this.client.catalogSearch(params)
-        .future()
         .thenAccept(runtimes -> showRuntimes(this.writer, runtimes));
     } catch (final Exception e) {
       return CompletableFuture.failedFuture(e);

@@ -120,7 +120,7 @@ public final class CoffeePickShellCommandDownload implements CoffeePickShellComm
       return CompletableFuture.completedFuture(null);
     }
 
-    return this.client.catalogDownload(arguments.get(1)).future().thenApply(path -> {
+    return this.client.catalogDownload(arguments.get(1)).thenApply(path -> {
       this.writer.printf("Runtime archive: %s\n", path);
       return path;
     });

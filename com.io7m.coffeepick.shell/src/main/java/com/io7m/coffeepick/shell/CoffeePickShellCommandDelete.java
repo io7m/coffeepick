@@ -66,7 +66,7 @@ public final class CoffeePickShellCommandDelete implements CoffeePickShellComman
       return CompletableFuture.completedFuture(null);
     }
 
-    return this.client.inventoryDelete(arguments.get(1)).future();
+    return this.client.inventoryDelete(arguments.get(1));
   }
 
   @Override

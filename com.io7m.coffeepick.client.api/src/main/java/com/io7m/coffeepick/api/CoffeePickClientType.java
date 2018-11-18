@@ -24,6 +24,10 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+
+import static com.io7m.coffeepick.api.CoffeePickInventoryType.UnpackOption;
 
 /**
  * The CoffeePick client API.
@@ -45,7 +49,7 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  CoffeePickOperation<Void> inventoryDelete(
+  CompletableFuture<Void> inventoryDelete(
     String id);
 
   /**
@@ -56,7 +60,7 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  CoffeePickOperation<CoffeePickVerification> inventoryVerify(
+  CompletableFuture<CoffeePickVerification> inventoryVerify(
     String id);
 
   /**
@@ -67,7 +71,7 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  CoffeePickOperation<Map<String, RuntimeDescription>> inventorySearch(
+  CompletableFuture<Map<String, RuntimeDescription>> inventorySearch(
     CoffeePickSearch parameters);
 
   /**
@@ -76,7 +80,7 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  default CoffeePickOperation<Map<String, RuntimeDescription>> inventorySearchAll()
+  default CompletableFuture<Map<String, RuntimeDescription>> inventorySearchAll()
   {
     return this.inventorySearch(
       CoffeePickSearch.builder()
@@ -91,20 +95,35 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  CoffeePickOperation<Optional<RuntimeDescription>> inventorySearchExact(
+  CompletableFuture<Optional<RuntimeDescription>> inventorySearchExact(
     String id);
 
   /**
-   * Return the path of the archive of the runtime in the inventory, or nothing if the runtime
-   * isn't installed.
+   * Return the path of the archive of the runtime in the inventory, or nothing if the runtime isn't
+   * installed.
    *
    * @param id The ID
    *
    * @return The operation in progress
    */
 
-  CoffeePickOperation<Optional<Path>> inventoryPathOf(
+  CompletableFuture<Optional<Path>> inventoryPathOf(
     String id);
+
+  /**
+   * Unpack the runtime with the given ID to the given path.
+   *
+   * @param id      The ID
+   * @param path    The target directory
+   * @param options The unpacking options
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<Path> inventoryUnpack(
+    String id,
+    Path path,
+    Set<UnpackOption> options);
 
   /**
    * Search for runtimes matching the given parameters in the catalog.
@@ -114,7 +133,7 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  CoffeePickOperation<Map<String, RuntimeDescription>> catalogSearch(
+  CompletableFuture<Map<String, RuntimeDescription>> catalogSearch(
     CoffeePickSearch parameters);
 
   /**
@@ -123,7 +142,7 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  default CoffeePickOperation<Map<String, RuntimeDescription>> catalogSearchAll()
+  default CompletableFuture<Map<String, RuntimeDescription>> catalogSearchAll()
   {
     return this.catalogSearch(
       CoffeePickSearch.builder()
@@ -139,7 +158,7 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  CoffeePickOperation<Path> catalogDownload(
+  CompletableFuture<Path> catalogDownload(
     String id);
 
   /**
@@ -152,7 +171,7 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  CoffeePickOperation<Path> catalogDownloadIfNecessary(
+  CompletableFuture<Path> catalogDownloadIfNecessary(
     String id);
 
   /**
@@ -163,6 +182,6 @@ public interface CoffeePickClientType extends Closeable
    * @return The operation in progress
    */
 
-  CoffeePickOperation<Void> repositoryUpdate(
+  CompletableFuture<Void> repositoryUpdate(
     URI uri);
 }

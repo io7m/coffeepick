@@ -86,9 +86,7 @@ public abstract class CoffeePickClientsContract
         CoffeePickSearch.builder()
           .build());
 
-    final var runtimes =
-      op.future().get(60L, TimeUnit.SECONDS);
-
+    final var runtimes = op.get(60L, TimeUnit.SECONDS);
     Assertions.assertEquals(0L, (long) runtimes.size());
   }
 
@@ -107,7 +105,6 @@ public abstract class CoffeePickClientsContract
     final var op =
       client.inventoryDelete("abcd");
 
-    final var runtimes =
-      op.future().get(60L, TimeUnit.SECONDS);
+    final var runtimes = op.get(60L, TimeUnit.SECONDS);
   }
 }
