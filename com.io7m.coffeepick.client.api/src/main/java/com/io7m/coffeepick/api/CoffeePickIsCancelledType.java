@@ -14,38 +14,17 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.shell;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import static org.jline.builtins.Completers.TreeCompleter.Node;
+package com.io7m.coffeepick.api;
 
 /**
- * The type of shell commands.
+ * A function that returns true if an operation should be cancelled.
  */
 
-public interface CoffeePickShellCommandType
+public interface CoffeePickIsCancelledType
 {
   /**
-   * @return The command name
+   * @return {@code true} if the operation should be cancelled
    */
 
-  String name();
-
-  /**
-   * Execute the command.
-   *
-   * @param arguments The command arguments
-   *
-   * @return The operation in progress
-   */
-
-  CompletableFuture<?> execute(List<String> arguments);
-
-  /**
-   * @return A shell command completer for the command
-   */
-
-  Node completer();
+  boolean isCancelled();
 }

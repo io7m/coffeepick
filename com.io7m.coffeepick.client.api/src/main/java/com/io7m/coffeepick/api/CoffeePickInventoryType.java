@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 
 /**
  * The interface exposed by the <i>inventory</i>. An <i>inventory</i> represents the set of runtimes
@@ -94,13 +95,15 @@ public interface CoffeePickInventoryType
    *
    * @return The path of the saved archive
    *
-   * @throws IOException On I/O errors
+   * @throws IOException           On I/O errors
+   * @throws CancellationException If {@code cancelled} returns {@code true} while the operation is
+   *                               running
    */
 
   Path write(
     RuntimeDescription description,
-    RuntimeArchiveWriterType writer)
-    throws IOException;
+    RuntimeCancellableArchiveWriterType writer)
+    throws IOException, CancellationException;
 
   /**
    * Return the path of the given runtime in the inventory if it exists, or nothing if it does not.
@@ -116,22 +119,28 @@ public interface CoffeePickInventoryType
     throws IOException;
 
   /**
-   * Unpack the runtime with the given ID to {@code path}.
+   * Unpack the runtime with the given ID to {@code path}. The method takes a function {@code
+   * cancelled} that will be evaluated repeatedly and, if the function returns {@code true} at any
+   * point, the operation will be cancelled.
    *
-   * @param id      The runtime ID
-   * @param path    The target path
-   * @param options The unpacking options
+   * @param id        The runtime ID
+   * @param path      The target path
+   * @param options   The unpacking options
+   * @param cancelled A function that returns {@code true} if the operation should be cancelled
    *
    * @return The path of the unpacked archive
    *
-   * @throws IOException On I/O errors
+   * @throws IOException           On I/O errors
+   * @throws CancellationException If {@code cancelled} returns {@code true} while the operation is
+   *                               running
    */
 
   Path unpack(
     String id,
     Path path,
+    CoffeePickIsCancelledType cancelled,
     Set<UnpackOption> options)
-    throws IOException;
+    throws IOException, CancellationException;
 
   /**
    * Options for unpacking.
@@ -153,6 +162,31 @@ public interface CoffeePickInventoryType
   }
 
   /**
+   * Unpack the runtime with the given ID to {@code path}. The method takes a function {@code
+   * cancelled} that will be evaluated repeatedly and, if the function returns {@code true} at any
+   * point, the operation will be cancelled.
+   *
+   * @param id        The runtime ID
+   * @param path      The target path
+   * @param cancelled A function that returns {@code true} if the operation should be cancelled
+   *
+   * @return The path of the unpacked archive
+   *
+   * @throws IOException           On I/O errors
+   * @throws CancellationException If {@code cancelled} returns {@code true} while the operation is
+   *                               running
+   */
+
+  default Path unpack(
+    final String id,
+    final Path path,
+    final CoffeePickIsCancelledType cancelled)
+    throws IOException, CancellationException
+  {
+    return this.unpack(id, path, cancelled, Set.of(UnpackOption.STRIP_NON_OWNER_WRITABLE));
+  }
+
+  /**
    * Unpack the runtime with the given ID to {@code path}.
    *
    * @param id   The runtime ID
@@ -168,7 +202,7 @@ public interface CoffeePickInventoryType
     final Path path)
     throws IOException
   {
-    return this.unpack(id, path, Set.of(UnpackOption.STRIP_NON_OWNER_WRITABLE));
+    return this.unpack(id, path, () -> false, Set.of(UnpackOption.STRIP_NON_OWNER_WRITABLE));
   }
 
   /**
@@ -193,24 +227,50 @@ public interface CoffeePickInventoryType
    * @throws IOException On I/O errors
    */
 
-  CoffeePickVerification verify(String id)
-    throws IOException;
+  default CoffeePickVerification verify(
+    final String id)
+    throws IOException
+  {
+    return this.verify(id, () -> false);
+  }
+
+  /**
+   * Verify the archive of the runtime with the given ID. The method takes a function {@code
+   * cancelled} that will be evaluated repeatedly and, if the function returns {@code true} at any
+   * point, the operation will be cancelled.
+   *
+   * @param id        The identifier
+   * @param cancelled A function that returns {@code true} if the operation should be cancelled
+   *
+   * @return The verification results
+   *
+   * @throws IOException           On I/O errors
+   * @throws CancellationException If {@code cancelled} returns {@code true} while the operation is
+   *                               running
+   */
+
+  CoffeePickVerification verify(
+    String id,
+    CoffeePickIsCancelledType cancelled)
+    throws IOException, CancellationException;
 
   /**
    * A function for writing archive data.
    */
 
-  interface RuntimeArchiveWriterType
+  interface RuntimeCancellableArchiveWriterType
   {
     /**
-     * Write data to the given stream.
+     * Write data to the given stream. The function should throw {@code CancellationException} if
+     * the write operation has been cancelled.
      *
      * @param stream An output stream
      *
-     * @throws IOException On I/O errors
+     * @throws IOException           On I/O errors
+     * @throws CancellationException If writing has been cancelled
      */
 
     void write(OutputStream stream)
-      throws IOException;
+      throws IOException, CancellationException;
   }
 }

@@ -65,7 +65,7 @@ public interface RuntimeVersionRangeType
   default void checkPreconditions()
   {
     if (this.lower().compareTo(this.upper()) > 0) {
-      final String separator = System.lineSeparator();
+      final var separator = System.lineSeparator();
       throw new IllegalArgumentException(
         new StringBuilder(128)
           .append("Invalid version range.")
@@ -93,8 +93,8 @@ public interface RuntimeVersionRangeType
   {
     Objects.requireNonNull(version, "version");
 
-    final Runtime.Version lower = this.lower();
-    final Runtime.Version upper = this.upper();
+    final var lower = this.lower();
+    final var upper = this.upper();
 
     if (this.lowerExclusive()) {
       if (this.upperExclusive()) {

@@ -21,6 +21,7 @@ import com.io7m.coffeepick.api.CoffeePickInventoryEventRuntimeLoadFailed;
 import com.io7m.coffeepick.api.CoffeePickInventoryEventRuntimeLoaded;
 import com.io7m.coffeepick.api.CoffeePickInventoryEventType;
 import com.io7m.coffeepick.api.CoffeePickInventoryType;
+import com.io7m.coffeepick.api.CoffeePickIsCancelledType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
 import com.io7m.coffeepick.api.CoffeePickSearches;
 import com.io7m.coffeepick.api.CoffeePickVerification;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -53,6 +55,7 @@ import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -60,6 +63,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
@@ -210,7 +214,7 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
 
   private static void writeLockedArchive(
     final RuntimeDescription description,
-    final RuntimeArchiveWriterType writer,
+    final RuntimeCancellableArchiveWriterType writer,
     final Path archive_tmp,
     final Path archive)
     throws IOException
@@ -258,6 +262,7 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
 
   private static CoffeePickVerification verifyLocked(
     final RuntimeDescription description,
+    final CoffeePickIsCancelledType cancelled,
     final Path archive)
     throws IOException
   {
@@ -268,7 +273,10 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
 
       try (var input = Files.newInputStream(archive)) {
         try (var input_digest = new DigestInputStream(input, digest)) {
-          input_digest.transferTo(new NullOutputStream());
+          try (var output = new NullOutputStream()) {
+            writeCancellable(cancelled, input_digest, output);
+          }
+
           return CoffeePickVerification.builder()
             .setExpectedHash(description.archiveHash())
             .setReceivedHash(RuntimeHash.of(algorithm, Hex.encodeHexString(digest.digest(), true)))
@@ -277,6 +285,25 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
       }
     } catch (final NoSuchAlgorithmException e) {
       throw new IOException(e);
+    }
+  }
+
+  private static void writeCancellable(
+    final CoffeePickIsCancelledType cancelled,
+    final InputStream input_digest,
+    final OutputStream output)
+    throws IOException
+  {
+    final var buffer = new byte[4096];
+    while (true) {
+      if (cancelled.isCancelled()) {
+        throw new CancellationException();
+      }
+      final var r = input_digest.read(buffer);
+      if (r == -1) {
+        break;
+      }
+      output.write(buffer, 0, r);
     }
   }
 
@@ -298,191 +325,27 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
       });
   }
 
-  @Override
-  public Optional<RuntimeDescription> searchExact(
-    final String id)
-  {
-    Objects.requireNonNull(id, "id");
-    return Optional.ofNullable(this.runtimes.get(id));
-  }
-
-  @Override
-  public Observable<CoffeePickInventoryEventType> events()
-  {
-    return this.events;
-  }
-
-  @Override
-  public Map<String, RuntimeDescription> search(
-    final CoffeePickSearch parameters)
-  {
-    Objects.requireNonNull(parameters, "parameters");
-
-    return this.runtimes.values()
-      .stream()
-      .filter(runtime -> CoffeePickSearches.matches(runtime, parameters))
-      .collect(Collectors.toMap(RuntimeDescriptionType::id, d -> d));
-  }
-
-  @Override
-  public Path write(
-    final RuntimeDescription description,
-    final RuntimeArchiveWriterType writer)
-    throws IOException
-  {
-    Objects.requireNonNull(description, "description");
-    Objects.requireNonNull(writer, "writer");
-
-    final var runtime_id = description.id();
-
-    final var directory =
-      this.path.resolve(runtime_id)
-        .toAbsolutePath();
-
-    Files.createDirectories(directory);
-
-    final var lock =
-      directory.resolve(LOCK).toAbsolutePath();
-    final var archive_tmp =
-      directory.resolve(ARCHIVE_TMP).toAbsolutePath();
-    final var archive =
-      directory.resolve(ARCHIVE).toAbsolutePath();
-    final var meta_tmp =
-      directory.resolve(META_PROPERTIES_TMP).toAbsolutePath();
-    final var meta =
-      directory.resolve(META_PROPERTIES).toAbsolutePath();
-
-    LOG.debug("lock {}", lock);
-    try (var channel = FileChannel.open(lock, CREATE, WRITE)) {
-      try (var ignored = channel.lock()) {
-        writeLockedArchive(description, writer, archive_tmp, archive);
-        writeLockedMeta(description, meta_tmp, meta);
-      }
-    }
-
-    this.runtimes.put(runtime_id, description);
-    this.events.onNext(CoffeePickInventoryEventRuntimeLoaded.of(runtime_id));
-    return archive;
-  }
-
-  @Override
-  public Optional<Path> pathOf(
-    final String id)
-    throws IOException
-  {
-    Objects.requireNonNull(id, "ID");
-
-    final var directory =
-      this.path.resolve(id)
-        .toAbsolutePath();
-
-    if (Files.isDirectory(directory)) {
-      final var lock =
-        directory.resolve(LOCK)
-          .toAbsolutePath();
-
-      LOG.debug("lock {}", lock);
-      try (var channel = FileChannel.open(lock, CREATE, WRITE)) {
-        try (var ignored = channel.lock()) {
-          return Optional.of(directory.resolve(ARCHIVE).toAbsolutePath());
-        }
-      }
-    }
-
-    return Optional.empty();
-  }
-
-  @Override
-  public Path unpack(
-    final String id,
-    final Path target_path,
-    final Set<UnpackOption> options)
-    throws IOException
-  {
-    Objects.requireNonNull(id, "id");
-    Objects.requireNonNull(target_path, "path");
-    Objects.requireNonNull(options, "options");
-
-    final var target_abs =
-      target_path.toAbsolutePath();
-
-    final var directory =
-      this.path.resolve(id)
-        .toAbsolutePath();
-
-    Files.createDirectories(directory);
-
-    final var lock =
-      directory.resolve(LOCK).toAbsolutePath();
-    final var archive =
-      directory.resolve(ARCHIVE).toAbsolutePath();
-
-    LOG.debug("lock {}", lock);
-    try (var channel = FileChannel.open(lock, CREATE, WRITE)) {
-      try (var ignored = channel.lock()) {
-        this.unpackLocked(target_abs, archive, options);
-      }
-    }
-
-    return target_path;
-  }
-
   private static BufferedInputStream open(final Path file)
     throws IOException
   {
     return new BufferedInputStream(Files.newInputStream(file, READ));
   }
 
-  private BufferedInputStream openCompressed(final Path file)
-    throws IOException, CompressorException
-  {
-    return new BufferedInputStream(this.compressors.createCompressorInputStream(open(file)));
-  }
-
-  private void unpackLocked(
-    final Path target_path,
-    final Path archive,
-    final Set<UnpackOption> options)
-    throws IOException
-  {
-    final CompressorException compressor_exception;
-
-    /*
-     * Try to treat the file as if it was a compressed archive. If a compressor exception is
-     * raised, then the archive probably isn't compressed. Retry using a plain archive stream.
-     */
-
-    try (var uncompressed = this.openCompressed(archive)) {
-      try (var archive_stream = this.archives.createArchiveInputStream(uncompressed)) {
-        unpackArchiveLocked(this.events, archive, target_path, archive_stream, options);
-        return;
-      }
-    } catch (final ArchiveException e) {
-      throw new IOException(e);
-    } catch (final CompressorException e) {
-      compressor_exception = e;
-    }
-
-    try (var archive_stream = this.archives.createArchiveInputStream(open(archive))) {
-      unpackArchiveLocked(this.events, archive, target_path, archive_stream, options);
-    } catch (final ArchiveException e) {
-      final var ex = new IOException(e);
-      ex.addSuppressed(compressor_exception);
-      throw ex;
-    }
-  }
-
   private static void unpackArchiveLocked(
-    final Subject<CoffeePickInventoryEventType> events,
     final Path archive,
     final Path target_path,
     final ArchiveInputStream archive_stream,
+    final CoffeePickIsCancelledType cancelled,
     final Set<UnpackOption> options)
     throws IOException
   {
     LOG.debug("unpacking {}", archive_stream.getClass().getCanonicalName());
 
     while (true) {
+      if (cancelled.isCancelled()) {
+        throw new CancellationException();
+      }
+
       final var entry = archive_stream.getNextEntry();
       if (entry == null) {
         break;
@@ -582,6 +445,203 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
   }
 
   @Override
+  public Optional<RuntimeDescription> searchExact(
+    final String id)
+  {
+    Objects.requireNonNull(id, "id");
+    return Optional.ofNullable(this.runtimes.get(id));
+  }
+
+  @Override
+  public Observable<CoffeePickInventoryEventType> events()
+  {
+    return this.events;
+  }
+
+  @Override
+  public Map<String, RuntimeDescription> search(
+    final CoffeePickSearch parameters)
+  {
+    Objects.requireNonNull(parameters, "parameters");
+
+    return this.runtimes.values()
+      .stream()
+      .filter(runtime -> CoffeePickSearches.matches(runtime, parameters))
+      .collect(Collectors.toMap(RuntimeDescriptionType::id, d -> d));
+  }
+
+  @Override
+  public Path write(
+    final RuntimeDescription description,
+    final RuntimeCancellableArchiveWriterType writer)
+    throws IOException
+  {
+    Objects.requireNonNull(description, "description");
+    Objects.requireNonNull(writer, "writer");
+
+    final var runtime_id = description.id();
+
+    final var directory =
+      this.path.resolve(runtime_id)
+        .toAbsolutePath();
+
+    Files.createDirectories(directory);
+
+    final var lock =
+      directory.resolve(LOCK).toAbsolutePath();
+    final var archive_tmp =
+      directory.resolve(ARCHIVE_TMP).toAbsolutePath();
+    final var archive =
+      directory.resolve(ARCHIVE).toAbsolutePath();
+    final var meta_tmp =
+      directory.resolve(META_PROPERTIES_TMP).toAbsolutePath();
+    final var meta =
+      directory.resolve(META_PROPERTIES).toAbsolutePath();
+
+    LOG.debug("lock {}", lock);
+    try (var channel = FileChannel.open(lock, CREATE, WRITE)) {
+      try (var ignored = channel.lock()) {
+        try {
+          writeLockedArchive(description, writer, archive_tmp, archive);
+          writeLockedMeta(description, meta_tmp, meta);
+        } catch (final CancellationException e) {
+          try {
+            Files.deleteIfExists(meta);
+          } catch (final IOException ex) {
+            LOG.error("could not delete {}: ", meta, ex);
+          }
+          try {
+            Files.deleteIfExists(archive);
+          } catch (final IOException ex) {
+            LOG.error("could not delete {}: ", meta, ex);
+          }
+          throw e;
+        }
+      }
+    }
+
+    this.runtimes.put(runtime_id, description);
+    this.events.onNext(CoffeePickInventoryEventRuntimeLoaded.of(runtime_id));
+    return archive;
+  }
+
+  @Override
+  public Optional<Path> pathOf(
+    final String id)
+    throws IOException
+  {
+    Objects.requireNonNull(id, "ID");
+
+    final var directory =
+      this.path.resolve(id)
+        .toAbsolutePath();
+
+    if (Files.isDirectory(directory)) {
+      final var lock =
+        directory.resolve(LOCK)
+          .toAbsolutePath();
+
+      LOG.debug("lock {}", lock);
+      try (var channel = FileChannel.open(lock, CREATE, WRITE)) {
+        try (var ignored = channel.lock()) {
+          return Optional.of(directory.resolve(ARCHIVE).toAbsolutePath());
+        }
+      }
+    }
+
+    return Optional.empty();
+  }
+
+  @Override
+  public Path unpack(
+    final String id,
+    final Path target_path,
+    final CoffeePickIsCancelledType cancelled,
+    final Set<UnpackOption> options)
+    throws IOException
+  {
+    Objects.requireNonNull(id, "id");
+    Objects.requireNonNull(target_path, "path");
+    Objects.requireNonNull(cancelled, "cancelled");
+    Objects.requireNonNull(options, "options");
+
+    final var target_abs =
+      target_path.toAbsolutePath();
+
+    final var directory =
+      this.path.resolve(id)
+        .toAbsolutePath();
+
+    Files.createDirectories(directory);
+
+    final var lock =
+      directory.resolve(LOCK).toAbsolutePath();
+    final var archive =
+      directory.resolve(ARCHIVE).toAbsolutePath();
+
+    LOG.debug("lock {}", lock);
+    try (var channel = FileChannel.open(lock, CREATE, WRITE)) {
+      try (var ignored = channel.lock()) {
+        try {
+          this.unpackLocked(target_abs, archive, cancelled, options);
+        } catch (final CancellationException e) {
+          Files.walk(target_abs)
+            .sorted(Comparator.reverseOrder())
+            .forEach(p -> {
+              try {
+                Files.delete(p);
+              } catch (final IOException ex) {
+                LOG.error("could not delete {}: ", p, ex);
+              }
+            });
+        }
+      }
+    }
+
+    return target_path;
+  }
+
+  private BufferedInputStream openCompressed(final Path file)
+    throws IOException, CompressorException
+  {
+    return new BufferedInputStream(this.compressors.createCompressorInputStream(open(file)));
+  }
+
+  private void unpackLocked(
+    final Path target_path,
+    final Path archive,
+    final CoffeePickIsCancelledType cancelled,
+    final Set<UnpackOption> options)
+    throws IOException
+  {
+    final CompressorException compressor_exception;
+
+    /*
+     * Try to treat the file as if it was a compressed archive. If a compressor exception is
+     * raised, then the archive probably isn't compressed. Retry using a plain archive stream.
+     */
+
+    try (var uncompressed = this.openCompressed(archive)) {
+      try (var archive_stream = this.archives.createArchiveInputStream(uncompressed)) {
+        unpackArchiveLocked(archive, target_path, archive_stream, cancelled, options);
+        return;
+      }
+    } catch (final ArchiveException e) {
+      throw new IOException(e);
+    } catch (final CompressorException e) {
+      compressor_exception = e;
+    }
+
+    try (var archive_stream = this.archives.createArchiveInputStream(open(archive))) {
+      unpackArchiveLocked(archive, target_path, archive_stream, cancelled, options);
+    } catch (final ArchiveException e) {
+      final var ex = new IOException(e);
+      ex.addSuppressed(compressor_exception);
+      throw ex;
+    }
+  }
+
+  @Override
   public void delete(final String id)
     throws IOException
   {
@@ -614,10 +674,13 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
   }
 
   @Override
-  public CoffeePickVerification verify(final String id)
+  public CoffeePickVerification verify(
+    final String id,
+    final CoffeePickIsCancelledType cancelled)
     throws IOException
   {
     Objects.requireNonNull(id, "id");
+    Objects.requireNonNull(cancelled, "cancelled");
 
     final var directory =
       this.path.resolve(id)
@@ -637,7 +700,7 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
           final var properties = new Properties();
           properties.load(stream);
           final var item = RuntimeDescriptions.parseFromProperties(properties);
-          return verifyLocked(item, archive);
+          return verifyLocked(item, cancelled, archive);
         }
       }
     }

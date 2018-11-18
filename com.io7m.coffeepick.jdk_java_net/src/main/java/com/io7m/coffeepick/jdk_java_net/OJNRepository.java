@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,7 +64,7 @@ public final class OJNRepository implements RuntimeRepositoryType
     this.runtimes = new ConcurrentHashMap<>(128);
     this.runtimes_read = Collections.unmodifiableMap(this.runtimes);
     this.events = PublishSubject.<RuntimeRepositoryEventType>create().toSerialized();
-    this.update();
+    this.update(() -> false);
   }
 
   private static RuntimeDescription loadBuild(
@@ -93,9 +94,12 @@ public final class OJNRepository implements RuntimeRepositoryType
   }
 
   @Override
-  public void update()
+  public void update(
+    final BooleanSupplier cancelled)
     throws IOException
   {
+    Objects.requireNonNull(cancelled, "cancelled");
+
     try {
       try (var stream = OJNRepository.class.getResourceAsStream(BUILDS)) {
         final var builds = new Properties();

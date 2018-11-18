@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 
 /**
  * The interface exposed by the <i>catalog</i>. A <i>catalog</i> represents an aggregated set of
@@ -120,6 +121,24 @@ public interface CoffeePickCatalogType
     throws IOException;
 
   /**
+   * Update the repository with the given URI. The method takes a function {@code cancelled} that
+   * will be evaluated repeatedly and, if the function returns {@code true} at any point, the
+   * operation will be cancelled.
+   *
+   * @param uri       The URI
+   * @param cancelled A function that returns {@code true} if the operation should be cancelled
+   *
+   * @throws Exception             On errors
+   * @throws CancellationException If {@code cancelled} returns {@code true} while the operation is
+   *                               running
+   */
+
+  void updateRepository(
+    URI uri,
+    CoffeePickIsCancelledType cancelled)
+    throws Exception, CancellationException;
+
+  /**
    * Update the repository with the given URI.
    *
    * @param uri The URI
@@ -127,7 +146,10 @@ public interface CoffeePickCatalogType
    * @throws Exception On errors
    */
 
-  void updateRepository(
-    URI uri)
-    throws Exception;
+  default void updateRepository(
+    final URI uri)
+    throws Exception
+  {
+    this.updateRepository(uri, () -> false);
+  }
 }

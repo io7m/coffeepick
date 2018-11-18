@@ -22,6 +22,8 @@ import net.jcip.annotations.ThreadSafe;
 import org.osgi.annotation.versioning.ProviderType;
 
 import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.function.BooleanSupplier;
 
 /**
  * A repository of runtimes.
@@ -48,11 +50,14 @@ public interface RuntimeRepositoryType
   /**
    * Update the repository.
    *
-   * @throws Exception On errors
+   * @param cancelled A function that returns {@code true} if the update should be cancelled
+   *
+   * @throws Exception             On errors
+   * @throws CancellationException If {@code cancelled} returns {@code true}
    */
 
-  void update()
-    throws Exception;
+  void update(BooleanSupplier cancelled)
+    throws Exception, CancellationException;
 
   /**
    * Obtain a read-only map of the available runtimes in the repository.

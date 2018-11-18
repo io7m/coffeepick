@@ -85,9 +85,9 @@ public final class CoffeePickShellSearchParameters
       }
 
       final var attribute = parameter.substring(0, colon);
-      final var value = parameter.substring(colon + 1);
 
       if (PARSERS_BY_NAME.containsKey(attribute)) {
+        final var value = parameter.substring(colon + 1);
         PARSERS_BY_NAME.get(attribute).parse(builder, value);
       } else {
         throw new IllegalArgumentException(

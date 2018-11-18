@@ -43,6 +43,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -133,6 +134,35 @@ public abstract class CoffeePickInventoryContract
     Assertions.assertEquals(1L, (long) this.event_log.size());
     final var event = this.eventFor(CoffeePickInventoryEventRuntimeLoaded.class, 0);
     Assertions.assertEquals(HASH_VALUE, event.id());
+  }
+
+  @Test
+  public final void testWriteCancelled()
+    throws Exception
+  {
+    final var inventory = this.inventory(this.events, this.directory);
+
+    final var description =
+      RuntimeDescription.builder()
+        .setRepository(URI.create("urn:example"))
+        .setArchitecture("x64")
+        .setArchiveHash(RuntimeHash.of("SHA-256", HASH_VALUE))
+        .setArchiveSize(100L)
+        .setArchiveURI(URI.create("https://www.example.com"))
+        .setConfiguration(RuntimeConfiguration.JDK)
+        .setPlatform("linux")
+        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVm("hotspot")
+        .build();
+
+    Assertions.assertThrows(CancellationException.class, () -> {
+      inventory.write(description, stream -> {
+        throw new CancellationException();
+      });
+    });
+
+    final var results = inventory.search(CoffeePickSearch.builder().build());
+    Assertions.assertEquals(0L, (long) results.size());
   }
 
   @Test
@@ -334,6 +364,60 @@ public abstract class CoffeePickInventoryContract
     Assertions.assertEquals(
       "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
       event.id());
+  }
+
+  @Test
+  public final void testVerify()
+    throws Exception
+  {
+    final var inventory = this.inventory(this.events, this.directory);
+
+    final var description =
+      RuntimeDescription.builder()
+        .setRepository(URI.create("urn:example"))
+        .setArchitecture("x64")
+        .setArchiveHash(RuntimeHash.of("SHA-256", HASH_VALUE))
+        .setArchiveSize(100L)
+        .setArchiveURI(URI.create("https://www.example.com"))
+        .setConfiguration(RuntimeConfiguration.JDK)
+        .setPlatform("linux")
+        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVm("hotspot")
+        .build();
+
+    inventory.write(description, stream -> stream.write("hello".getBytes(UTF_8)));
+    final var result = inventory.verify(HASH_VALUE);
+    Assertions.assertTrue(result.isVerified());
+    Assertions.assertEquals("SHA-256", result.expectedHash().algorithm());
+    Assertions.assertEquals("SHA-256", result.receivedHash().algorithm());
+    Assertions.assertEquals(HASH_VALUE, result.expectedHash().value());
+    Assertions.assertEquals(HASH_VALUE, result.receivedHash().value());
+  }
+
+  @Test
+  public final void testVerifyCancelled()
+    throws Exception
+  {
+    final var inventory = this.inventory(this.events, this.directory);
+
+    final var description =
+      RuntimeDescription.builder()
+        .setRepository(URI.create("urn:example"))
+        .setArchitecture("x64")
+        .setArchiveHash(RuntimeHash.of("SHA-256", HASH_VALUE))
+        .setArchiveSize(100L)
+        .setArchiveURI(URI.create("https://www.example.com"))
+        .setConfiguration(RuntimeConfiguration.JDK)
+        .setPlatform("linux")
+        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVm("hotspot")
+        .build();
+
+    inventory.write(description, stream -> stream.write("hello".getBytes(UTF_8)));
+
+    Assertions.assertThrows(CancellationException.class, () -> {
+      inventory.verify(HASH_VALUE, () -> true);
+    });
   }
 
   @SuppressWarnings("unchecked")

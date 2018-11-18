@@ -26,6 +26,7 @@ import org.jline.builtins.Completers;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -87,7 +88,7 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
         throw new ParameterException("Must specify exactly one ID");
       }
 
-      final Set<UnpackOption> options = new HashSet<>(8);
+      final Set<UnpackOption> options = EnumSet.noneOf(UnpackOption.class);
       if (parameters.stripLeadingDirectory) {
         options.add(STRIP_LEADING_DIRECTORY);
       }
@@ -135,6 +136,6 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
     boolean stripNonOwnerWrite = true;
 
     @Parameter(description = "<id>")
-    private List<String> rest = new ArrayList<>();
+    private List<String> rest = new ArrayList<>(1);
   }
 }

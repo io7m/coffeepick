@@ -74,13 +74,11 @@ public final class AOJDKDataParser
     final var name = tree.get("name");
     LOG.debug("name: {}", name);
 
-    final var checksums = new HashMap<String, URI>();
-
-    final var results = new ArrayList<AOJDKArchive>();
+    final var results = new ArrayList<AOJDKArchive>(64);
     final var assets = tree.get("assets");
     if (assets != null && assets.isArray()) {
       final var asset_array = (ArrayNode) assets;
-
+      final var checksums = new HashMap<String, URI>(64);
       for (var index = 0; index < asset_array.size(); ++index) {
         try {
           parseChecksums(checksums, asset_array, index);
@@ -221,7 +219,7 @@ public final class AOJDKDataParser
   {
     final var tree = this.mapper.readTree(this.stream);
     if (tree.isArray()) {
-      return this.parseArchives((ArrayNode) tree);
+      return AOJDKDataParser.parseArchives((ArrayNode) tree);
     }
     if (tree.isObject()) {
       return parseArchive((ObjectNode) tree);
@@ -240,7 +238,7 @@ public final class AOJDKDataParser
         .toString());
   }
 
-  private List<AOJDKArchive> parseArchives(
+  private static List<AOJDKArchive> parseArchives(
     final ArrayNode tree)
   {
     final List<AOJDKArchive> descriptions = new ArrayList<>(tree.size() * 8);

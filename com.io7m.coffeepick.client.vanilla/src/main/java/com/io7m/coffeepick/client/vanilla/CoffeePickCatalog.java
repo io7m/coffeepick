@@ -22,6 +22,7 @@ import com.io7m.coffeepick.api.CoffeePickCatalogEventRuntimeDownloading;
 import com.io7m.coffeepick.api.CoffeePickCatalogEventType;
 import com.io7m.coffeepick.api.CoffeePickCatalogType;
 import com.io7m.coffeepick.api.CoffeePickInventoryType;
+import com.io7m.coffeepick.api.CoffeePickIsCancelledType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
 import com.io7m.coffeepick.api.CoffeePickSearches;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
@@ -49,6 +50,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -127,17 +129,20 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
    * @param description The runtime description
    * @param events      The event receiver
    * @param input       The input stream
+   * @param cancelled   A function that returns {@code true} if the operation should be cancelled
    *
    * @return A writer
    */
 
-  public static CoffeePickInventoryType.RuntimeArchiveWriterType publishingWriter(
+  public static CoffeePickInventoryType.RuntimeCancellableArchiveWriterType publishingWriter(
     final RuntimeDescription description,
     final Subject<CoffeePickCatalogEventType> events,
+    final CoffeePickIsCancelledType cancelled,
     final InputStream input)
   {
     Objects.requireNonNull(description, "description");
     Objects.requireNonNull(events, "events");
+    Objects.requireNonNull(cancelled, "cancelled");
     Objects.requireNonNull(input, "input");
 
     return output -> {
@@ -148,6 +153,10 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
       final var buffer = new byte[4096];
 
       while (true) {
+        if (cancelled.isCancelled()) {
+          throw new CancellationException();
+        }
+
         final var r = input.read(buffer);
         if (r == -1) {
           break;
@@ -303,14 +312,17 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
   }
 
   @Override
-  public void updateRepository(final URI uri)
+  public void updateRepository(
+    final URI uri,
+    final CoffeePickIsCancelledType cancelled)
     throws Exception
   {
     Objects.requireNonNull(uri, "uri");
+    Objects.requireNonNull(cancelled, "cancelled");
 
     final var repository = this.runtime_repositories.get(uri);
     if (repository != null) {
-      repository.update();
+      repository.update(cancelled::isCancelled);
     }
   }
 }

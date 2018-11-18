@@ -61,9 +61,15 @@ public final class CoffeePickShell
       description = "The logging level",
       required = false,
       converter = CoffeePickShellLogLevelConverter.class,
-      names = "--verbosity")
+      names = "--verbose")
     Level logLevel = Level.INFO;
   }
+
+  /**
+   * Command line entry point.
+   * @param args The command-line arguments
+   * @throws IOException On I/O errors
+   */
 
   public static void main(
     final String[] args)

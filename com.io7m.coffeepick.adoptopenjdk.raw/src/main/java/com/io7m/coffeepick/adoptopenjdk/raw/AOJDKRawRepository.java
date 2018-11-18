@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.function.BooleanSupplier;
 
 import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
 
@@ -107,9 +109,12 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
   }
 
   @Override
-  public void update()
+  public void update(
+    final BooleanSupplier cancelled)
     throws Exception
   {
+    Objects.requireNonNull(cancelled, "cancelled");
+
     try {
       this.events.onNext(
         RuntimeRepositoryEventUpdateStarted.builder()
@@ -125,6 +130,10 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
       final var archives = new ArrayList<AOJDKArchive>(128);
       for (final var uri : URIS) {
         try {
+          if (cancelled.getAsBoolean()) {
+            throw new CancellationException();
+          }
+
           final var request =
             HttpRequest.newBuilder(uri)
               .GET()
@@ -155,6 +164,10 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
 
       var index = 0;
       for (final var archive : archives) {
+        if (cancelled.getAsBoolean()) {
+          throw new CancellationException();
+        }
+
         try {
           final var release = this.resolver.resolveOne(archive);
           this.database.add(release);

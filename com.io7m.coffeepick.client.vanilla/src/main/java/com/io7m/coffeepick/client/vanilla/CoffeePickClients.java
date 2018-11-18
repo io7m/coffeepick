@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -187,7 +186,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(id, "id");
       this.checkNotClosed();
-      return this.submit(() -> {
+      return this.submit(future -> {
         this.inventory.delete(id);
         return null;
       });
@@ -199,7 +198,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(id, "id");
       this.checkNotClosed();
-      return this.submit(() -> this.inventory.verify(id));
+      return this.submit(future -> this.inventory.verify(id, future::isCancelled));
     }
 
     @Override
@@ -208,7 +207,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(parameters, "parameters");
       this.checkNotClosed();
-      return this.submit(() -> this.inventory.search(parameters));
+      return this.submit(future -> this.inventory.search(parameters));
     }
 
     @Override
@@ -217,7 +216,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(id, "id");
       this.checkNotClosed();
-      return this.submit(() -> this.inventory.searchExact(id));
+      return this.submit(future -> this.inventory.searchExact(id));
     }
 
     @Override
@@ -226,7 +225,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(parameters, "parameters");
       this.checkNotClosed();
-      return this.submit(() -> this.catalog.search(parameters));
+      return this.submit(future -> this.catalog.search(parameters));
     }
 
     @Override
@@ -239,12 +238,13 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       @SuppressWarnings("unchecked") final var catalog_events =
         (Subject<CoffeePickCatalogEventType>) (Object) this.events;
 
-      return this.submit(() -> this.doDownload(id, catalog_events));
+      return this.submit(future -> this.doDownload(id, catalog_events, future));
     }
 
     private Path doDownload(
       final String id,
-      final Subject<CoffeePickCatalogEventType> catalog_events)
+      final Subject<CoffeePickCatalogEventType> catalog_events,
+      final CompletableFuture<Path> future)
       throws IOException, InterruptedException
     {
       final var description = this.catalog.searchExactOrFail(id);
@@ -275,7 +275,9 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
 
       try (var input = response.body()) {
         return this.inventory.write(
-          description, CoffeePickCatalog.publishingWriter(description, catalog_events, input));
+          description,
+          CoffeePickCatalog.publishingWriter(
+            description, catalog_events, future::isCancelled, input));
       }
     }
 
@@ -289,12 +291,12 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       @SuppressWarnings("unchecked") final var catalog_events =
         (Subject<CoffeePickCatalogEventType>) (Object) this.events;
 
-      return this.submit(() -> {
+      return this.submit(future -> {
         final var result = this.inventory.pathOf(id);
         if (result.isPresent()) {
           return result.get();
         }
-        return this.doDownload(id, catalog_events);
+        return this.doDownload(id, catalog_events, future);
       });
     }
 
@@ -305,7 +307,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       Objects.requireNonNull(id, "id");
       this.checkNotClosed();
 
-      return this.submit(() -> this.inventory.pathOf(id));
+      return this.submit(future -> this.inventory.pathOf(id));
     }
 
     @Override
@@ -319,7 +321,7 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       Objects.requireNonNull(options, "options");
       this.checkNotClosed();
 
-      return this.submit(() -> this.inventory.unpack(id, path, options));
+      return this.submit(future -> this.inventory.unpack(id, path, future::isCancelled, options));
     }
 
     @Override
@@ -329,21 +331,27 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       Objects.requireNonNull(uri, "uri");
       this.checkNotClosed();
 
-      return this.submit(() -> {
+      return this.submit(future -> {
         this.catalog.updateRepository(uri);
         return null;
       });
     }
 
+    private interface TaskType<T>
+    {
+      T execute(CompletableFuture<T> future)
+        throws Exception;
+    }
+
     private <T> CompletableFuture<T> submit(
-      final Callable<T> callable)
+      final TaskType<T> callable)
     {
       Objects.requireNonNull(callable, "callable");
 
       final var future = new CompletableFuture<T>();
       this.executor.execute(() -> {
         try {
-          future.complete(callable.call());
+          future.complete(callable.execute(future));
         } catch (final Throwable ex) {
           future.completeExceptionally(ex);
         }
