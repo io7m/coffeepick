@@ -139,7 +139,7 @@ public final class AOJDKArchiveResolver
    *
    * @param archive The archive
    *
-   * @return A runtime description
+   * @return A runtime descriptions
    *
    * @throws IOException On I/O errors
    */

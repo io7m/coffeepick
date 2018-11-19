@@ -123,10 +123,10 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
   }
 
   /**
-   * A writer that writes an archive described by {@code description}, reading from the stream
+   * A writer that writes an archive described by {@code descriptions}, reading from the stream
    * {@code input}, and publishes status events to {@code events}.
    *
-   * @param description The runtime description
+   * @param description The runtime descriptions
    * @param events      The event receiver
    * @param input       The input stream
    * @param cancelled   A function that returns {@code true} if the operation should be cancelled
@@ -140,7 +140,7 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
     final CoffeePickIsCancelledType cancelled,
     final InputStream input)
   {
-    Objects.requireNonNull(description, "description");
+    Objects.requireNonNull(description, "descriptions");
     Objects.requireNonNull(events, "events");
     Objects.requireNonNull(cancelled, "cancelled");
     Objects.requireNonNull(input, "input");

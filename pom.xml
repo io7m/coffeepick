@@ -29,6 +29,9 @@
     <module>com.io7m.coffeepick.runtime</module>
     <module>com.io7m.coffeepick.shell</module>
     <module>com.io7m.coffeepick.adoptopenjdk.raw</module>
+    <module>com.io7m.coffeepick.runtime.parser.api</module>
+    <module>com.io7m.coffeepick.runtime.parser.spi</module>
+    <module>com.io7m.coffeepick.runtime.format.xml</module>
   </modules>
 
   <properties>
@@ -97,6 +100,16 @@
       <dependency>
         <groupId>com.io7m.immutables.style</groupId>
         <artifactId>com.io7m.immutables.style</artifactId>
+        <version>0.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.jlexing</groupId>
+        <artifactId>com.io7m.jlexing.core</artifactId>
+        <version>2.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.jxe</groupId>
+        <artifactId>com.io7m.jxe.core</artifactId>
         <version>0.0.1</version>
       </dependency>
       <dependency>

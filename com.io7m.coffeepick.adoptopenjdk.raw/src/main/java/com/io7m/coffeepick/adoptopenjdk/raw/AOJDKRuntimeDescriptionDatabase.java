@@ -117,10 +117,10 @@ public final class AOJDKRuntimeDescriptionDatabase
   }
 
   /**
-   * Add a description to the cache. The description will be persisted to disk, but no exception
+   * Add a descriptions to the cache. The descriptions will be persisted to disk, but no exception
    * will be raised if persisting the file fails.
    *
-   * @param description The description to be added
+   * @param description The descriptions to be added
    */
 
   public void add(

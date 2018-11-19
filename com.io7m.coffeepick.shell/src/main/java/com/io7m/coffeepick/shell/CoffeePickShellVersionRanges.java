@@ -36,6 +36,7 @@ public final class CoffeePickShellVersionRanges
     Pattern.compile("\\(([0-9a-z\\-+]+)[ ]*,([0-9a-z\\-+]+)[ ]*]");
   private static final Pattern PATTERN_EXC_LOWER_EXC_UPPER =
     Pattern.compile("\\(([0-9a-z\\-+]+)[ ]*,([0-9a-z\\-+]+)[ ]*\\)");
+
   private CoffeePickShellVersionRanges()
   {
 

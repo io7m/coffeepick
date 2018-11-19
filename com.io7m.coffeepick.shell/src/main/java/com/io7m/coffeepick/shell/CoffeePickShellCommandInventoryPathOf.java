@@ -17,7 +17,6 @@
 package com.io7m.coffeepick.shell;
 
 import com.io7m.coffeepick.api.CoffeePickClientType;
-import com.io7m.coffeepick.api.CoffeePickSearch;
 import org.jline.builtins.Completers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-import static com.io7m.coffeepick.shell.CoffeePickShellCommandCatalogList.showRuntimes;
 import static org.jline.builtins.Completers.TreeCompleter.node;
 
 /**

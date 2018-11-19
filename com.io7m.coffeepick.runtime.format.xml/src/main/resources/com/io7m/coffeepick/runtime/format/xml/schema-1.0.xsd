@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2018 Mark Raynsford <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+  SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+  IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:c="urn:com.io7m.coffeepick:xml:1.0"
+        targetNamespace="urn:com.io7m.coffeepick:xml:1.0"
+        elementFormDefault="qualified">
+
+  <simpleType name="configurationType">
+    <annotation>
+      <documentation>
+        A string specifying the configuration of the runtime. A JDK contains the
+        full compiler and development code. A JRE purely contains code useful
+        for running average Java programs.
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <enumeration value="jre"/>
+      <enumeration value="jdk"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="architectureType">
+    <annotation>
+      <documentation>
+        A short string identifying the CPU architecture upon which this runtime
+        will execute (such as "x64", "x32", "s390x", "ppc64", etc).
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[a-z0-9]+"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="platformType">
+    <annotation>
+      <documentation>
+        A short string identifying the operating system upon which this runtime
+        will execute (such as "linux", "windows", "macos", etc).
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[a-z0-9]+"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="versionType">
+    <annotation>
+      <documentation>
+        A java.lang.Runtime.Version string. This schema does not attempt to
+        parse version numbers strictly.
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[A-Za-z0-9.-\\+]+"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="vmType">
+    <annotation>
+      <documentation>
+        A short string identifying the VM implementation (such as "hotspot",
+        "graal", "openj9", etc).
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[a-z0-9]+"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="tagNameType">
+    <annotation>
+      <documentation>
+        A short string intended to add extra descriptive information to the
+        runtime. One such tag is "production", indicating that the runtime has
+        been subjected to extensive testing and is believed to be suitable for
+        production use.
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[a-z0-9-]+"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="tagType">
+    <attribute name="name"
+               type="c:tagNameType"
+               use="required"/>
+  </complexType>
+
+  <element name="tag"
+           type="c:tagType"/>
+
+  <complexType name="tagsType">
+    <annotation>
+      <documentation>
+        A set of unique tags.
+      </documentation>
+    </annotation>
+
+    <sequence minOccurs="0"
+              maxOccurs="unbounded">
+      <element ref="c:tag"/>
+    </sequence>
+  </complexType>
+
+  <element name="tags"
+           type="c:tagsType">
+    <annotation>
+      <documentation>
+        Tags within a tags element must be unique.
+      </documentation>
+    </annotation>
+
+    <unique name="tagsAreUnique">
+      <selector xpath=".//c:tag"/>
+      <field xpath="@name"/>
+    </unique>
+  </element>
+
+  <simpleType name="hashValueType">
+    <annotation>
+      <documentation>
+        An ASCII-encoded hash value (such as the SHA-256 string
+        "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824").
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[a-f0-9]+"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="hashAlgorithmType">
+    <annotation>
+      <documentation>
+        A hash algorithm name (such as "SHA-256"). Names should be one of the
+        JCA standard algorithm names: See
+        https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#MessageDigest
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[A-Z0-9-]+"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="hashType">
+    <annotation>
+      <documentation>
+        A hash value.
+      </documentation>
+    </annotation>
+
+    <attribute name="value"
+               type="c:hashValueType"
+               use="required"/>
+    <attribute name="algorithm"
+               type="c:hashAlgorithmType"
+               use="required"/>
+  </complexType>
+
+  <element name="hash"
+           type="c:hashType"/>
+
+  <complexType name="runtimeType">
+    <annotation>
+      <documentation>
+        The description of a runtime, including the information needed to
+        download the runtime and to verify that the download was correct.
+      </documentation>
+    </annotation>
+
+    <sequence minOccurs="1"
+              maxOccurs="1">
+      <element ref="c:hash"/>
+      <sequence minOccurs="0"
+                maxOccurs="1">
+        <element ref="c:tags"/>
+      </sequence>
+    </sequence>
+
+    <attribute name="archive"
+               type="anyURI"
+               use="required">
+      <annotation>
+        <documentation>
+          A link to the archive file.
+        </documentation>
+      </annotation>
+    </attribute>
+
+    <attribute name="archiveSize"
+               type="nonNegativeInteger"
+               use="required">
+      <annotation>
+        <documentation>
+          The size in octets of the archive file.
+        </documentation>
+      </annotation>
+    </attribute>
+
+    <attribute name="version"
+               type="c:versionType"
+               use="required"/>
+
+    <attribute name="configuration"
+               type="c:configurationType"
+               use="required"/>
+
+    <attribute name="platform"
+               type="c:platformType"
+               use="required"/>
+
+    <attribute name="architecture"
+               type="c:architectureType"
+               use="required"/>
+
+    <attribute name="vm"
+               type="c:vmType"
+               use="required"/>
+  </complexType>
+
+  <element name="runtime"
+           type="c:runtimeType"/>
+
+  <complexType name="runtimeRepositoryType">
+    <annotation>
+      <documentation>
+        A set of runtimes.
+      </documentation>
+    </annotation>
+
+    <sequence minOccurs="0"
+              maxOccurs="unbounded">
+      <element ref="c:runtime"/>
+    </sequence>
+
+    <attribute name="updated"
+               type="dateTime"
+               use="optional"/>
+
+    <attribute name="id"
+               type="anyURI"
+               use="required"/>
+  </complexType>
+
+  <element name="runtime-repository"
+           type="c:runtimeRepositoryType">
+    <unique name="runtimeHashesAreUnique">
+      <annotation>
+        <documentation>
+          The combination of hash algorithm and value must be unique within a
+          repository for any given runtime. The URI for each runtime must be
+          unique within a repository.
+        </documentation>
+      </annotation>
+
+      <selector xpath=".//c:runtime/c:hash"/>
+      <field xpath="@value"/>
+      <field xpath="@algorithm"/>
+    </unique>
+
+    <unique name="runtimeURIsAreUnique">
+      <annotation>
+        <documentation>
+          The URIs of runtime archives must be unique within a repository.
+        </documentation>
+      </annotation>
+
+      <selector xpath=".//c:runtime"/>
+      <field xpath="@archive"/>
+    </unique>
+  </element>
+
+</schema>

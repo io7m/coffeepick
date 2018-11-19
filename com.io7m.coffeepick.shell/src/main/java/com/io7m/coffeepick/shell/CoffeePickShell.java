@@ -55,19 +55,11 @@ public final class CoffeePickShell
 
   }
 
-  private static final class Parameters
-  {
-    @Parameter(
-      description = "The logging level",
-      required = false,
-      converter = CoffeePickShellLogLevelConverter.class,
-      names = "--verbose")
-    Level logLevel = Level.INFO;
-  }
-
   /**
    * Command line entry point.
+   *
    * @param args The command-line arguments
+   *
    * @throws IOException On I/O errors
    */
 
@@ -219,5 +211,15 @@ public final class CoffeePickShell
   {
     return TerminalBuilder.builder()
       .build();
+  }
+
+  private static final class Parameters
+  {
+    @Parameter(
+      description = "The logging level",
+      required = false,
+      converter = CoffeePickShellLogLevelConverter.class,
+      names = "--verbose")
+    Level logLevel = Level.INFO;
   }
 }
