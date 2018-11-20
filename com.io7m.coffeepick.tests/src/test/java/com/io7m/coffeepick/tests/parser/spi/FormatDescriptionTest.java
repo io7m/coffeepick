@@ -14,7 +14,6 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 package com.io7m.coffeepick.tests.parser.spi;
 
 import com.io7m.coffeepick.runtime.parser.spi.FormatDescription;
