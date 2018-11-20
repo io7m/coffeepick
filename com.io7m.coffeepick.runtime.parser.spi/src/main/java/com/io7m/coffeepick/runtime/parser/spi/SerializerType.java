@@ -14,32 +14,29 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.tests.runtime;
+package com.io7m.coffeepick.runtime.parser.spi;
 
-import com.io7m.coffeepick.runtime.RuntimeDescription;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Test;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
+import org.osgi.annotation.versioning.ProviderType;
+
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
- * Runtime runtimes tests.
+ * A serializer.
  */
 
-public final class RuntimeDescriptionTest
+@ProviderType
+public interface SerializerType extends Closeable
 {
-  @Test
-  public void testEquals()
-  {
-    EqualsVerifier.forClass(RuntimeDescription.class)
-      .withNonnullFields(
-        "architecture",
-        "archiveHash",
-        "archiveURI",
-        "configuration",
-        "platform",
-        "repository",
-        "tags",
-        "vm",
-        "version")
-      .verify();
-  }
+  /**
+   * Serialize a repository.
+   *
+   * @param repository The repository
+   *
+   * @throws IOException On I/O errors
+   */
+
+  void serialize(RuntimeRepositoryDescription repository)
+    throws IOException;
 }

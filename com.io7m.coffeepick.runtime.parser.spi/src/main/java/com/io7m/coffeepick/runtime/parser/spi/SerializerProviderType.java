@@ -14,32 +14,41 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.tests.runtime;
+package com.io7m.coffeepick.runtime.parser.spi;
 
-import com.io7m.coffeepick.runtime.RuntimeDescription;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Test;
+import org.osgi.annotation.versioning.ProviderType;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.SortedSet;
 
 /**
- * Runtime runtimes tests.
+ * The type of parser providers.
  */
 
-public final class RuntimeDescriptionTest
+@ProviderType
+public interface SerializerProviderType
 {
-  @Test
-  public void testEquals()
-  {
-    EqualsVerifier.forClass(RuntimeDescription.class)
-      .withNonnullFields(
-        "architecture",
-        "archiveHash",
-        "archiveURI",
-        "configuration",
-        "platform",
-        "repository",
-        "tags",
-        "vm",
-        "version")
-      .verify();
-  }
+  /**
+   * @return The format that this provider supports
+   */
+
+  FormatDescription serializerFormatSupported();
+
+  /**
+   * @return The supported versions of the format
+   */
+
+  SortedSet<FormatVersion> serializerFormatVersionsSupported();
+
+  /**
+   * @param output The output stream
+   *
+   * @return A new serializer for the format
+   *
+   * @throws IOException On I/O or serializer configuration errors
+   */
+
+  SerializerType serializerCreate(OutputStream output)
+    throws IOException;
 }

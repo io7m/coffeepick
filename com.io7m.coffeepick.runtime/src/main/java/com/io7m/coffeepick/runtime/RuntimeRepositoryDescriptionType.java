@@ -20,7 +20,7 @@ import com.io7m.immutables.styles.ImmutablesStyleType;
 import org.immutables.value.Value;
 
 import java.net.URI;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,13 +43,13 @@ public interface RuntimeRepositoryDescriptionType
    * @return The time of the last update of the repository
    */
 
-  Optional<ZonedDateTime> updated();
+  Optional<OffsetDateTime> updated();
 
   /**
    * @return The runtimes available in the repository
    */
 
-  Map<String, RuntimeDescription> descriptions();
+  Map<String, RuntimeDescription> runtimes();
 
   /**
    * Check preconditions for the type.
@@ -58,7 +58,7 @@ public interface RuntimeRepositoryDescriptionType
   @Value.Check
   default void checkPreconditions()
   {
-    this.descriptions()
+    this.runtimes()
       .values()
       .forEach(description -> {
         if (!Objects.equals(description.repository(), this.id())) {

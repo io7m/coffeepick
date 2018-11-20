@@ -37,9 +37,9 @@ public interface ParserType extends Closeable
   Observable<ParseError> errors();
 
   /**
-   * Parse a list of runtime descriptions.
+   * Parse a list of runtime runtimes.
    *
-   * @return The descriptions
+   * @return The runtimes
    *
    * @throws IOException            On I/O errors
    * @throws ParserFailureException At the end of parsing if any error events have been raised, or

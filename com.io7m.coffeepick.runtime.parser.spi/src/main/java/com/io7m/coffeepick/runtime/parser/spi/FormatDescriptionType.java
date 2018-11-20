@@ -23,7 +23,7 @@ import org.osgi.annotation.versioning.ProviderType;
 import java.net.URI;
 
 /**
- * A descriptions of a supported format.
+ * A runtimes of a supported format.
  */
 
 @ProviderType
@@ -32,7 +32,7 @@ import java.net.URI;
 public interface FormatDescriptionType
 {
   /**
-   * @return A human-readable descriptions of the format
+   * @return A human-readable runtimes of the format
    */
 
   String description();

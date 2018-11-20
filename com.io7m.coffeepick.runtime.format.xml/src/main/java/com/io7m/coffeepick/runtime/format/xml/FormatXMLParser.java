@@ -93,6 +93,10 @@ public final class FormatXMLParser implements ParserType
 
     try {
       this.reader.parse(new InputSource(this.request.stream()));
+      if (handler.failed()) {
+        throw new ParserFailureException("Parsing failed");
+      }
+
       return handler.description();
     } catch (final SAXException e) {
       throw new ParserFailureException(e);

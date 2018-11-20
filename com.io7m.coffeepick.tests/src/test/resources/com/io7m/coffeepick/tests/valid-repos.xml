@@ -2,31 +2,33 @@
 <c:runtime-repository xmlns:c="urn:com.io7m.coffeepick:xml:1.0"
                       id="urn:com.io7m.coffeepick.example"
                       updated="2018-01-01T00:00:00+00:00">
-  <c:runtime configuration="jre"
-             platform="linux"
-             architecture="x64"
-             archive="https://www.example.com/jre.tar.gz"
-             archiveSize="100"
-             version="11"
-             vm="hotspot">
-    <c:hash value="2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
-            algorithm="SHA-256"/>
-    <c:tags>
-      <c:tag name="large-heap"/>
-      <c:tag name="production"/>
-    </c:tags>
-  </c:runtime>
-  <c:runtime configuration="jdk"
-             platform="windows"
-             architecture="x32"
-             archive="https://www.example.com/jre2.tar.gz"
-             archiveSize="200"
-             version="11.0.1"
-             vm="openj9">
-    <c:hash value="2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9823"
-            algorithm="SHA-256"/>
-    <c:tags>
-      <c:tag name="production"/>
-    </c:tags>
-  </c:runtime>
+  <c:runtimes>
+    <c:runtime configuration="jre"
+               platform="linux"
+               architecture="x64"
+               archive="https://www.example.com/jre.tar.gz"
+               archiveSize="100"
+               version="11"
+               vm="hotspot">
+      <c:hash value="2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+              algorithm="SHA-256"/>
+      <c:tags>
+        <c:tag name="large-heap"/>
+        <c:tag name="production"/>
+      </c:tags>
+    </c:runtime>
+    <c:runtime configuration="jdk"
+               platform="windows"
+               architecture="x32"
+               archive="https://www.example.com/jre2.tar.gz"
+               archiveSize="200"
+               version="11.0.1"
+               vm="openj9">
+      <c:hash value="2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9823"
+              algorithm="SHA-256"/>
+      <c:tags>
+        <c:tag name="production"/>
+      </c:tags>
+    </c:runtime>
+  </c:runtimes>
 </c:runtime-repository>

@@ -31,7 +31,7 @@ import org.xml.sax.ext.DefaultHandler2;
 import java.net.URI;
 import java.util.Objects;
 
-import static com.io7m.coffeepick.runtime.format.xml.FormatXMLProvider.SCHEMA_1_0_NAMESPACE;
+import static com.io7m.coffeepick.runtime.format.xml.FormatXMLConstants.SCHEMA_1_0_NAMESPACE;
 import static com.io7m.coffeepick.runtime.parser.spi.ParseErrorType.Severity.ERROR;
 import static com.io7m.coffeepick.runtime.parser.spi.ParseErrorType.Severity.WARNING;
 
@@ -208,5 +208,14 @@ public final class FormatXMLVersionedHandlerDispatcher extends DefaultHandler2
   public RuntimeRepositoryDescription description()
   {
     return this.handler.get();
+  }
+
+  /**
+   * @return {@code true} if any parse errors were encountered
+   */
+
+  public boolean failed()
+  {
+    return this.failed;
   }
 }

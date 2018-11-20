@@ -90,7 +90,7 @@ public interface CoffeePickInventoryType
    * Save a runtime. The method calls the given writer method when it needs to write an archive of
    * the runtime to disk.
    *
-   * @param description The runtime descriptions
+   * @param description The runtime runtimes
    * @param writer      A function that will be called to write data
    *
    * @return The path of the saved archive

@@ -245,6 +245,15 @@
   <element name="runtime"
            type="c:runtimeType"/>
 
+  <complexType name="runtimesType">
+    <sequence minOccurs="0" maxOccurs="unbounded">
+      <element ref="c:runtime"/>
+    </sequence>
+  </complexType>
+
+  <element name="runtimes"
+           type="c:runtimesType"/>
+
   <complexType name="runtimeRepositoryType">
     <annotation>
       <documentation>
@@ -253,8 +262,8 @@
     </annotation>
 
     <sequence minOccurs="0"
-              maxOccurs="unbounded">
-      <element ref="c:runtime"/>
+              maxOccurs="1">
+      <element ref="c:runtimes"/>
     </sequence>
 
     <attribute name="updated"
@@ -277,7 +286,7 @@
         </documentation>
       </annotation>
 
-      <selector xpath=".//c:runtime/c:hash"/>
+      <selector xpath=".//c:runtimes/c:runtime/c:hash"/>
       <field xpath="@value"/>
       <field xpath="@algorithm"/>
     </unique>
@@ -289,7 +298,7 @@
         </documentation>
       </annotation>
 
-      <selector xpath=".//c:runtime"/>
+      <selector xpath=".//c:runtimes/c:runtime"/>
       <field xpath="@archive"/>
     </unique>
   </element>

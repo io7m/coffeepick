@@ -23,7 +23,7 @@ import java.net.URI;
 import java.util.Set;
 
 /**
- * A descriptions of a runtime.
+ * A runtimes of a runtime.
  */
 
 @ImmutablesStyleType

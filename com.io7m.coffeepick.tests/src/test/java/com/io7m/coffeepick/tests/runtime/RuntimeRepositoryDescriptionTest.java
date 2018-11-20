@@ -21,7 +21,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 /**
- * Runtime repository descriptions tests.
+ * Runtime repository runtimes tests.
  */
 
 public final class RuntimeRepositoryDescriptionTest
@@ -33,7 +33,7 @@ public final class RuntimeRepositoryDescriptionTest
       .withNonnullFields(
         "id",
         "updated",
-        "descriptions")
+        "runtimes")
       .verify();
   }
 }

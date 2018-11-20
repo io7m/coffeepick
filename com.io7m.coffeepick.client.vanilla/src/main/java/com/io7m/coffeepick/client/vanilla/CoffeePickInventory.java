@@ -476,7 +476,7 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
     final RuntimeCancellableArchiveWriterType writer)
     throws IOException
   {
-    Objects.requireNonNull(description, "descriptions");
+    Objects.requireNonNull(description, "runtimes");
     Objects.requireNonNull(writer, "writer");
 
     final var runtime_id = description.id();

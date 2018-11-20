@@ -16,37 +16,38 @@
 
 package com.io7m.coffeepick.runtime.format.xml;
 
-import com.io7m.coffeepick.runtime.RuntimeDescriptionType;
-import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
+import com.io7m.coffeepick.runtime.RuntimeDescription;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.OffsetDateTime;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
- * A content handler for parsing repositories.
+ * A content handler for parsing sets of runtimes.
  */
 
-public final class FormatXML1RepositoryHandler
-  implements FormatXMLContentHandlerType<RuntimeRepositoryDescription>
+public final class FormatXML1RuntimesHandler
+  implements FormatXMLContentHandlerType<List<RuntimeDescription>>
 {
-  private final RuntimeRepositoryDescription.Builder repository;
-  private FormatXML1RuntimesHandler handler;
-  private URI id;
+  private final URI repository;
+  private final ArrayList<RuntimeDescription> runtimes;
+  private FormatXMLContentHandlerType<RuntimeDescription> handler;
 
   /**
    * Construct a handler.
+   *
+   * @param in_repository The repository URI
    */
 
-  public FormatXML1RepositoryHandler()
+  public FormatXML1RuntimesHandler(
+    final URI in_repository)
   {
-    this.repository = RuntimeRepositoryDescription.builder();
+    this.repository =
+      Objects.requireNonNull(in_repository, "repository");
+    this.runtimes = new ArrayList<>();
   }
 
   @Override
@@ -58,22 +59,11 @@ public final class FormatXML1RepositoryHandler
     throws SAXException
   {
     switch (local_name) {
-      case "runtime-repository": {
-        try {
-          this.id = new URI(attributes.getValue("id"));
-          this.repository.setId(this.id);
-
-          final var text = attributes.getValue("updated");
-          if (text != null) {
-            this.repository.setUpdated(OffsetDateTime.parse(text, ISO_OFFSET_DATE_TIME));
-          }
-        } catch (final URISyntaxException e) {
-          throw new SAXException(e);
-        }
+      case "runtimes": {
         break;
       }
-      case "runtimes": {
-        this.handler = new FormatXML1RuntimesHandler(this.id);
+      case "runtime": {
+        this.handler = new FormatXML1RuntimeHandler(this.repository);
         this.handler.onElementStarted(namespace_uri, local_name, qualified_name, attributes);
         break;
       }
@@ -92,15 +82,12 @@ public final class FormatXML1RepositoryHandler
     throws SAXException
   {
     switch (local_name) {
-      case "runtime-repository": {
+      case "runtimes": {
         break;
       }
-      case "runtimes": {
+      case "runtime": {
         this.handler.onElementFinished(namespace_uri, local_name, qualified_name);
-        final var runtimes = this.handler.get();
-        this.repository.setRuntimes(
-          runtimes.stream()
-            .collect(Collectors.toMap(RuntimeDescriptionType::id, Function.identity())));
+        this.runtimes.add(this.handler.get());
         this.handler = null;
         break;
       }
@@ -118,12 +105,12 @@ public final class FormatXML1RepositoryHandler
     final int length)
     throws SAXException
   {
-    this.handler.onCharacters(ch, start, length);
+    this.handler.onCharacters(ch, length, start);
   }
 
   @Override
-  public RuntimeRepositoryDescription get()
+  public List<RuntimeDescription> get()
   {
-    return this.repository.build();
+    return this.runtimes;
   }
 }

@@ -18,7 +18,7 @@ package com.io7m.coffeepick.tests.format.xml;
 
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeHash;
-import com.io7m.coffeepick.runtime.format.xml.FormatXMLProvider;
+import com.io7m.coffeepick.runtime.format.xml.FormatXMLParserProvider;
 import com.io7m.coffeepick.runtime.parser.spi.ParseError;
 import com.io7m.coffeepick.runtime.parser.spi.ParserFailureException;
 import com.io7m.coffeepick.runtime.parser.spi.ParserRequest;
@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Set;
@@ -40,10 +41,10 @@ import java.util.Set;
  * Tests for the XML provider.
  */
 
-public final class FormatXMLProviderTest
+public final class FormatXMLParserProviderTest
 {
   private static final Logger LOG =
-    LoggerFactory.getLogger(FormatXMLProviderTest.class);
+    LoggerFactory.getLogger(FormatXMLParserProviderTest.class);
 
   private static ArrayList<ParseError> logEvents(
     final ParserType parser)
@@ -67,7 +68,7 @@ public final class FormatXMLProviderTest
   private static InputStream resource(final String name)
     throws IOException
   {
-    final var url = FormatXMLProviderTest.class.getResource(
+    final var url = FormatXMLParserProviderTest.class.getResource(
       "/com/io7m/coffeepick/tests/" + name);
     if (url == null) {
       throw new FileNotFoundException(name);
@@ -79,7 +80,7 @@ public final class FormatXMLProviderTest
   public void testValidRepository()
     throws Exception
   {
-    final var provider = new FormatXMLProvider();
+    final var provider = new FormatXMLParserProvider();
     final var parser =
       provider.parserCreate(
         ParserRequest.builder()
@@ -94,10 +95,10 @@ public final class FormatXMLProviderTest
       URI.create("urn:com.io7m.coffeepick.example"),
       repository.id());
     Assertions.assertEquals(
-      ZonedDateTime.parse("2018-01-01T00:00:00+00:00"),
+      OffsetDateTime.parse("2018-01-01T00:00:00+00:00"),
       repository.updated().get());
 
-    final var runtimes = repository.descriptions();
+    final var runtimes = repository.runtimes();
     Assertions.assertEquals(2L, (long) runtimes.size());
     Assertions.assertTrue(runtimes.containsKey(
       "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"));
@@ -165,7 +166,7 @@ public final class FormatXMLProviderTest
   public void testInvalidNoNamespace()
     throws Exception
   {
-    final var provider = new FormatXMLProvider();
+    final var provider = new FormatXMLParserProvider();
     final var parser =
       provider.parserCreate(
         ParserRequest.builder()
@@ -183,7 +184,7 @@ public final class FormatXMLProviderTest
   public void testInvalidWrongNamespace()
     throws Exception
   {
-    final var provider = new FormatXMLProvider();
+    final var provider = new FormatXMLParserProvider();
     final var parser =
       provider.parserCreate(
         ParserRequest.builder()

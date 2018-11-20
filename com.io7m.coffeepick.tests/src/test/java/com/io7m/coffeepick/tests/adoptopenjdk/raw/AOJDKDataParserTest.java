@@ -38,7 +38,7 @@ public final class AOJDKDataParserTest
 
     final var descriptions = parser.parse();
     for (final var description : descriptions) {
-      LOG.debug("descriptions: {}", description);
+      LOG.debug("runtimes: {}", description);
     }
   }
 
@@ -52,7 +52,7 @@ public final class AOJDKDataParserTest
 
     final var descriptions = parser.parse();
     for (final var description : descriptions) {
-      LOG.debug("descriptions: {}", description);
+      LOG.debug("runtimes: {}", description);
     }
   }
 
@@ -66,7 +66,7 @@ public final class AOJDKDataParserTest
 
     final var descriptions = parser.parse();
     for (final var description : descriptions) {
-      LOG.debug("descriptions: {}", description);
+      LOG.debug("runtimes: {}", description);
     }
   }
 }

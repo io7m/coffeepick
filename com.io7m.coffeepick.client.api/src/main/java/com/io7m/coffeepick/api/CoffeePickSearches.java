@@ -46,7 +46,7 @@ public final class CoffeePickSearches
 
   /**
    *
-   * @param runtime The runtime descriptions
+   * @param runtime The runtime runtimes
    * @param parameters The search parameters
    * @return {@code true} if the given runtime is matched by the given search parameters
    */

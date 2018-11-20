@@ -22,8 +22,6 @@ import com.io7m.coffeepick.runtime.parser.spi.ParserProviderType;
 import com.io7m.coffeepick.runtime.parser.spi.ParserRequest;
 import com.io7m.coffeepick.runtime.parser.spi.ParserType;
 import com.io7m.jxe.core.JXEHardenedSAXParsers;
-import com.io7m.jxe.core.JXESchemaDefinition;
-import com.io7m.jxe.core.JXESchemaResolutionMappings;
 import com.io7m.jxe.core.JXEXInclude;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -32,52 +30,24 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.net.URI;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import static com.io7m.coffeepick.runtime.format.xml.FormatXMLConstants.FORMAT;
+import static com.io7m.coffeepick.runtime.format.xml.FormatXMLConstants.SCHEMAS;
+import static com.io7m.coffeepick.runtime.format.xml.FormatXMLConstants.VERSIONS;
 
 /**
  * An XML format provider.
  */
 
 @Component(service = ParserProviderType.class)
-public final class FormatXMLProvider implements ParserProviderType
+public final class FormatXMLParserProvider implements ParserProviderType
 {
-  static final URI SCHEMA_1_0_NAMESPACE =
-    URI.create("urn:com.io7m.coffeepick:xml:1.0");
-
-  private static final JXESchemaDefinition SCHEMA_1_0 =
-    JXESchemaDefinition.builder()
-      .setNamespace(SCHEMA_1_0_NAMESPACE)
-      .setFileIdentifier("file::schema-1.0.xsd")
-      .setLocation(FormatXMLProvider.class.getResource(
-        "/com/io7m/coffeepick/runtime/format/xml/schema-1.0.xsd"))
-      .build();
-
-  private static final JXESchemaResolutionMappings SCHEMAS =
-    JXESchemaResolutionMappings.builder()
-      .putMappings(SCHEMA_1_0_NAMESPACE, SCHEMA_1_0)
-      .build();
-
-  private static final FormatDescription FORMAT =
-    FormatDescription.builder()
-      .setDescription("XML format")
-      .setMimeType("application/coffeepick+xml")
-      .setName(URI.create("urn:com.io7m.coffeepick:xml"))
-      .build();
-
-  private static final List<FormatVersion> VERSIONS =
-    List.of(
-      FormatVersion.builder()
-        .setMajor(1)
-        .setMinor(0)
-        .build());
-
   private static final Logger LOG =
-    LoggerFactory.getLogger(FormatXMLProvider.class);
+    LoggerFactory.getLogger(FormatXMLParserProvider.class);
 
   private final JXEHardenedSAXParsers parsers;
 
@@ -85,7 +55,7 @@ public final class FormatXMLProvider implements ParserProviderType
    * Construct a provider.
    */
 
-  public FormatXMLProvider()
+  public FormatXMLParserProvider()
   {
     this.parsers = new JXEHardenedSAXParsers();
   }
