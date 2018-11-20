@@ -48,6 +48,9 @@ public final class FormatXML1TagHandler
         this.tag = attributes.getValue("name");
         break;
       }
+      default: {
+        throw new IllegalArgumentException("Tag elements cannot have child elements");
+      }
     }
   }
 

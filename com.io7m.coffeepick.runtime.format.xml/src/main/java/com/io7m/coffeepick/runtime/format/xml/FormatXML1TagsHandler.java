@@ -91,7 +91,7 @@ public final class FormatXML1TagsHandler implements FormatXMLContentHandlerType<
     final int start,
     final int length)
   {
-
+    this.handler.onCharacters(ch, start, length);
   }
 
   @Override
