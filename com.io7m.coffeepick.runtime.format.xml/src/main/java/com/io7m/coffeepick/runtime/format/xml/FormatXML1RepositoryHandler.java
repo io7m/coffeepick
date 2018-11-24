@@ -16,114 +16,97 @@
 
 package com.io7m.coffeepick.runtime.format.xml;
 
-import com.io7m.coffeepick.runtime.RuntimeDescriptionType;
+import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.ext.Locator2;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 /**
- * A content handler for parsing repositories.
+ * A content handler for parsing runtime repositories.
  */
 
 public final class FormatXML1RepositoryHandler
-  implements FormatXMLContentHandlerType<RuntimeRepositoryDescription>
+  extends FormatXMLAbstractContentHandler<List<RuntimeDescription>, RuntimeRepositoryDescription>
 {
-  private final RuntimeRepositoryDescription.Builder repository;
-  private FormatXML1RuntimesHandler handler;
-  private URI id;
+  private final RuntimeRepositoryDescription.Builder repository_builder;
+  private URI repository_uri;
 
   /**
    * Construct a handler.
+   *
+   * @param in_locator The XML locator
    */
 
-  public FormatXML1RepositoryHandler()
+  public FormatXML1RepositoryHandler(
+    final Locator2 in_locator)
   {
-    this.repository = RuntimeRepositoryDescription.builder();
+    super(in_locator, Optional.of("runtime-repository"));
+    this.repository_builder = RuntimeRepositoryDescription.builder();
   }
 
   @Override
-  public void onElementStarted(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name,
+  protected Map<String, Supplier<FormatXMLContentHandlerType<List<RuntimeDescription>>>> onWantChildHandlers()
+  {
+    return Map.of(
+      "runtimes", () -> new FormatXML1RuntimesHandler(this.repository_uri, super.locator())
+    );
+  }
+
+  @Override
+  protected String onWantHandlerName()
+  {
+    return FormatXML1RepositoryHandler.class.getSimpleName();
+  }
+
+  @Override
+  protected Optional<RuntimeRepositoryDescription> onElementFinishDirectly(
+    final String namespace,
+    final String name,
+    final String qname)
+  {
+    return Optional.of(this.repository_builder.build());
+  }
+
+  @Override
+  protected void onElementStartDirectly(
+    final String namespace,
+    final String name,
+    final String qname,
     final Attributes attributes)
-    throws SAXException
+    throws SAXParseException
   {
-    switch (local_name) {
-      case "runtime-repository": {
-        try {
-          this.id = new URI(attributes.getValue("id"));
-          this.repository.setId(this.id);
+    try {
+      this.repository_uri = new URI(attributes.getValue("id"));
+      this.repository_builder.setId(this.repository_uri);
 
-          final var text = attributes.getValue("updated");
-          if (text != null) {
-            this.repository.setUpdated(OffsetDateTime.parse(text, ISO_OFFSET_DATE_TIME));
-          }
-        } catch (final URISyntaxException e) {
-          throw new SAXException(e);
+      {
+        final var updated = attributes.getValue("updated");
+        if (updated != null) {
+          this.repository_builder.setUpdated(OffsetDateTime.parse(updated, ISO_OFFSET_DATE_TIME));
         }
-        break;
       }
-      case "runtimes": {
-        this.handler = new FormatXML1RuntimesHandler(this.id);
-        this.handler.onElementStarted(namespace_uri, local_name, qualified_name, attributes);
-        break;
-      }
-      default: {
-        this.handler.onElementStarted(namespace_uri, local_name, qualified_name, attributes);
-        break;
-      }
+
+    } catch (final URISyntaxException | IllegalArgumentException e) {
+      throw new SAXParseException(e.getMessage(), this.locator(), e);
     }
   }
 
   @Override
-  public void onElementFinished(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name)
-    throws SAXException
+  protected void onChildResultReceived(final List<RuntimeDescription> runtimes)
   {
-    switch (local_name) {
-      case "runtime-repository": {
-        break;
-      }
-      case "runtimes": {
-        this.handler.onElementFinished(namespace_uri, local_name, qualified_name);
-        final var runtimes = this.handler.get();
-        this.repository.setRuntimes(
-          runtimes.stream()
-            .collect(Collectors.toMap(RuntimeDescriptionType::id, Function.identity())));
-        this.handler = null;
-        break;
-      }
-      default: {
-        this.handler.onElementFinished(namespace_uri, local_name, qualified_name);
-        break;
-      }
+    for (final var runtime : runtimes) {
+      this.repository_builder.putRuntimes(runtime.id(), runtime);
     }
-  }
-
-  @Override
-  public void onCharacters(
-    final char[] ch,
-    final int start,
-    final int length)
-    throws SAXException
-  {
-    this.handler.onCharacters(ch, start, length);
-  }
-
-  @Override
-  public RuntimeRepositoryDescription get()
-  {
-    return this.repository.build();
   }
 }

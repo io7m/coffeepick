@@ -18,9 +18,10 @@ package com.io7m.coffeepick.runtime.format.xml;
 
 import com.io7m.coffeepick.runtime.parser.spi.FormatDescription;
 import com.io7m.coffeepick.runtime.parser.spi.FormatVersion;
-import com.io7m.coffeepick.runtime.parser.spi.ParserProviderType;
-import com.io7m.coffeepick.runtime.parser.spi.ParserRequest;
-import com.io7m.coffeepick.runtime.parser.spi.ParserType;
+import com.io7m.coffeepick.runtime.parser.spi.SPIParserProviderType;
+import com.io7m.coffeepick.runtime.parser.spi.SPIParserRequest;
+import com.io7m.coffeepick.runtime.parser.spi.SPIParserType;
+import com.io7m.coffeepick.runtime.parser.spi.SPIProbeResultType;
 import com.io7m.jxe.core.JXEHardenedSAXParsers;
 import com.io7m.jxe.core.JXEXInclude;
 import org.osgi.service.component.annotations.Component;
@@ -43,11 +44,11 @@ import static com.io7m.coffeepick.runtime.format.xml.FormatXMLConstants.VERSIONS
  * An XML format provider.
  */
 
-@Component(service = ParserProviderType.class)
-public final class FormatXMLParserProvider implements ParserProviderType
+@Component(service = SPIParserProviderType.class)
+public final class FormatXMLSPIParserProvider implements SPIParserProviderType
 {
   private static final Logger LOG =
-    LoggerFactory.getLogger(FormatXMLParserProvider.class);
+    LoggerFactory.getLogger(FormatXMLSPIParserProvider.class);
 
   private final JXEHardenedSAXParsers parsers;
 
@@ -55,7 +56,7 @@ public final class FormatXMLParserProvider implements ParserProviderType
    * Construct a provider.
    */
 
-  public FormatXMLParserProvider()
+  public FormatXMLSPIParserProvider()
   {
     this.parsers = new JXEHardenedSAXParsers();
   }
@@ -73,14 +74,37 @@ public final class FormatXMLParserProvider implements ParserProviderType
   }
 
   @Override
-  public ParserType parserCreate(
-    final ParserRequest request)
+  public String parserName()
+  {
+    return FormatXMLSPIParserProvider.class.getCanonicalName();
+  }
+
+  @Override
+  public SPIProbeResultType probe(
+    final SPIParserRequest request)
     throws IOException
   {
     Objects.requireNonNull(request, "request");
 
     try {
-      return new FormatXMLParser(
+      return new FormatXMLSPIProbe(
+        request,
+        this.parsers.createXMLReaderNonValidating(Optional.empty(), JXEXInclude.XINCLUDE_DISABLED))
+        .probe();
+    } catch (final ParserConfigurationException | SAXException e) {
+      throw new IOException(e);
+    }
+  }
+
+  @Override
+  public SPIParserType parserCreate(
+    final SPIParserRequest request)
+    throws IOException
+  {
+    Objects.requireNonNull(request, "request");
+
+    try {
+      return new FormatXMLSPIParser(
         request,
         this.parsers.createXMLReader(Optional.empty(), JXEXInclude.XINCLUDE_DISABLED, SCHEMAS));
     } catch (final ParserConfigurationException | SAXException e) {

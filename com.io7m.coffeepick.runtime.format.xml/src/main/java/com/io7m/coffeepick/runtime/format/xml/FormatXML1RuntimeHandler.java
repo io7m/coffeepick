@@ -18,131 +18,154 @@ package com.io7m.coffeepick.runtime.format.xml;
 
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
-import com.io7m.coffeepick.runtime.RuntimeHash;
 import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.ext.Locator2;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A content handler for parsing runtimes.
  */
 
 public final class FormatXML1RuntimeHandler
-  implements FormatXMLContentHandlerType<RuntimeDescription>
+  extends FormatXMLAbstractContentHandler<FormatXML1RuntimeChildType, RuntimeDescription>
 {
   private final RuntimeDescription.Builder runtime_builder;
-  private final URI repository;
-  private FormatXMLContentHandlerType<?> handler;
+  private final Optional<URI> repository;
 
   /**
    * Construct a handler.
    *
    * @param in_repository The repository URI
+   * @param in_locator    The XML locator
    */
 
   public FormatXML1RuntimeHandler(
-    final URI in_repository)
+    final Optional<URI> in_repository,
+    final Locator2 in_locator)
   {
+    super(in_locator, Optional.of("runtime"));
+
     this.repository =
       Objects.requireNonNull(in_repository, "repository");
     this.runtime_builder =
       RuntimeDescription.builder();
   }
 
+  private static FormatXMLContentHandlerType<FormatXML1RuntimeChildType> hashHandler(
+    final Locator2 locator)
+  {
+    return new FormatXML1HashHandler(locator).map(FormatXML1RuntimeChildHash::of);
+  }
+
+  private static FormatXMLContentHandlerType<FormatXML1RuntimeChildType> tagsHandler(
+    final Locator2 locator)
+  {
+    return new FormatXML1TagsHandler(locator).map(FormatXML1RuntimeChildTags::of);
+  }
+
   @Override
-  public void onElementStarted(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name,
+  protected Map<String, Supplier<FormatXMLContentHandlerType<FormatXML1RuntimeChildType>>> onWantChildHandlers()
+  {
+    return Map.of(
+      "tags", () -> tagsHandler(super.locator()),
+      "hash", () -> hashHandler(super.locator())
+    );
+  }
+
+  @Override
+  protected String onWantHandlerName()
+  {
+    return FormatXML1RuntimeHandler.class.getSimpleName();
+  }
+
+  @Override
+  protected Optional<RuntimeDescription> onElementFinishDirectly(
+    final String namespace,
+    final String name,
+    final String qname)
+  {
+    return Optional.of(this.runtime_builder.build());
+  }
+
+  @Override
+  protected void onElementStartDirectly(
+    final String namespace,
+    final String name,
+    final String qname,
     final Attributes attributes)
-    throws SAXException
+    throws SAXParseException
   {
-    switch (local_name) {
-      case "runtime": {
-        try {
-          this.runtime_builder.setRepository(
-            this.repository);
-          this.runtime_builder.setArchiveSize(
-            Long.parseUnsignedLong(attributes.getValue("archiveSize")));
-          this.runtime_builder.setArchiveURI(
-            new URI(attributes.getValue("archive")));
-          this.runtime_builder.setConfiguration(
-            RuntimeConfiguration.ofName(attributes.getValue("configuration")));
-          this.runtime_builder.setPlatform(
-            attributes.getValue("platform"));
-          this.runtime_builder.setArchitecture(
-            attributes.getValue("architecture"));
-          this.runtime_builder.setVersion(
-            Runtime.Version.parse(attributes.getValue("version")));
-          this.runtime_builder.setVm(
-            attributes.getValue("vm"));
-        } catch (final URISyntaxException e) {
-          throw new SAXException(e);
-        }
+    try {
+      this.parseRepositoryURI(attributes);
+
+      this.runtime_builder.setArchiveSize(
+        Long.parseUnsignedLong(attributes.getValue("archiveSize")));
+      this.runtime_builder.setArchiveURI(
+        new URI(attributes.getValue("archive")));
+      this.runtime_builder.setConfiguration(
+        RuntimeConfiguration.ofName(attributes.getValue("configuration")));
+      this.runtime_builder.setPlatform(
+        attributes.getValue("platform"));
+      this.runtime_builder.setArchitecture(
+        attributes.getValue("architecture"));
+      this.runtime_builder.setVersion(
+        Runtime.Version.parse(attributes.getValue("version")));
+      this.runtime_builder.setVm(
+        attributes.getValue("vm"));
+
+    } catch (final URISyntaxException | IllegalArgumentException e) {
+      throw new SAXParseException(e.getMessage(), this.locator(), e);
+    }
+  }
+
+  @Override
+  protected void onChildResultReceived(
+    final FormatXML1RuntimeChildType value)
+  {
+    switch (value.kind()) {
+      case TAGS: {
+        final var tags = (FormatXML1RuntimeChildTags) value;
+        this.runtime_builder.addAllTags(tags.tags());
         break;
       }
-      case "tags": {
-        this.handler = new FormatXML1TagsHandler();
-        this.handler.onElementStarted(namespace_uri, local_name, qualified_name, attributes);
-        break;
-      }
-      case "hash": {
-        this.handler = new FormatXML1HashHandler();
-        this.handler.onElementStarted(namespace_uri, local_name, qualified_name, attributes);
-        break;
-      }
-      default: {
-        this.handler.onElementStarted(namespace_uri, local_name, qualified_name, attributes);
+      case HASH: {
+        final var hash = (FormatXML1RuntimeChildHash) value;
+        this.runtime_builder.setArchiveHash(hash.hash());
         break;
       }
     }
   }
 
-  @Override
-  public void onElementFinished(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name)
-    throws SAXException
+  private void parseRepositoryURI(
+    final Attributes attributes)
+    throws URISyntaxException
   {
-    switch (local_name) {
-      case "runtime": {
-        break;
-      }
-      case "tags": {
-        this.handler.onElementFinished(namespace_uri, local_name, qualified_name);
-        this.runtime_builder.setTags((Iterable<String>) this.handler.get());
-        this.handler = null;
-        break;
-      }
-      case "hash": {
-        this.handler.onElementFinished(namespace_uri, local_name, qualified_name);
-        this.runtime_builder.setArchiveHash((RuntimeHash) this.handler.get());
-        break;
-      }
-      default: {
-        this.handler.onElementFinished(namespace_uri, local_name, qualified_name);
-        break;
-      }
+    final var value = attributes.getValue("repository");
+    if (value != null) {
+      this.runtime_builder.setRepository(new URI(value));
+      return;
     }
-  }
 
-  @Override
-  public void onCharacters(
-    final char[] ch,
-    final int start,
-    final int length)
-    throws SAXException
-  {
-    this.handler.onCharacters(ch, length, start);
-  }
+    if (this.repository.isEmpty()) {
+      final var separator = System.lineSeparator();
+      throw new IllegalArgumentException(
+        new StringBuilder(128)
+          .append(
+            "A runtime description declared outside of a repository must have an explicit 'repository' attribute.")
+          .append(separator)
+          .append("  Expected: An XML 'repository' attribute")
+          .append(separator)
+          .append("  Received: Nothing")
+          .toString());
+    }
 
-  @Override
-  public RuntimeDescription get()
-  {
-    return this.runtime_builder.build();
+    this.runtime_builder.setRepository(this.repository.get());
   }
 }

@@ -14,41 +14,31 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.runtime.parser.spi;
+package com.io7m.coffeepick.runtime.parser.api;
 
-import org.osgi.annotation.versioning.ProviderType;
+import com.io7m.immutables.styles.ImmutablesStyleType;
+import org.immutables.value.Value;
 
-import java.io.IOException;
-import java.util.SortedSet;
+import java.io.InputStream;
+import java.net.URI;
 
 /**
- * The type of parser providers.
+ * A request to parse something.
  */
 
-@ProviderType
-public interface ParserProviderType
+@ImmutablesStyleType
+@Value.Immutable
+public interface CoffeePickParseRequestType
 {
   /**
-   * @return The format that this provider supports
+   * @return The URI of the input stream, for diagnostics
    */
 
-  FormatDescription parserFormatSupported();
+  URI uri();
 
   /**
-   * @return The supported versions of the format
+   * @return The input stream
    */
 
-  SortedSet<FormatVersion> parserFormatVersionsSupported();
-
-  /**
-   * @param request The parser request
-   *
-   * @return A new parser for the format
-   *
-   * @throws IOException On I/O or parser configuration errors
-   */
-
-  ParserType parserCreate(
-    ParserRequest request)
-    throws IOException;
+  InputStream stream();
 }

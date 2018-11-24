@@ -27,7 +27,7 @@ import java.util.SortedSet;
  */
 
 @ProviderType
-public interface SerializerProviderType
+public interface SPISerializerProviderType
 {
   /**
    * @return The format that this provider supports
@@ -42,6 +42,12 @@ public interface SerializerProviderType
   SortedSet<FormatVersion> serializerFormatVersionsSupported();
 
   /**
+   * @return The name of this provider
+   */
+
+  String serializerName();
+
+  /**
    * @param output The output stream
    *
    * @return A new serializer for the format
@@ -49,6 +55,6 @@ public interface SerializerProviderType
    * @throws IOException On I/O or serializer configuration errors
    */
 
-  SerializerType serializerCreate(OutputStream output)
+  SPISerializerType serializerCreate(OutputStream output)
     throws IOException;
 }

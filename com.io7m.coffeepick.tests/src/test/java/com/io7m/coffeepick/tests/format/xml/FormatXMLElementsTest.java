@@ -21,8 +21,12 @@ import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import com.io7m.coffeepick.runtime.format.xml.FormatXMLElements;
-import com.io7m.coffeepick.runtime.format.xml.FormatXMLParserProvider;
-import com.io7m.coffeepick.runtime.parser.spi.ParserRequest;
+import com.io7m.coffeepick.runtime.format.xml.FormatXMLSPIParserProvider;
+import com.io7m.coffeepick.runtime.parser.spi.ParsedRepository;
+import com.io7m.coffeepick.runtime.parser.spi.ParsedRuntime;
+import com.io7m.coffeepick.runtime.parser.spi.SPIParserRequest;
+import com.io7m.coffeepick.runtime.parser.spi.ParserResultType;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,8 +54,7 @@ public final class FormatXMLElementsTest
   private static final Logger LOG =
     LoggerFactory.getLogger(FormatXMLElementsTest.class);
 
-  private static void dumpAndValidate(
-    final RuntimeRepositoryDescription repository,
+  private static ParserResultType dumpAndValidate(
     final Document document)
     throws Exception
   {
@@ -71,16 +74,50 @@ public final class FormatXMLElementsTest
       final var text = output.toString(UTF_8);
       LOG.debug("document:\n{}", text);
 
-      final var provider = new FormatXMLParserProvider();
+      final var provider = new FormatXMLSPIParserProvider();
       try (var parser = provider.parserCreate(
-        ParserRequest.builder()
+        SPIParserRequest.builder()
           .setStream(new ByteArrayInputStream(output.toByteArray()))
           .setFile(URI.create("urn:input"))
           .build())) {
 
         parser.errors().forEach(event -> LOG.error("{}", event));
-        final var received = parser.parse();
-        Assertions.assertEquals(repository, received);
+        return parser.parse();
+      }
+    }
+  }
+
+  public static void dumpAndValidateRepository(
+    final Document document,
+    final RuntimeRepositoryDescription repository)
+    throws Exception
+  {
+    final var received = dumpAndValidate(document);
+    switch (received.kind()) {
+      case REPOSITORY: {
+        final var parsed_repository = (ParsedRepository) received;
+        Assertions.assertEquals(repository, parsed_repository.repository());
+        break;
+      }
+      case RUNTIME: {
+        throw new UnreachableCodeException();
+      }
+    }
+  }
+
+  public static void dumpAndValidateRuntime(
+    final Document document,
+    final RuntimeDescription runtime)
+    throws Exception
+  {
+    final var received = dumpAndValidate(document);
+    switch (received.kind()) {
+      case REPOSITORY: {
+        throw new UnreachableCodeException();
+      }
+      case RUNTIME: {
+        final var parsed_runtime = (ParsedRuntime) received;
+        Assertions.assertEquals(runtime, parsed_runtime.runtime());
       }
     }
   }
@@ -99,7 +136,7 @@ public final class FormatXMLElementsTest
       new FormatXMLElements()
         .ofRepository(repository);
 
-    dumpAndValidate(repository, document);
+    dumpAndValidateRepository(document, repository);
   }
 
   @Test
@@ -163,6 +200,34 @@ public final class FormatXMLElementsTest
       new FormatXMLElements()
         .ofRepository(repository);
 
-    dumpAndValidate(repository, document);
+    dumpAndValidateRepository(document, repository);
+  }
+
+  @Test
+  public void testSimpleRuntime()
+    throws Exception
+  {
+    final var runtime =
+      RuntimeDescription.builder()
+        .setConfiguration(RuntimeConfiguration.JDK)
+        .setRepository(URI.create("urn:repository"))
+        .setVersion(Runtime.Version.parse("11"))
+        .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
+        .setArchitecture("x64")
+        .setPlatform("linux")
+        .setArchiveURI(URI.create("http://example.com/a.tar.gz"))
+        .setArchiveSize(100L)
+        .setVm("hotspot")
+        .addTags("production")
+        .build();
+
+    final var document =
+      new FormatXMLElements()
+        .document();
+    final var runtime_element =
+      FormatXMLElements.ofRuntime(document, runtime, true);
+
+    document.appendChild(runtime_element);
+    dumpAndValidateRuntime(document, runtime);
   }
 }

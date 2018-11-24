@@ -30,7 +30,7 @@ import java.net.URI;
 @ProviderType
 @ImmutablesStyleType
 @Value.Immutable
-public interface ParserRequestType
+public interface SPIParserRequestType
 {
   /**
    * @return The URI of the file, for diagnostic purposes

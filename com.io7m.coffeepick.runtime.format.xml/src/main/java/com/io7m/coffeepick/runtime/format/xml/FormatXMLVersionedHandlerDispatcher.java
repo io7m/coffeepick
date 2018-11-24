@@ -16,8 +16,8 @@
 
 package com.io7m.coffeepick.runtime.format.xml;
 
-import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import com.io7m.coffeepick.runtime.parser.spi.ParseError;
+import com.io7m.coffeepick.runtime.parser.spi.ParserResultType;
 import com.io7m.jlexing.core.LexicalPosition;
 import io.reactivex.subjects.PublishSubject;
 import org.slf4j.Logger;
@@ -27,6 +27,7 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.DefaultHandler2;
+import org.xml.sax.ext.Locator2;
 
 import java.net.URI;
 import java.util.Objects;
@@ -45,9 +46,9 @@ public final class FormatXMLVersionedHandlerDispatcher extends DefaultHandler2
 
   private final URI file_uri;
   private final PublishSubject<ParseError> events;
-  private Locator locator;
+  private Locator2 locator;
   private boolean failed;
-  private FormatXMLContentHandlerType<RuntimeRepositoryDescription> handler;
+  private FormatXMLContentHandlerType<ParserResultType> handler;
 
   /**
    * Construct a dispatcher.
@@ -78,7 +79,7 @@ public final class FormatXMLVersionedHandlerDispatcher extends DefaultHandler2
 
     if (Objects.equals(uri, SCHEMA_1_0_NAMESPACE.toString())) {
       LOG.debug("using 1.0 schema handler");
-      this.handler = new FormatXML1RepositoryHandler();
+      this.handler = new FormatXML1TopLevelHandler(this.locator);
       return;
     }
 
@@ -116,7 +117,7 @@ public final class FormatXMLVersionedHandlerDispatcher extends DefaultHandler2
     final String qualified_name)
     throws SAXException
   {
-    LOG.trace("endElement: {} {} {}", namespace_uri, local_name, qualified_name);
+    LOG.trace("endElement:   {} {} {}", namespace_uri, local_name, qualified_name);
 
     if (this.failed) {
       return;
@@ -143,7 +144,7 @@ public final class FormatXMLVersionedHandlerDispatcher extends DefaultHandler2
   public void setDocumentLocator(
     final Locator in_locator)
   {
-    this.locator = Objects.requireNonNull(in_locator, "locator");
+    this.locator = (Locator2) Objects.requireNonNull(in_locator, "locator");
   }
 
   @Override
@@ -202,10 +203,10 @@ public final class FormatXMLVersionedHandlerDispatcher extends DefaultHandler2
   }
 
   /**
-   * @return The parsed repository
+   * @return The parsed value
    */
 
-  public RuntimeRepositoryDescription description()
+  public ParserResultType result()
   {
     return this.handler.get();
   }

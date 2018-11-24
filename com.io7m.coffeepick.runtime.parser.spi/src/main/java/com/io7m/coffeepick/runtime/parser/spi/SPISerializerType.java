@@ -27,7 +27,7 @@ import java.io.IOException;
  */
 
 @ProviderType
-public interface SerializerType extends Closeable
+public interface SPISerializerType extends Closeable
 {
   /**
    * Serialize a repository.

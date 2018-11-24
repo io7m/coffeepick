@@ -17,7 +17,7 @@
 package com.io7m.coffeepick.runtime.format.xml;
 
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
-import com.io7m.coffeepick.runtime.parser.spi.SerializerType;
+import com.io7m.coffeepick.runtime.parser.spi.SPISerializerType;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -37,7 +37,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * An XML serializer.
  */
 
-public final class FormatXMLSerializer implements SerializerType
+public final class FormatXMLSPISerializer implements SPISerializerType
 {
   private static final byte[] XML_DECLARATION =
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>".getBytes(UTF_8);
@@ -53,7 +53,7 @@ public final class FormatXMLSerializer implements SerializerType
    * @param in_output   The output stream
    */
 
-  public FormatXMLSerializer(
+  public FormatXMLSPISerializer(
     final FormatXMLElements in_elements,
     final OutputStream in_output)
   {

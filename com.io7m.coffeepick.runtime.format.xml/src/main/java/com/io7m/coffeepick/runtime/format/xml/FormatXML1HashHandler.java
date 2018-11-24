@@ -17,30 +17,61 @@
 package com.io7m.coffeepick.runtime.format.xml;
 
 import com.io7m.coffeepick.runtime.RuntimeHash;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.xml.sax.Attributes;
+import org.xml.sax.ext.Locator2;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A content handler that can parse hash values.
  */
 
-public final class FormatXML1HashHandler implements FormatXMLContentHandlerType<RuntimeHash>
+public final class FormatXML1HashHandler extends FormatXMLAbstractContentHandler<Void, RuntimeHash>
 {
   private final RuntimeHash.Builder hash_builder;
 
   /**
    * Construct a handler.
+   *
+   * @param locator The XML locator
    */
 
-  public FormatXML1HashHandler()
+  public FormatXML1HashHandler(
+    final Locator2 locator)
   {
+    super(locator, Optional.of("hash"));
     this.hash_builder = RuntimeHash.builder();
   }
 
   @Override
-  public void onElementStarted(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name,
+  protected String onWantHandlerName()
+  {
+    return FormatXML1HashHandler.class.getSimpleName();
+  }
+
+  @Override
+  protected Map<String, Supplier<FormatXMLContentHandlerType<Void>>> onWantChildHandlers()
+  {
+    return Map.of();
+  }
+
+  @Override
+  protected Optional<RuntimeHash> onElementFinishDirectly(
+    final String namespace,
+    final String name,
+    final String qname)
+  {
+    return Optional.of(this.hash_builder.build());
+  }
+
+  @Override
+  protected void onElementStartDirectly(
+    final String namespace,
+    final String name,
+    final String qname,
     final Attributes attributes)
   {
     this.hash_builder.setAlgorithm(attributes.getValue("algorithm"));
@@ -48,26 +79,9 @@ public final class FormatXML1HashHandler implements FormatXMLContentHandlerType<
   }
 
   @Override
-  public void onElementFinished(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name)
+  protected void onChildResultReceived(
+    final Void value)
   {
-
-  }
-
-  @Override
-  public void onCharacters(
-    final char[] ch,
-    final int start,
-    final int length)
-  {
-
-  }
-
-  @Override
-  public RuntimeHash get()
-  {
-    return this.hash_builder.build();
+    throw new UnreachableCodeException();
   }
 }

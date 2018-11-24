@@ -18,99 +18,83 @@ package com.io7m.coffeepick.runtime.format.xml;
 
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
+import org.xml.sax.ext.Locator2;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A content handler for parsing sets of runtimes.
  */
 
 public final class FormatXML1RuntimesHandler
-  implements FormatXMLContentHandlerType<List<RuntimeDescription>>
+  extends FormatXMLAbstractContentHandler<RuntimeDescription, List<RuntimeDescription>>
 {
-  private final URI repository;
   private final ArrayList<RuntimeDescription> runtimes;
-  private FormatXMLContentHandlerType<RuntimeDescription> handler;
+  private final URI repository;
 
   /**
    * Construct a handler.
    *
    * @param in_repository The repository URI
+   * @param in_locator    An XML locator
    */
 
   public FormatXML1RuntimesHandler(
-    final URI in_repository)
+    final URI in_repository,
+    final Locator2 in_locator)
   {
+    super(
+      in_locator,
+      Optional.of("runtimes"));
+
     this.repository =
       Objects.requireNonNull(in_repository, "repository");
-    this.runtimes = new ArrayList<>();
+    this.runtimes =
+      new ArrayList<>();
   }
 
   @Override
-  public void onElementStarted(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name,
+  protected Map<String, Supplier<FormatXMLContentHandlerType<RuntimeDescription>>> onWantChildHandlers()
+  {
+    return Map.of(
+      "runtime",
+      () -> new FormatXML1RuntimeHandler(Optional.of(this.repository), super.locator()));
+  }
+
+  @Override
+  protected String onWantHandlerName()
+  {
+    return FormatXML1RuntimesHandler.class.getSimpleName();
+  }
+
+  @Override
+  protected Optional<List<RuntimeDescription>> onElementFinishDirectly(
+    final String namespace,
+    final String name,
+    final String qname)
+  {
+    return Optional.of(this.runtimes);
+  }
+
+  @Override
+  protected void onElementStartDirectly(
+    final String namespace,
+    final String name,
+    final String qname,
     final Attributes attributes)
-    throws SAXException
   {
-    switch (local_name) {
-      case "runtimes": {
-        break;
-      }
-      case "runtime": {
-        this.handler = new FormatXML1RuntimeHandler(this.repository);
-        this.handler.onElementStarted(namespace_uri, local_name, qualified_name, attributes);
-        break;
-      }
-      default: {
-        this.handler.onElementStarted(namespace_uri, local_name, qualified_name, attributes);
-        break;
-      }
-    }
+
   }
 
   @Override
-  public void onElementFinished(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name)
-    throws SAXException
+  protected void onChildResultReceived(final RuntimeDescription value)
   {
-    switch (local_name) {
-      case "runtimes": {
-        break;
-      }
-      case "runtime": {
-        this.handler.onElementFinished(namespace_uri, local_name, qualified_name);
-        this.runtimes.add(this.handler.get());
-        this.handler = null;
-        break;
-      }
-      default: {
-        this.handler.onElementFinished(namespace_uri, local_name, qualified_name);
-        break;
-      }
-    }
-  }
-
-  @Override
-  public void onCharacters(
-    final char[] ch,
-    final int start,
-    final int length)
-    throws SAXException
-  {
-    this.handler.onCharacters(ch, length, start);
-  }
-
-  @Override
-  public List<RuntimeDescription> get()
-  {
-    return this.runtimes;
+    this.runtimes.add(value);
   }
 }

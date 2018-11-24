@@ -75,7 +75,7 @@ public final class FormatXMLElements
     root.appendChild(runtimes);
 
     for (final var runtime : repository.runtimes().values()) {
-      runtimes.appendChild(ofRuntime(document, runtime));
+      runtimes.appendChild(ofRuntime(document, runtime, false));
     }
     return root;
   }
@@ -83,15 +83,17 @@ public final class FormatXMLElements
   /**
    * Serialize the given runtime, using the given document to create elements.
    *
-   * @param document The target document
-   * @param runtime  The runtime
+   * @param document         The target document
+   * @param runtime          The runtime
+   * @param append_repository True if the repository ID should be included in the element
    *
    * @return A serialized runtime
    */
 
   public static Element ofRuntime(
     final Document document,
-    final RuntimeDescription runtime)
+    final RuntimeDescription runtime,
+    final boolean append_repository)
   {
     Objects.requireNonNull(document, "document");
     Objects.requireNonNull(runtime, "runtime");
@@ -104,6 +106,11 @@ public final class FormatXMLElements
     e_runtime.setAttribute("platform", runtime.platform());
     e_runtime.setAttribute("version", runtime.version().toString());
     e_runtime.setAttribute("vm", runtime.vm());
+
+    if (append_repository) {
+      e_runtime.setAttribute("repository", runtime.repository().toString());
+    }
+
     e_runtime.appendChild(ofHash(document, runtime.archiveHash()));
     e_runtime.appendChild(ofTags(document, runtime.tags()));
     return e_runtime;
@@ -191,13 +198,27 @@ public final class FormatXMLElements
   {
     Objects.requireNonNull(repository, "repository");
 
+    final var document = this.document();
+    final var root = ofRepository(document, repository);
+    document.appendChild(root);
+    return document;
+  }
+
+  /**
+   * Create a new empty document.
+   *
+   * @return An empty document
+   *
+   * @throws ParserConfigurationException On configuration errors
+   */
+
+  public Document document()
+    throws ParserConfigurationException
+  {
     final var builder = this.document_builders.newDocumentBuilder();
     final var document = builder.newDocument();
     document.setStrictErrorChecking(true);
     document.setXmlStandalone(true);
-
-    final var root = ofRepository(document, repository);
-    document.appendChild(root);
     return document;
   }
 }

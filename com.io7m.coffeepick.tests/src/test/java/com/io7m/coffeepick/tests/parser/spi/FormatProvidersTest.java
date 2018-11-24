@@ -16,8 +16,8 @@
 
 package com.io7m.coffeepick.tests.parser.spi;
 
-import com.io7m.coffeepick.runtime.parser.spi.ParserProviderType;
-import com.io7m.coffeepick.runtime.parser.spi.SerializerProviderType;
+import com.io7m.coffeepick.runtime.parser.spi.SPIParserProviderType;
+import com.io7m.coffeepick.runtime.parser.spi.SPISerializerProviderType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +31,7 @@ public final class FormatProvidersTest
   public void testParserProvidersAreAvailable()
   {
     final var providers =
-      ServiceLoader.load(ParserProviderType.class)
+      ServiceLoader.load(SPIParserProviderType.class)
         .stream()
         .map(ServiceLoader.Provider::get)
         .collect(Collectors.toList());
@@ -49,7 +49,7 @@ public final class FormatProvidersTest
   public void testSerializerProvidersAreAvailable()
   {
     final var providers =
-      ServiceLoader.load(SerializerProviderType.class)
+      ServiceLoader.load(SPISerializerProviderType.class)
         .stream()
         .map(ServiceLoader.Provider::get)
         .collect(Collectors.toList());

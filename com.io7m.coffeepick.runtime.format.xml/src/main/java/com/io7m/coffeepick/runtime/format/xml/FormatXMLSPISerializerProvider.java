@@ -18,8 +18,8 @@ package com.io7m.coffeepick.runtime.format.xml;
 
 import com.io7m.coffeepick.runtime.parser.spi.FormatDescription;
 import com.io7m.coffeepick.runtime.parser.spi.FormatVersion;
-import com.io7m.coffeepick.runtime.parser.spi.SerializerProviderType;
-import com.io7m.coffeepick.runtime.parser.spi.SerializerType;
+import com.io7m.coffeepick.runtime.parser.spi.SPISerializerProviderType;
+import com.io7m.coffeepick.runtime.parser.spi.SPISerializerType;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.OutputStream;
@@ -30,8 +30,8 @@ import java.util.TreeSet;
  * An XML format provider.
  */
 
-@Component(service = SerializerProviderType.class)
-public final class FormatXMLSerializerProvider implements SerializerProviderType
+@Component(service = SPISerializerProviderType.class)
+public final class FormatXMLSPISerializerProvider implements SPISerializerProviderType
 {
   private final FormatXMLElements elements;
 
@@ -39,7 +39,7 @@ public final class FormatXMLSerializerProvider implements SerializerProviderType
    * Construct a provider.
    */
 
-  public FormatXMLSerializerProvider()
+  public FormatXMLSPISerializerProvider()
   {
     this.elements = new FormatXMLElements();
   }
@@ -57,8 +57,14 @@ public final class FormatXMLSerializerProvider implements SerializerProviderType
   }
 
   @Override
-  public SerializerType serializerCreate(final OutputStream output)
+  public String serializerName()
   {
-    return new FormatXMLSerializer(this.elements, output);
+    return FormatXMLSPISerializerProvider.class.getCanonicalName();
+  }
+
+  @Override
+  public SPISerializerType serializerCreate(final OutputStream output)
+  {
+    return new FormatXMLSPISerializer(this.elements, output);
   }
 }

@@ -86,10 +86,10 @@ public final class CoffeePickShell
 
     final var root =
       (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    root.setLevel(mapLevel(parameters.logLevel));
+    root.setLevel(mapLevel(parameters.log_level));
 
-    try (final var terminal = createTerminal()) {
-      try (final var writer = terminal.writer()) {
+    try (var terminal = createTerminal()) {
+      try (var writer = terminal.writer()) {
 
         final var directory = CoffeePickUserDirectory.detectUserDirectory();
         writer.printf("User directory: %s\n", directory);
@@ -102,7 +102,7 @@ public final class CoffeePickShell
         final var repositories = RuntimeRepositoriesServiceLoaderProvider.create();
         final var clients = CoffeePickClients.createWith(repositories);
 
-        try (final var client = clients.newClient(directory)) {
+        try (var client = clients.newClient(directory)) {
 
           final var commands =
             List.of(
@@ -215,11 +215,16 @@ public final class CoffeePickShell
 
   private static final class Parameters
   {
+    Parameters()
+    {
+
+    }
+
     @Parameter(
       description = "The logging level",
       required = false,
       converter = CoffeePickShellLogLevelConverter.class,
       names = "--verbose")
-    Level logLevel = Level.INFO;
+    Level log_level = Level.INFO;
   }
 }

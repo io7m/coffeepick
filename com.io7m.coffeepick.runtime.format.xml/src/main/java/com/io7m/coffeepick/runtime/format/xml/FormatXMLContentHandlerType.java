@@ -19,47 +19,62 @@ package com.io7m.coffeepick.runtime.format.xml;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 /**
- * A content handler that produces values of type {@code T}
+ * A content handler that produces values of type {@code A}
  *
- * @param <T> The type of produced values
+ * @param <A> The type of produced values
  */
 
-public interface FormatXMLContentHandlerType<T>
+public interface FormatXMLContentHandlerType<A>
 {
+  /**
+   * Apply {@code f} to the results of this content handler.
+   *
+   * @param f   The function
+   * @param <B> The type of returned values
+   *
+   * @return A content handler that produces values of type {@code B}
+   */
+
+  <B> FormatXMLContentHandlerType<B> map(Function<A, B> f);
+
   /**
    * An XML element has been started.
    *
-   * @param namespace_uri  The namespace URI
-   * @param local_name     The local element name
-   * @param qualified_name The fully qualified name
-   * @param attributes     The attributes
+   * @param namespace  The namespace URI
+   * @param name       The local element name
+   * @param qname      The fully qualified name
+   * @param attributes The attributes
    *
    * @throws SAXException On errors
    */
 
   void onElementStarted(
-    String namespace_uri,
-    String local_name,
-    String qualified_name,
+    String namespace,
+    String name,
+    String qname,
     Attributes attributes)
     throws SAXException;
 
   /**
    * An XML element has finished.
    *
-   * @param namespace_uri  The namespace URI
-   * @param local_name     The local element name
-   * @param qualified_name The fully qualified name
+   * @param namespace The namespace URI
+   * @param name      The local element name
+   * @param qname     The fully qualified name
+   *
+   * @return A value of {@code A} if the given element finished the content
    *
    * @throws SAXException On errors
    */
 
-
-  void onElementFinished(
-    String namespace_uri,
-    String local_name,
-    String qualified_name)
+  Optional<A> onElementFinished(
+    String namespace,
+    String name,
+    String qname)
     throws SAXException;
 
   /**
@@ -72,7 +87,6 @@ public interface FormatXMLContentHandlerType<T>
    * @throws SAXException On errors
    */
 
-
   void onCharacters(
     char[] ch,
     int start,
@@ -83,5 +97,5 @@ public interface FormatXMLContentHandlerType<T>
    * @return The completed value
    */
 
-  T get();
+  A get();
 }

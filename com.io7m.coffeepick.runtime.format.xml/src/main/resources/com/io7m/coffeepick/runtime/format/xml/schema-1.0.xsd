@@ -221,6 +221,10 @@
       </annotation>
     </attribute>
 
+    <attribute name="repository"
+               type="anyURI"
+               use="optional"/>
+
     <attribute name="version"
                type="c:versionType"
                use="required"/>
@@ -246,7 +250,8 @@
            type="c:runtimeType"/>
 
   <complexType name="runtimesType">
-    <sequence minOccurs="0" maxOccurs="unbounded">
+    <sequence minOccurs="0"
+              maxOccurs="unbounded">
       <element ref="c:runtime"/>
     </sequence>
   </complexType>

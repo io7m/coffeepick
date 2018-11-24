@@ -16,65 +16,68 @@
 
 package com.io7m.coffeepick.runtime.format.xml;
 
+import com.io7m.junreachable.UnreachableCodeException;
 import org.xml.sax.Attributes;
+import org.xml.sax.ext.Locator2;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A content handler for parsing tags.
  */
 
-public final class FormatXML1TagHandler
-  implements FormatXMLContentHandlerType<String>
+public final class FormatXML1TagHandler extends FormatXMLAbstractContentHandler<Void, String>
 {
-  private String tag;
+  private String tag_name;
 
   /**
    * Construct a handler.
+   *
+   * @param locator The XML locator
    */
 
-  public FormatXML1TagHandler()
+  public FormatXML1TagHandler(
+    final Locator2 locator)
   {
-
+    super(locator, Optional.of("tag"));
   }
 
   @Override
-  public void onElementStarted(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name,
+  protected Map<String, Supplier<FormatXMLContentHandlerType<Void>>> onWantChildHandlers()
+  {
+    return Map.of();
+  }
+
+  @Override
+  protected String onWantHandlerName()
+  {
+    return FormatXML1TagHandler.class.getSimpleName();
+  }
+
+  @Override
+  protected Optional<String> onElementFinishDirectly(
+    final String namespace,
+    final String name,
+    final String qname)
+  {
+    return Optional.of(this.tag_name);
+  }
+
+  @Override
+  protected void onElementStartDirectly(
+    final String namespace,
+    final String name,
+    final String qname,
     final Attributes attributes)
   {
-    switch (local_name) {
-      case "tag": {
-        this.tag = attributes.getValue("name");
-        break;
-      }
-      default: {
-        throw new IllegalArgumentException("Tag elements cannot have child elements");
-      }
-    }
+    this.tag_name = attributes.getValue("name");
   }
 
   @Override
-  public void onElementFinished(
-    final String namespace_uri,
-    final String local_name,
-    final String qualified_name)
+  protected void onChildResultReceived(final Void value)
   {
-
-  }
-
-  @Override
-  public void onCharacters(
-    final char[] ch,
-    final int start,
-    final int length)
-  {
-
-  }
-
-  @Override
-  public String get()
-  {
-    return this.tag;
+    throw new UnreachableCodeException();
   }
 }

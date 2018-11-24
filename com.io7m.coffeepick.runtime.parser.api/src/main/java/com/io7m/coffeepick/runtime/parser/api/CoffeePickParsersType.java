@@ -14,9 +14,32 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+package com.io7m.coffeepick.runtime.parser.api;
+
+import com.io7m.coffeepick.runtime.parser.spi.ParserFailureException;
+
+import java.io.IOException;
+
 /**
- * Java runtime retrieval (Shell)
+ * Functions to create parsers.
  */
 
-@org.osgi.annotation.bundle.Export
-package com.io7m.coffeepick.shell;
+public interface CoffeePickParsersType
+{
+  /**
+   * Create a parser for the given request, probing the input stream for format information and
+   * using this to pick an appropriate parser implementation.
+   *
+   * @param request The parse request
+   *
+   * @return A parser
+   *
+   * @throws IOException            On I/O errors
+   * @throws ParserFailureException On parser configuration problems, such as there not being an
+   *                                available provider for the detected format
+   */
+
+  CoffeePickParserType createParser(
+    CoffeePickParseRequest request)
+    throws IOException, ParserFailureException;
+}

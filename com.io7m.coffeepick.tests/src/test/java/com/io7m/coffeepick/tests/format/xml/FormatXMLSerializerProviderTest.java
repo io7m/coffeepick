@@ -20,9 +20,11 @@ import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
-import com.io7m.coffeepick.runtime.format.xml.FormatXMLParserProvider;
-import com.io7m.coffeepick.runtime.format.xml.FormatXMLSerializerProvider;
-import com.io7m.coffeepick.runtime.parser.spi.ParserRequest;
+import com.io7m.coffeepick.runtime.format.xml.FormatXMLSPIParserProvider;
+import com.io7m.coffeepick.runtime.format.xml.FormatXMLSPISerializerProvider;
+import com.io7m.coffeepick.runtime.parser.spi.ParsedRepository;
+import com.io7m.coffeepick.runtime.parser.spi.SPIParserRequest;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -49,7 +51,7 @@ public final class FormatXMLSerializerProviderTest
     final RuntimeRepositoryDescription repository)
     throws Exception
   {
-    final var serializers = new FormatXMLSerializerProvider();
+    final var serializers = new FormatXMLSPISerializerProvider();
 
     try (var output = new ByteArrayOutputStream()) {
       try (var serial = serializers.serializerCreate(output)) {
@@ -59,16 +61,26 @@ public final class FormatXMLSerializerProviderTest
       final var text = output.toString(UTF_8);
       LOG.debug("document:\n{}", text);
 
-      final var parsers = new FormatXMLParserProvider();
+      final var parsers = new FormatXMLSPIParserProvider();
       try (var parser = parsers.parserCreate(
-        ParserRequest.builder()
+        SPIParserRequest.builder()
           .setStream(new ByteArrayInputStream(output.toByteArray()))
           .setFile(URI.create("urn:input"))
           .build())) {
 
         parser.errors().forEach(event -> LOG.error("{}", event));
         final var received = parser.parse();
-        Assertions.assertEquals(repository, received);
+
+        switch (received.kind()) {
+          case REPOSITORY: {
+            final var parsed_repository = (ParsedRepository) received;
+            Assertions.assertEquals(repository, parsed_repository.repository());
+            break;
+          }
+          case RUNTIME: {
+            throw new UnreachableCodeException();
+          }
+        }
       }
     }
   }

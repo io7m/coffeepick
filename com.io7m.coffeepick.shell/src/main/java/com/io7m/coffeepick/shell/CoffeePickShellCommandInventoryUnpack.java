@@ -88,16 +88,16 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
       }
 
       final Set<UnpackOption> options = EnumSet.noneOf(UnpackOption.class);
-      if (parameters.stripLeadingDirectory) {
+      if (parameters.strip_leading_directory) {
         options.add(STRIP_LEADING_DIRECTORY);
       }
-      if (parameters.stripNonOwnerWrite) {
+      if (parameters.strip_non_owner_write) {
         options.add(STRIP_NON_OWNER_WRITABLE);
       }
 
       return this.client.inventoryUnpack(
         parameters.rest.get(0),
-        parameters.outputPath,
+        parameters.output_path,
         options);
 
     } catch (final ParameterException e) {
@@ -116,23 +116,28 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
 
   private static final class Parameters
   {
+    Parameters()
+    {
+
+    }
+
     @Parameter(
       description = "The output directory",
       required = true,
       names = "--output")
-    Path outputPath;
+    Path output_path;
 
     @Parameter(
       description = "Strip the leading directory from archives",
       required = false,
       names = "--strip-leading-directory")
-    boolean stripLeadingDirectory = false;
+    boolean strip_leading_directory = false;
 
     @Parameter(
       description = "Remove write permissions for group/others on POSIX filesystems",
       required = false,
       names = "--strip-group-other-writes")
-    boolean stripNonOwnerWrite = true;
+    boolean strip_non_owner_write = true;
 
     @Parameter(description = "<id>")
     private List<String> rest = new ArrayList<>(1);

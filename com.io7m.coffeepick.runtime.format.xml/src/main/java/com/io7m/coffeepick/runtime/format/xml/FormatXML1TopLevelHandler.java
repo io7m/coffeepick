@@ -16,56 +16,61 @@
 
 package com.io7m.coffeepick.runtime.format.xml;
 
+import com.io7m.coffeepick.runtime.parser.spi.ParsedRepository;
+import com.io7m.coffeepick.runtime.parser.spi.ParsedRuntime;
+import com.io7m.coffeepick.runtime.parser.spi.ParserResultType;
 import org.xml.sax.Attributes;
 import org.xml.sax.ext.Locator2;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * A content handler for parsing sets of tags.
+ * A content handler for parsing top-level values.
  */
 
-public final class FormatXML1TagsHandler
-  extends FormatXMLAbstractContentHandler<String, Set<String>>
+public final class FormatXML1TopLevelHandler
+  extends FormatXMLAbstractContentHandler<ParserResultType, ParserResultType>
 {
-  private final Set<String> tags;
-
   /**
    * Construct a handler.
    *
-   * @param locator The XML locator
+   * @param in_locator An XML locator
    */
 
-  public FormatXML1TagsHandler(
-    final Locator2 locator)
+  public FormatXML1TopLevelHandler(
+    final Locator2 in_locator)
   {
-    super(locator, Optional.of("tags"));
-    this.tags = new HashSet<>(16);
+    super(in_locator, Optional.empty());
   }
 
   @Override
-  protected Map<String, Supplier<FormatXMLContentHandlerType<String>>> onWantChildHandlers()
+  protected Map<String, Supplier<FormatXMLContentHandlerType<ParserResultType>>> onWantChildHandlers()
   {
-    return Map.of("tag", () -> new FormatXML1TagHandler(super.locator()));
+    return Map.of(
+      "runtime",
+      () -> new FormatXML1RuntimeHandler(Optional.empty(), super.locator())
+        .map(ParsedRuntime::of),
+      "runtime-repository",
+      () -> new FormatXML1RepositoryHandler(super.locator())
+        .map(ParsedRepository::of)
+    );
   }
 
   @Override
   protected String onWantHandlerName()
   {
-    return FormatXML1TagsHandler.class.getSimpleName();
+    return FormatXML1TopLevelHandler.class.getSimpleName();
   }
 
   @Override
-  protected Optional<Set<String>> onElementFinishDirectly(
+  protected Optional<ParserResultType> onElementFinishDirectly(
     final String namespace,
     final String name,
     final String qname)
   {
-    return Optional.of(this.tags);
+    return Optional.of(this.get());
   }
 
   @Override
@@ -80,8 +85,8 @@ public final class FormatXML1TagsHandler
 
   @Override
   protected void onChildResultReceived(
-    final String value)
+    final ParserResultType value)
   {
-    this.tags.add(value);
+    this.finish(value);
   }
 }

@@ -62,9 +62,9 @@ public final class CoffeePickShellCommandDownload implements CoffeePickShellComm
         .subscribe(this::onCatalogEvent);
   }
 
-  private static String megabytesPerSecond(final double octetsPerSecond)
+  private static String megabytesPerSecond(final double octets_per_second)
   {
-    return String.format("%.2fMB/s", Double.valueOf(octetsPerSecond / 1_000_000.0));
+    return String.format("%.2fMB/s", Double.valueOf(octets_per_second / 1_000_000.0));
   }
 
   static String progressBar(

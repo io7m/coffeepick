@@ -18,11 +18,12 @@ package com.io7m.coffeepick.tests.format.xml;
 
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeHash;
-import com.io7m.coffeepick.runtime.format.xml.FormatXMLParserProvider;
+import com.io7m.coffeepick.runtime.format.xml.FormatXMLSPIParserProvider;
 import com.io7m.coffeepick.runtime.parser.spi.ParseError;
 import com.io7m.coffeepick.runtime.parser.spi.ParserFailureException;
-import com.io7m.coffeepick.runtime.parser.spi.ParserRequest;
-import com.io7m.coffeepick.runtime.parser.spi.ParserType;
+import com.io7m.coffeepick.runtime.parser.spi.SPIParserRequest;
+import com.io7m.coffeepick.runtime.parser.spi.ParserResultType;
+import com.io7m.coffeepick.runtime.parser.spi.SPIParserType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -33,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -47,7 +47,7 @@ public final class FormatXMLParserProviderTest
     LoggerFactory.getLogger(FormatXMLParserProviderTest.class);
 
   private static ArrayList<ParseError> logEvents(
-    final ParserType parser)
+    final SPIParserType parser)
   {
     final var events = parser.errors();
     final var event_log = new ArrayList<ParseError>();
@@ -77,19 +77,66 @@ public final class FormatXMLParserProviderTest
   }
 
   @Test
+  public void testValidRuntime()
+    throws Exception
+  {
+    final var provider = new FormatXMLSPIParserProvider();
+    final var parser =
+      provider.parserCreate(
+        SPIParserRequest.builder()
+          .setFile(URI.create("urn:file"))
+          .setStream(resource("valid-runtime.xml"))
+          .build());
+
+    final var event_log = logEvents(parser);
+    final var result = parser.parse();
+
+    Assertions.assertTrue(result instanceof ParserResultType.ParsedRuntimeType);
+    final var runtime = ((ParserResultType.ParsedRuntimeType) result).runtime();
+
+    Assertions.assertEquals(
+      RuntimeConfiguration.JRE, runtime.configuration());
+    Assertions.assertEquals(
+      "linux", runtime.platform());
+    Assertions.assertEquals(
+      "x64", runtime.architecture());
+    Assertions.assertEquals(
+      URI.create("https://www.example.com/jre.tar.gz"), runtime.archiveURI());
+    Assertions.assertEquals(
+      100L, runtime.archiveSize());
+    Assertions.assertEquals(
+      Runtime.Version.parse("11"), runtime.version());
+    Assertions.assertEquals(
+      "hotspot", runtime.vm());
+    Assertions.assertEquals(
+      Set.of("large-heap", "production"), runtime.tags());
+    Assertions.assertEquals(
+      RuntimeHash.builder()
+        .setAlgorithm("SHA-256")
+        .setValue("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")
+        .build(),
+      runtime.archiveHash());
+
+    Assertions.assertEquals(0L, (long) event_log.size());
+  }
+
+  @Test
   public void testValidRepository()
     throws Exception
   {
-    final var provider = new FormatXMLParserProvider();
+    final var provider = new FormatXMLSPIParserProvider();
     final var parser =
       provider.parserCreate(
-        ParserRequest.builder()
+        SPIParserRequest.builder()
           .setFile(URI.create("urn:file"))
           .setStream(resource("valid-repos.xml"))
           .build());
 
     final var event_log = logEvents(parser);
-    final var repository = parser.parse();
+    final var result = parser.parse();
+
+    Assertions.assertTrue(result instanceof ParserResultType.ParsedRepositoryType);
+    final var repository = ((ParserResultType.ParsedRepositoryType) result).repository();
 
     Assertions.assertEquals(
       URI.create("urn:com.io7m.coffeepick.example"),
@@ -166,16 +213,15 @@ public final class FormatXMLParserProviderTest
   public void testInvalidNoNamespace()
     throws Exception
   {
-    final var provider = new FormatXMLParserProvider();
+    final var provider = new FormatXMLSPIParserProvider();
     final var parser =
       provider.parserCreate(
-        ParserRequest.builder()
+        SPIParserRequest.builder()
           .setFile(URI.create("urn:file"))
           .setStream(resource("invalid-no-namespace.xml"))
           .build());
 
     final var event_log = logEvents(parser);
-
     Assertions.assertThrows(ParserFailureException.class, parser::parse);
     Assertions.assertEquals(1L, (long) event_log.size());
   }
@@ -184,17 +230,33 @@ public final class FormatXMLParserProviderTest
   public void testInvalidWrongNamespace()
     throws Exception
   {
-    final var provider = new FormatXMLParserProvider();
+    final var provider = new FormatXMLSPIParserProvider();
     final var parser =
       provider.parserCreate(
-        ParserRequest.builder()
+        SPIParserRequest.builder()
           .setFile(URI.create("urn:file"))
           .setStream(resource("invalid-wrong-namespace.xml"))
           .build());
 
     final var event_log = logEvents(parser);
-
     Assertions.assertThrows(ParserFailureException.class, parser::parse);
     Assertions.assertEquals(1L, (long) event_log.size());
+  }
+
+  @Test
+  public void testInvalidUnexpectedRoot()
+    throws Exception
+  {
+    final var provider = new FormatXMLSPIParserProvider();
+    final var parser =
+      provider.parserCreate(
+        SPIParserRequest.builder()
+          .setFile(URI.create("urn:file"))
+          .setStream(resource("invalid-unexpected-root.xml"))
+          .build());
+
+    final var event_log = logEvents(parser);
+    Assertions.assertThrows(ParserFailureException.class, parser::parse);
+    Assertions.assertEquals(0L, (long) event_log.size());
   }
 }

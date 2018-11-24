@@ -14,9 +14,37 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+package com.io7m.coffeepick.runtime.parser.spi;
+
+import io.reactivex.Observable;
+import org.osgi.annotation.versioning.ProviderType;
+
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
- * Java runtime retrieval (Shell)
+ * A parser.
  */
 
-@org.osgi.annotation.bundle.Export
-package com.io7m.coffeepick.shell;
+@ProviderType
+public interface SPIParserType extends Closeable
+{
+  /**
+   * @return The sequence of error events produced during parsing
+   */
+
+  Observable<ParseError> errors();
+
+  /**
+   * Parse something.
+   *
+   * @return The parsed value
+   *
+   * @throws IOException            On I/O errors
+   * @throws ParserFailureException At the end of parsing if any error events have been raised, or
+   *                                if parsing encounters an unrecoverable error
+   */
+
+  ParserResultType parse()
+    throws IOException, ParserFailureException;
+}

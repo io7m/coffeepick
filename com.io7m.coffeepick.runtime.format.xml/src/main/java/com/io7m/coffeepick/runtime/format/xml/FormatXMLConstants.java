@@ -45,7 +45,7 @@ public final class FormatXMLConstants
     JXESchemaDefinition.builder()
       .setNamespace(SCHEMA_1_0_NAMESPACE)
       .setFileIdentifier("file::schema-1.0.xsd")
-      .setLocation(FormatXMLSerializerProvider.class.getResource(
+      .setLocation(FormatXMLSPISerializerProvider.class.getResource(
         "/com/io7m/coffeepick/runtime/format/xml/schema-1.0.xsd"))
       .build();
 
@@ -70,15 +70,21 @@ public final class FormatXMLConstants
       .build();
 
   /**
+   * Format version 1.0.
+   */
+
+  public static final FormatVersion VERSION_1_0 =
+    FormatVersion.builder()
+      .setMajor(1)
+      .setMinor(0)
+      .build();
+
+  /**
    * The format versions supported by this provider.
    */
 
   public static final List<FormatVersion> VERSIONS =
-    List.of(
-      FormatVersion.builder()
-        .setMajor(1)
-        .setMinor(0)
-        .build());
+    List.of(VERSION_1_0);
 
   private FormatXMLConstants()
   {

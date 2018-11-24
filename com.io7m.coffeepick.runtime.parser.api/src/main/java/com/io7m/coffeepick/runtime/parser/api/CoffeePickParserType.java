@@ -14,11 +14,12 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.runtime.parser.spi;
+package com.io7m.coffeepick.runtime.parser.api;
 
-import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
+import com.io7m.coffeepick.runtime.parser.spi.ParseError;
+import com.io7m.coffeepick.runtime.parser.spi.ParserFailureException;
+import com.io7m.coffeepick.runtime.parser.spi.ParserResultType;
 import io.reactivex.Observable;
-import org.osgi.annotation.versioning.ProviderType;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -27,25 +28,29 @@ import java.io.IOException;
  * A parser.
  */
 
-@ProviderType
-public interface ParserType extends Closeable
+public interface CoffeePickParserType extends Closeable
 {
   /**
-   * @return The sequence of error events produced during parsing
+   * @return An observable stream of warnings and errors
    */
 
   Observable<ParseError> errors();
 
   /**
-   * Parse a list of runtime runtimes.
-   *
-   * @return The runtimes
-   *
-   * @throws IOException            On I/O errors
-   * @throws ParserFailureException At the end of parsing if any error events have been raised, or
-   *                                if parsing encounters an unrecoverable error
+   * @return The name of the provider used to construct this parser
    */
 
-  RuntimeRepositoryDescription parse()
+  String provider();
+
+  /**
+   * Run the parser.
+   *
+   * @return The result of parsing
+   *
+   * @throws IOException            On I/O errors
+   * @throws ParserFailureException On fatal parse errors
+   */
+
+  ParserResultType parse()
     throws IOException, ParserFailureException;
 }
