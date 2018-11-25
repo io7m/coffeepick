@@ -106,6 +106,7 @@ public final class CoffeePickShell
 
           final var commands =
             List.of(
+              new CoffeePickShellCommandRuntimeShow(client, writer),
               new CoffeePickShellCommandRepositoryUpdate(client, writer),
               new CoffeePickShellCommandInventoryList(client, writer),
               new CoffeePickShellCommandInventoryPathOf(client, writer),

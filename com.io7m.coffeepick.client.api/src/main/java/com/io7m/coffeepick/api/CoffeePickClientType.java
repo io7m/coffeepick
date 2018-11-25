@@ -150,6 +150,24 @@ public interface CoffeePickClientType extends Closeable
   }
 
   /**
+   * Search for a runtime with the given ID in the catalog.
+   *
+   * @param id The ID
+   *
+   * @return The operation in progress
+   */
+
+  default CompletableFuture<Optional<RuntimeDescription>> catalogSearchExact(
+    final String id)
+  {
+    return this.catalogSearch(
+      CoffeePickSearch.builder()
+        .setId(id)
+        .build())
+      .thenApply(results -> Optional.ofNullable(results.get(id)));
+  }
+
+  /**
    * Download the runtime with the given ID from the catalog, installing it into the inventory if
    * the download succeeds and the data is correctly verified.
    *
