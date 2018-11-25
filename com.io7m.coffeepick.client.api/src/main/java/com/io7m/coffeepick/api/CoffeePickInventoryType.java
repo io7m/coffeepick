@@ -143,25 +143,6 @@ public interface CoffeePickInventoryType
     throws IOException, CancellationException;
 
   /**
-   * Options for unpacking.
-   */
-
-  enum UnpackOption
-  {
-    /**
-     * Strip the leading directory from archive files.
-     */
-
-    STRIP_LEADING_DIRECTORY,
-
-    /**
-     * On POSIX filesystems, remove write permissions for anything other than the owner.
-     */
-
-    STRIP_NON_OWNER_WRITABLE
-  }
-
-  /**
    * Unpack the runtime with the given ID to {@code path}. The method takes a function {@code
    * cancelled} that will be evaluated repeatedly and, if the function returns {@code true} at any
    * point, the operation will be cancelled.
@@ -253,6 +234,25 @@ public interface CoffeePickInventoryType
     String id,
     CoffeePickIsCancelledType cancelled)
     throws IOException, CancellationException;
+
+  /**
+   * Options for unpacking.
+   */
+
+  enum UnpackOption
+  {
+    /**
+     * Strip the leading directory from archive files.
+     */
+
+    STRIP_LEADING_DIRECTORY,
+
+    /**
+     * On POSIX filesystems, remove write permissions for anything other than the owner.
+     */
+
+    STRIP_NON_OWNER_WRITABLE
+  }
 
   /**
    * A function for writing archive data.

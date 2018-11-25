@@ -23,6 +23,12 @@ package com.io7m.coffeepick.api;
 public interface CoffeePickEventType
 {
   /**
+   * @return The severity of the event
+   */
+
+  Severity severity();
+
+  /**
    * The severity of the event.
    */
 
@@ -46,10 +52,4 @@ public interface CoffeePickEventType
 
     ERROR
   }
-
-  /**
-   * @return The severity of the event
-   */
-
-  Severity severity();
 }

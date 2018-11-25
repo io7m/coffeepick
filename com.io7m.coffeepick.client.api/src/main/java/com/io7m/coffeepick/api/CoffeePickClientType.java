@@ -18,7 +18,6 @@ package com.io7m.coffeepick.api;
 
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
-import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import io.reactivex.Observable;
 
 import java.io.Closeable;
