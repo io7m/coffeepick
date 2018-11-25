@@ -16,12 +16,15 @@
 
 package com.io7m.coffeepick.api;
 
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import io.reactivex.Observable;
 
 import java.io.Closeable;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -202,4 +205,12 @@ public interface CoffeePickClientType extends Closeable
 
   CompletableFuture<Void> repositoryUpdate(
     URI uri);
+
+  /**
+   * Retrieve a list of the available repositories.
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<List<RuntimeRepositoryType>> repositoryList();
 }

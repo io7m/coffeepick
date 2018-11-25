@@ -116,30 +116,27 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
 
   private static final class Parameters
   {
-    Parameters()
-    {
-
-    }
-
     @Parameter(
       description = "The output directory",
       required = true,
       names = "--output")
     Path output_path;
-
     @Parameter(
       description = "Strip the leading directory from archives",
       required = false,
       names = "--strip-leading-directory")
     boolean strip_leading_directory = false;
-
     @Parameter(
       description = "Remove write permissions for group/others on POSIX filesystems",
       required = false,
       names = "--strip-group-other-writes")
     boolean strip_non_owner_write = true;
-
     @Parameter(description = "<id>")
     private List<String> rest = new ArrayList<>(1);
+
+    Parameters()
+    {
+
+    }
   }
 }

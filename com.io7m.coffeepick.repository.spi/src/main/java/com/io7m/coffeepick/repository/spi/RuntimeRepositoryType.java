@@ -17,6 +17,7 @@
 package com.io7m.coffeepick.repository.spi;
 
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import io.reactivex.Observable;
 import net.jcip.annotations.ThreadSafe;
 import org.osgi.annotation.versioning.ProviderType;
@@ -66,4 +67,10 @@ public interface RuntimeRepositoryType
    */
 
   Map<String, RuntimeDescription> runtimes();
+
+  /**
+   * @return The current repository description
+   */
+
+  RuntimeRepositoryDescription description();
 }

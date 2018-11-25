@@ -208,6 +208,21 @@ public final class AOJDKDataParser
     checksums.put(original, new URI(download_url));
   }
 
+  private static List<AOJDKArchive> parseArchives(
+    final ArrayNode tree)
+  {
+    final List<AOJDKArchive> descriptions = new ArrayList<>(tree.size() * 8);
+
+    for (var index = 0; index < tree.size(); ++index) {
+      final var node = tree.get(index);
+      if (node.isObject()) {
+        descriptions.addAll(parseArchive((ObjectNode) node));
+      }
+    }
+
+    return descriptions;
+  }
+
   /**
    * @return A list of parsed archives
    *
@@ -236,20 +251,5 @@ public final class AOJDKDataParser
         .append(tree.getNodeType().name())
         .append(separator)
         .toString());
-  }
-
-  private static List<AOJDKArchive> parseArchives(
-    final ArrayNode tree)
-  {
-    final List<AOJDKArchive> descriptions = new ArrayList<>(tree.size() * 8);
-
-    for (var index = 0; index < tree.size(); ++index) {
-      final var node = tree.get(index);
-      if (node.isObject()) {
-        descriptions.addAll(parseArchive((ObjectNode) node));
-      }
-    }
-
-    return descriptions;
   }
 }

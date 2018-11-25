@@ -28,6 +28,7 @@ import com.io7m.coffeepick.api.CoffeePickVerification;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoaderProvider;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
@@ -39,6 +40,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,6 +50,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * The default client provider implementation.
@@ -335,6 +339,16 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
         this.catalog.updateRepository(uri);
         return null;
       });
+    }
+
+    @Override
+    public CompletableFuture<List<RuntimeRepositoryType>> repositoryList()
+    {
+      return this.submit(
+        future -> this.catalog.listRepositories()
+          .stream()
+          .sorted(Comparator.comparing(repos -> repos.description().id()))
+          .collect(Collectors.toList()));
     }
 
     private interface TaskType<T>

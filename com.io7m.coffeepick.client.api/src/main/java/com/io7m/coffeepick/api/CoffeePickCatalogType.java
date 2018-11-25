@@ -16,6 +16,7 @@
 
 package com.io7m.coffeepick.api;
 
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import io.reactivex.Observable;
 
@@ -23,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -152,4 +154,10 @@ public interface CoffeePickCatalogType
   {
     this.updateRepository(uri, () -> false);
   }
+
+  /**
+   * @return An immutable snapshot of the current repositories
+   */
+
+  List<RuntimeRepositoryType> listRepositories();
 }

@@ -24,6 +24,7 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeDescriptionType;
 import com.io7m.coffeepick.runtime.RuntimeDescriptions;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -35,6 +36,7 @@ import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
@@ -135,5 +137,15 @@ public final class OJNRepository implements RuntimeRepositoryType
   public Map<String, RuntimeDescription> runtimes()
   {
     return this.runtimes_read;
+  }
+
+  @Override
+  public RuntimeRepositoryDescription description()
+  {
+    return RuntimeRepositoryDescription.builder()
+      .setUpdated(Optional.empty())
+      .setId(this.provider.uri())
+      .setRuntimes(Map.copyOf(this.runtimes))
+      .build();
   }
 }

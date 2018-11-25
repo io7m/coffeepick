@@ -36,7 +36,7 @@ import static com.io7m.coffeepick.shell.CoffeePickShellCommandDownload.progressB
 import static org.jline.builtins.Completers.TreeCompleter.node;
 
 /**
- * Download a runtime.
+ * Update a repository.
  */
 
 public final class CoffeePickShellCommandRepositoryUpdate implements CoffeePickShellCommandType

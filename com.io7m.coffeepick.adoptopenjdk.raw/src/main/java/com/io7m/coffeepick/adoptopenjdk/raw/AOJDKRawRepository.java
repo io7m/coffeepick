@@ -25,6 +25,7 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateStarted;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -187,7 +188,6 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
         RuntimeRepositoryEventUpdateFinished.builder()
           .setRepository(this.provider.uri())
           .build());
-
     } catch (final Exception e) {
       this.events.onNext(
         RuntimeRepositoryEventUpdateFailed.builder()
@@ -202,5 +202,15 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
   public Map<String, RuntimeDescription> runtimes()
   {
     return this.database.descriptions();
+  }
+
+  @Override
+  public RuntimeRepositoryDescription description()
+  {
+    return RuntimeRepositoryDescription.builder()
+      .setUpdated(this.database.updated())
+      .setId(this.provider.uri())
+      .setRuntimes(Map.copyOf(this.database.descriptions()))
+      .build();
   }
 }

@@ -106,16 +106,18 @@ public final class CoffeePickShell
 
           final var commands =
             List.of(
-              new CoffeePickShellCommandRuntimeShow(client, writer),
-              new CoffeePickShellCommandRepositoryUpdate(client, writer),
+              new CoffeePickShellCommandCatalogList(client, writer),
+              new CoffeePickShellCommandDelete(client, writer),
+              new CoffeePickShellCommandDownload(client, writer),
               new CoffeePickShellCommandInventoryList(client, writer),
               new CoffeePickShellCommandInventoryPathOf(client, writer),
               new CoffeePickShellCommandInventoryUnpack(client, writer),
-              new CoffeePickShellCommandDelete(client, writer),
+              new CoffeePickShellCommandRepositoryList(client, writer),
+              new CoffeePickShellCommandRepositoryUpdate(client, writer),
+              new CoffeePickShellCommandRuntimeShow(client, writer),
               new CoffeePickShellCommandVerify(client, writer),
-              new CoffeePickShellCommandCatalogList(client, writer),
-              new CoffeePickShellCommandVersion(client, writer),
-              new CoffeePickShellCommandDownload(client, writer));
+              new CoffeePickShellCommandVersion(client, writer)
+            );
 
           final var commands_named =
             commands.stream()
@@ -216,16 +218,16 @@ public final class CoffeePickShell
 
   private static final class Parameters
   {
-    Parameters()
-    {
-
-    }
-
     @Parameter(
       description = "The logging level",
       required = false,
       converter = CoffeePickShellLogLevelConverter.class,
       names = "--verbose")
     Level log_level = Level.INFO;
+
+    Parameters()
+    {
+
+    }
   }
 }

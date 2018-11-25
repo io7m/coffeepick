@@ -92,8 +92,15 @@ public final class CoffeePickShellCommandRuntimeShow implements CoffeePickShellC
     this.writer.printf("%-16s: %-32s\n", "ID", description.id());
 
     this.writer.printf("%-16s: %-32s\n", "Architecture", description.architecture());
-    this.writer.printf("%-16s: %s:%-32s\n", "Archive Hash", description.archiveHash().algorithm(), description.archiveHash().value());
-    this.writer.printf("%-16s: %-32s\n", "Archive Size", Long.toUnsignedString(description.archiveSize()));
+    this.writer.printf(
+      "%-16s: %s:%-32s\n",
+      "Archive Hash",
+      description.archiveHash().algorithm(),
+      description.archiveHash().value());
+    this.writer.printf(
+      "%-16s: %-32s\n",
+      "Archive Size",
+      Long.toUnsignedString(description.archiveSize()));
     this.writer.printf("%-16s: %-32s\n", "Archive URI", description.archiveURI());
     this.writer.printf("%-16s: %-32s\n", "Configuration", description.configuration());
     this.writer.printf("%-16s: %-32s\n", "Platform", description.platform());

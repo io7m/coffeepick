@@ -24,11 +24,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -40,6 +46,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 /**
  * A persistent database of runtime runtimes.
@@ -51,16 +58,20 @@ public final class AOJDKRuntimeDescriptionDatabase
   private static final Logger LOG = LoggerFactory.getLogger(AOJDKRuntimeDescriptionDatabase.class);
   private final Path path;
   private final ConcurrentHashMap<String, RuntimeDescription> descriptions;
+  private volatile Optional<OffsetDateTime> updated;
   private final Map<String, RuntimeDescription> descriptions_read;
 
   private AOJDKRuntimeDescriptionDatabase(
     final Path in_path,
-    final Map<String, RuntimeDescription> in_descriptions)
+    final Map<String, RuntimeDescription> in_descriptions,
+    final Optional<OffsetDateTime> in_updated)
   {
     this.path =
       Objects.requireNonNull(in_path, "path");
     this.descriptions =
       new ConcurrentHashMap<>(Objects.requireNonNull(in_descriptions, "runtimes"));
+    this.updated =
+      Objects.requireNonNull(in_updated, "updated");
     this.descriptions_read =
       Collections.unmodifiableMap(this.descriptions);
   }
@@ -82,13 +93,40 @@ public final class AOJDKRuntimeDescriptionDatabase
   {
     Files.createDirectories(path);
 
+    final var updated = loadUpdatedFile(path);
+
     final var descriptions =
       Files.list(path)
         .filter(file -> Files.isRegularFile(file))
+        .filter(AOJDKRuntimeDescriptionDatabase::isNotUpdatedFile)
         .flatMap(AOJDKRuntimeDescriptionDatabase::parseAsStream)
         .collect(Collectors.toMap(RuntimeDescriptionType::id, Function.identity()));
 
-    return new AOJDKRuntimeDescriptionDatabase(path, descriptions);
+    return new AOJDKRuntimeDescriptionDatabase(path, descriptions, updated);
+  }
+
+  private static Optional<OffsetDateTime> loadUpdatedFile(final Path path)
+  {
+    Optional<OffsetDateTime> updated;
+    final var update_file = path.resolve("updated").toAbsolutePath();
+    try {
+      final var filedate =
+        OffsetDateTime.from(ISO_OFFSET_DATE_TIME.parse(Files.readString(update_file).trim()));
+      updated = Optional.of(filedate);
+    } catch (final NoSuchFileException e) {
+      LOG.debug("updated file does not exist");
+      updated = Optional.empty();
+    } catch (final IOException | DateTimeParseException e) {
+      LOG.debug("unable to load {}: ", update_file, e);
+      updated = Optional.empty();
+    }
+    return updated;
+  }
+
+  private static boolean isNotUpdatedFile(
+    final Path file)
+  {
+    return !Objects.equals(file.getFileName().toString(), "updated");
   }
 
   private static Stream<RuntimeDescription> parseAsStream(
@@ -117,8 +155,17 @@ public final class AOJDKRuntimeDescriptionDatabase
   }
 
   /**
-   * Add a runtimes to the cache. The runtimes will be persisted to disk, but no exception
-   * will be raised if persisting the file fails.
+   * @return The time of the most recent database update
+   */
+
+  public Optional<OffsetDateTime> updated()
+  {
+    return this.updated;
+  }
+
+  /**
+   * Add a runtimes to the cache. The runtimes will be persisted to disk, but no exception will be
+   * raised if persisting the file fails.
    *
    * @param description The runtimes to be added
    */
@@ -130,8 +177,26 @@ public final class AOJDKRuntimeDescriptionDatabase
 
     try {
       this.write(description);
+      final var time = OffsetDateTime.now(ZoneId.of("UTC"));
+      this.updated = Optional.of(time);
+      this.writeUpdated(time);
     } catch (final IOException e) {
       LOG.debug("could not cache {}: ", description.id(), e);
+    }
+  }
+
+  private void writeUpdated(
+    final OffsetDateTime time)
+    throws IOException
+  {
+    final var file =
+      this.path.resolve("updated");
+    final var file_tmp =
+      this.path.resolve("updated.tmp");
+
+    try (var output = Files.newOutputStream(file_tmp, TRUNCATE_EXISTING, CREATE, WRITE)) {
+      output.write(ISO_OFFSET_DATE_TIME.format(time).getBytes(StandardCharsets.UTF_8));
+      Files.move(file_tmp, file, ATOMIC_MOVE, REPLACE_EXISTING);
     }
   }
 

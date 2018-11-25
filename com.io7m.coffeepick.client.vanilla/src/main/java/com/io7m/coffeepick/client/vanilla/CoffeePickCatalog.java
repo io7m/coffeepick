@@ -47,6 +47,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -123,8 +124,8 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
   }
 
   /**
-   * A writer that writes an archive described by {@code runtimes}, reading from the stream
-   * {@code input}, and publishes status events to {@code events}.
+   * A writer that writes an archive described by {@code runtimes}, reading from the stream {@code
+   * input}, and publishes status events to {@code events}.
    *
    * @param description The runtime runtimes
    * @param events      The event receiver
@@ -324,5 +325,11 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
     if (repository != null) {
       repository.update(cancelled::isCancelled);
     }
+  }
+
+  @Override
+  public List<RuntimeRepositoryType> listRepositories()
+  {
+    return List.copyOf(this.runtime_repositories.values());
   }
 }
