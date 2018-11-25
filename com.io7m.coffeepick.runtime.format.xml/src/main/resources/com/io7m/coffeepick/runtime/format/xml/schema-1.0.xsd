@@ -66,7 +66,10 @@
     <annotation>
       <documentation>
         A java.lang.Runtime.Version string. This schema does not attempt to
-        parse version numbers strictly.
+        enforce version number formats strictly, but authors of documents should
+        be aware that consumers will inevitably try to parse values of this
+        type as java.lang.Runtime.Version values. See the JDK JavaDoc for
+        the precise regular expression that defines valid version strings.
       </documentation>
     </annotation>
 
