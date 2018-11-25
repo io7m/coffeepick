@@ -33,8 +33,8 @@ import java.util.Objects;
 import static com.io7m.coffeepick.adoptopenjdk.raw.AOJDKRawRepositoryProvider.PROVIDER_URI;
 
 /**
- * Resolve a list of archives. A resolver takes a list of archive descriptions parsed from the
- * AdoptOpenJDK git repository and turns them into runtime descriptions by transforming metadata and
+ * Resolve a list of archives. A resolver takes a list of archive runtimes parsed from the
+ * AdoptOpenJDK git repository and turns them into runtime runtimes by transforming metadata and
  * fetching checksums from the remote server.
  */
 
@@ -139,7 +139,7 @@ public final class AOJDKArchiveResolver
    *
    * @param archive The archive
    *
-   * @return A runtime description
+   * @return A runtime runtimes
    *
    * @throws IOException On I/O errors
    */

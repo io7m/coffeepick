@@ -61,11 +61,11 @@ public final class RuntimeDescriptions
   }
 
   /**
-   * Parse a runtime description from the given properties.
+   * Parse a runtime runtimes from the given properties.
    *
    * @param properties The properties
    *
-   * @return A description
+   * @return A runtimes
    *
    * @throws IOException On errors
    */
@@ -78,9 +78,9 @@ public final class RuntimeDescriptions
   }
 
   /**
-   * Serialize a runtime description.
+   * Serialize a runtime runtimes.
    *
-   * @param description The runtime description
+   * @param description The runtime runtimes
    *
    * @return Properties
    */
@@ -88,7 +88,7 @@ public final class RuntimeDescriptions
   public static Properties serializeToProperties(
     final RuntimeDescription description)
   {
-    Objects.requireNonNull(description, "description");
+    Objects.requireNonNull(description, "runtimes");
 
     final var properties = new Properties();
 

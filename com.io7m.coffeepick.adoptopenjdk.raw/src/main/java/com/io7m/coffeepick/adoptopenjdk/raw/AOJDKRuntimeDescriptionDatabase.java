@@ -42,7 +42,7 @@ import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
- * A persistent database of runtime descriptions.
+ * A persistent database of runtime runtimes.
  */
 
 @ThreadSafe
@@ -60,14 +60,14 @@ public final class AOJDKRuntimeDescriptionDatabase
     this.path =
       Objects.requireNonNull(in_path, "path");
     this.descriptions =
-      new ConcurrentHashMap<>(Objects.requireNonNull(in_descriptions, "descriptions"));
+      new ConcurrentHashMap<>(Objects.requireNonNull(in_descriptions, "runtimes"));
     this.descriptions_read =
       Collections.unmodifiableMap(this.descriptions);
   }
 
   /**
    * Open an existing, or create a new, on-disk cache. The cache will be populated from the contents
-   * of the given directory if it exists and contains runtime descriptions.
+   * of the given directory if it exists and contains runtime runtimes.
    *
    * @param path The directory
    *
@@ -117,10 +117,10 @@ public final class AOJDKRuntimeDescriptionDatabase
   }
 
   /**
-   * Add a description to the cache. The description will be persisted to disk, but no exception
+   * Add a runtimes to the cache. The runtimes will be persisted to disk, but no exception
    * will be raised if persisting the file fails.
    *
-   * @param description The description to be added
+   * @param description The runtimes to be added
    */
 
   public void add(
@@ -152,7 +152,7 @@ public final class AOJDKRuntimeDescriptionDatabase
   }
 
   /**
-   * @return A read-only map of the current descriptions
+   * @return A read-only map of the current runtimes
    */
 
   public Map<String, RuntimeDescription> descriptions()
