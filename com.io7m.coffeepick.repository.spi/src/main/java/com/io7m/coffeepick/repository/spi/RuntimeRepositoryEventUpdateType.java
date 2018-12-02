@@ -24,6 +24,15 @@ import java.net.URI;
 
 public interface RuntimeRepositoryEventUpdateType extends RuntimeRepositoryEventType
 {
+  @Override
+  URI repository();
+
+  /**
+   * @return The kind of event
+   */
+
+  Kind kind();
+
   /**
    * The kind of event.
    */
@@ -54,13 +63,4 @@ public interface RuntimeRepositoryEventUpdateType extends RuntimeRepositoryEvent
 
     FINISHED
   }
-
-  @Override
-  URI repository();
-
-  /**
-   * @return The kind of event
-   */
-
-  Kind kind();
 }

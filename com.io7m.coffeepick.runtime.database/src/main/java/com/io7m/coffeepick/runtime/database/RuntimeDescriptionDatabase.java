@@ -58,8 +58,8 @@ public final class RuntimeDescriptionDatabase
   private static final Logger LOG = LoggerFactory.getLogger(RuntimeDescriptionDatabase.class);
   private final Path path;
   private final ConcurrentHashMap<String, RuntimeDescription> descriptions;
-  private volatile Optional<OffsetDateTime> updated;
   private final Map<String, RuntimeDescription> descriptions_read;
+  private volatile Optional<OffsetDateTime> updated;
 
   private RuntimeDescriptionDatabase(
     final Path in_path,

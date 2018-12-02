@@ -52,6 +52,28 @@ public final class AOJDKArchiveResolverTest
     }
   }
 
+  private static void isRecognizedArchitecture(
+    final RuntimeDescription description)
+  {
+    for (final var arch : RuntimeArchitectures.values()) {
+      if (Objects.equals(arch.architectureName(), description.architecture())) {
+        return;
+      }
+    }
+    throw new IllegalArgumentException("Unrecognized arch: " + description.architecture());
+  }
+
+  private static void isRecognizedPlatform(
+    final RuntimeDescription description)
+  {
+    for (final var arch : RuntimePlatforms.values()) {
+      if (Objects.equals(arch.platformName(), description.platform())) {
+        return;
+      }
+    }
+    throw new IllegalArgumentException("Unrecognized platform: " + description.platform());
+  }
+
   @BeforeEach
   public void setup()
   {
@@ -140,27 +162,5 @@ public final class AOJDKArchiveResolverTest
           isRecognizedPlatform(description);
           return;
         }));
-  }
-
-  private static void isRecognizedArchitecture(
-    final RuntimeDescription description)
-  {
-    for (final var arch : RuntimeArchitectures.values()) {
-      if (Objects.equals(arch.architectureName(), description.architecture())) {
-        return;
-      }
-    }
-    throw new IllegalArgumentException("Unrecognized arch: " + description.architecture());
-  }
-
-  private static void isRecognizedPlatform(
-    final RuntimeDescription description)
-  {
-    for (final var arch : RuntimePlatforms.values()) {
-      if (Objects.equals(arch.platformName(), description.platform())) {
-        return;
-      }
-    }
-    throw new IllegalArgumentException("Unrecognized platform: " + description.platform());
   }
 }

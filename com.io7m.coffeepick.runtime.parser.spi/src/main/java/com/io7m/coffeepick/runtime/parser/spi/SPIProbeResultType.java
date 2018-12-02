@@ -28,6 +28,12 @@ import java.util.Optional;
 public interface SPIProbeResultType
 {
   /**
+   * @return The kind of result
+   */
+
+  Kind kind();
+
+  /**
    * The kind of result.
    */
 
@@ -40,18 +46,12 @@ public interface SPIProbeResultType
     PROBE_SUCCESS,
 
     /**
-     * Probing failed; the provider does not support the probed format (or the format could not
-     * be determined at all).
+     * Probing failed; the provider does not support the probed format (or the format could not be
+     * determined at all).
      */
 
     PROBE_FAILURE
   }
-
-  /**
-   * @return The kind of result
-   */
-
-  Kind kind();
 
   /**
    * Probing succeeded.

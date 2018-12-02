@@ -34,28 +34,6 @@ public final class ASArchiveResolverTest
   private static final Logger LOG =
     LoggerFactory.getLogger(ASArchiveResolverTest.class);
 
-  @Test
-  public void testResolve()
-    throws Exception
-  {
-    final var client =
-      HttpClient.newBuilder().build();
-    final var names =
-      ASFileList.fetch(client);
-    final var runtimes =
-      ASArchiveResolver.create(client)
-        .resolve(names);
-
-    Assertions.assertTrue(runtimes.size() > 250);
-    Assertions.assertAll(
-      runtimes.stream()
-        .map(description -> () -> {
-          isRecognizedArchitecture(description);
-          isRecognizedPlatform(description);
-          return;
-        }));
-  }
-
   private static void isRecognizedArchitecture(
     final RuntimeDescription description)
   {
@@ -76,5 +54,27 @@ public final class ASArchiveResolverTest
       }
     }
     throw new IllegalArgumentException("Unrecognized platform: " + description.platform());
+  }
+
+  @Test
+  public void testResolve()
+    throws Exception
+  {
+    final var client =
+      HttpClient.newBuilder().build();
+    final var names =
+      ASFileList.fetch(client);
+    final var runtimes =
+      ASArchiveResolver.create(client)
+        .resolve(names);
+
+    Assertions.assertTrue(runtimes.size() > 250);
+    Assertions.assertAll(
+      runtimes.stream()
+        .map(description -> () -> {
+          isRecognizedArchitecture(description);
+          isRecognizedPlatform(description);
+          return;
+        }));
   }
 }

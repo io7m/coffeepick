@@ -28,6 +28,12 @@ import org.immutables.value.Value;
 public interface ParserResultType
 {
   /**
+   * @return The kind of parsed value
+   */
+
+  Kind kind();
+
+  /**
    * The kind of parsed value.
    */
 
@@ -46,12 +52,6 @@ public interface ParserResultType
 
     RUNTIME
   }
-
-  /**
-   * @return The kind of parsed value
-   */
-
-  Kind kind();
 
   /**
    * A parsed repository

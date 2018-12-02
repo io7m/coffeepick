@@ -68,6 +68,12 @@ public enum RuntimeArchitectures
 
   private final String name;
 
+  RuntimeArchitectures(
+    final String in_name)
+  {
+    this.name = Objects.requireNonNull(in_name, "name");
+  }
+
   /**
    * @return The name of the architecture
    */
@@ -75,11 +81,5 @@ public enum RuntimeArchitectures
   public String architectureName()
   {
     return this.name;
-  }
-
-  RuntimeArchitectures(
-    final String in_name)
-  {
-    this.name = Objects.requireNonNull(in_name, "name");
   }
 }

@@ -56,7 +56,6 @@ public interface ASFilenameMetadataType
   Optional<RuntimeBuild> build();
 
   /**
-   *
    * @return The extra tags for the build
    */
 

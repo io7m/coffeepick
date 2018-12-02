@@ -79,41 +79,6 @@ public final class ASArchiveResolver
     return new ASArchiveResolver(client);
   }
 
-  /**
-   * Resolve a collection of files.
-   *
-   * @param files The file collection
-   *
-   * @return A list of resolved runtime descriptions
-   *
-   * @throws IOException          On I/O errors
-   * @throws InterruptedException If the operation is interrupted
-   */
-
-  public List<RuntimeDescription> resolve(
-    final Collection<ASFile> files)
-    throws IOException, InterruptedException
-  {
-    Objects.requireNonNull(files, "files");
-
-    final var runtimes = new ArrayList<RuntimeDescription>(files.size());
-    final var grouped = groupByDirectory(files);
-    for (final var directory : grouped.keySet()) {
-      final var checksum_uri = URI.create(String.format("%s/%s/SHA1SUMS", BASE_URI, directory));
-      LOG.debug("{}", checksum_uri);
-
-      final var checksums = this.fetchChecksums(checksum_uri);
-      for (final var file : grouped.get(directory)) {
-        final var uri = URI.create(String.format("%s/%s/%s", BASE_URI, directory, file.name()));
-        LOG.debug("{}", uri);
-        runtimeOf(checksum_uri, checksums, directory, file, uri)
-          .ifPresent(runtimes::add);
-      }
-    }
-
-    return runtimes;
-  }
-
   private static Optional<RuntimeDescription> runtimeOf(
     final URI checksum_file,
     final Map<String, String> checksums,
@@ -168,6 +133,60 @@ public final class ASArchiveResolver
         .toString());
   }
 
+  private static HashMap<String, Set<ASFile>> groupByDirectory(
+    final Collection<ASFile> files)
+  {
+    final HashMap<String, Set<ASFile>> grouped = new HashMap<>(files.size());
+    for (final var file : files) {
+      final Set<ASFile> values;
+      final var directory = file.directory();
+      if (grouped.containsKey(directory)) {
+        values = grouped.get(directory);
+      } else {
+        values = new HashSet<>();
+      }
+
+      values.add(file);
+      grouped.put(directory, values);
+    }
+    return grouped;
+  }
+
+  /**
+   * Resolve a collection of files.
+   *
+   * @param files The file collection
+   *
+   * @return A list of resolved runtime descriptions
+   *
+   * @throws IOException          On I/O errors
+   * @throws InterruptedException If the operation is interrupted
+   */
+
+  public List<RuntimeDescription> resolve(
+    final Collection<ASFile> files)
+    throws IOException, InterruptedException
+  {
+    Objects.requireNonNull(files, "files");
+
+    final var runtimes = new ArrayList<RuntimeDescription>(files.size());
+    final var grouped = groupByDirectory(files);
+    for (final var directory : grouped.keySet()) {
+      final var checksum_uri = URI.create(String.format("%s/%s/SHA1SUMS", BASE_URI, directory));
+      LOG.debug("{}", checksum_uri);
+
+      final var checksums = this.fetchChecksums(checksum_uri);
+      for (final var file : grouped.get(directory)) {
+        final var uri = URI.create(String.format("%s/%s/%s", BASE_URI, directory, file.name()));
+        LOG.debug("{}", uri);
+        runtimeOf(checksum_uri, checksums, directory, file, uri)
+          .ifPresent(runtimes::add);
+      }
+    }
+
+    return runtimes;
+  }
+
   private Map<String, String> fetchChecksums(
     final URI checksum_uri)
     throws IOException, InterruptedException
@@ -206,24 +225,5 @@ public final class ASArchiveResolver
     }
 
     return checksums;
-  }
-
-  private static HashMap<String, Set<ASFile>> groupByDirectory(
-    final Collection<ASFile> files)
-  {
-    final HashMap<String, Set<ASFile>> grouped = new HashMap<>(files.size());
-    for (final var file : files) {
-      final Set<ASFile> values;
-      final var directory = file.directory();
-      if (grouped.containsKey(directory)) {
-        values = grouped.get(directory);
-      } else {
-        values = new HashSet<>();
-      }
-
-      values.add(file);
-      grouped.put(directory, values);
-    }
-    return grouped;
   }
 }

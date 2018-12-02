@@ -38,6 +38,12 @@ public enum RuntimeConfiguration
 
   private final String name;
 
+  RuntimeConfiguration(
+    final String in_name)
+  {
+    this.name = Objects.requireNonNull(in_name, "name");
+  }
+
   /**
    * @param name The configuration name
    *
@@ -64,11 +70,5 @@ public enum RuntimeConfiguration
   public String configurationName()
   {
     return this.name;
-  }
-
-  RuntimeConfiguration(
-    final String in_name)
-  {
-    this.name = Objects.requireNonNull(in_name, "name");
   }
 }

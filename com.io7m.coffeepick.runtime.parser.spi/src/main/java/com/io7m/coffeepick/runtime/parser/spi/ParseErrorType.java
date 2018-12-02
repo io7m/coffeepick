@@ -36,6 +36,24 @@ public interface ParseErrorType extends LexicalType<URI>
   LexicalPosition<URI> lexical();
 
   /**
+   * @return The error severity
+   */
+
+  Severity severity();
+
+  /**
+   * @return The error message
+   */
+
+  String message();
+
+  /**
+   * @return The exception raised, if any
+   */
+
+  Optional<Exception> exception();
+
+  /**
    * The error severity
    */
 
@@ -54,22 +72,4 @@ public interface ParseErrorType extends LexicalType<URI>
 
     ERROR
   }
-
-  /**
-   * @return The error severity
-   */
-
-  Severity severity();
-
-  /**
-   * @return The error message
-   */
-
-  String message();
-
-  /**
-   * @return The exception raised, if any
-   */
-
-  Optional<Exception> exception();
 }

@@ -50,6 +50,12 @@ public enum RuntimePlatforms
 
   private final String name;
 
+  RuntimePlatforms(
+    final String in_name)
+  {
+    this.name = Objects.requireNonNull(in_name, "name");
+  }
+
   /**
    * @return The name of the platform
    */
@@ -57,11 +63,5 @@ public enum RuntimePlatforms
   public String platformName()
   {
     return this.name;
-  }
-
-  RuntimePlatforms(
-    final String in_name)
-  {
-    this.name = Objects.requireNonNull(in_name, "name");
   }
 }

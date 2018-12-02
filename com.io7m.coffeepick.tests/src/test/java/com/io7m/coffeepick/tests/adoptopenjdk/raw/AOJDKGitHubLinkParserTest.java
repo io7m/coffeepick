@@ -38,6 +38,8 @@ public final class AOJDKGitHubLinkParserTest
       "<https://api.github.com/repositories/140419044/releases?page=2>; rel=\"next\", <https://api.github.com/repositories/140419044/releases?page=4>; rel=\"last\"");
 
     Assertions.assertEquals(1, uris.size());
-    Assertions.assertEquals("https://api.github.com/repositories/140419044/releases?page=2", uris.get(0).toString());
+    Assertions.assertEquals(
+      "https://api.github.com/repositories/140419044/releases?page=2",
+      uris.get(0).toString());
   }
 }

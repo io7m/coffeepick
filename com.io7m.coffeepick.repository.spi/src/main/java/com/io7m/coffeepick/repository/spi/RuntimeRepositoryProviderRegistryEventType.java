@@ -28,6 +28,20 @@ import org.immutables.value.Value;
 public interface RuntimeRepositoryProviderRegistryEventType
 {
   /**
+   * @return The type of change
+   */
+
+  @Value.Parameter
+  Change change();
+
+  /**
+   * @return The repository provider
+   */
+
+  @Value.Parameter
+  RuntimeRepositoryProviderType repositoryProvider();
+
+  /**
    * The type of change.
    */
 
@@ -45,18 +59,4 @@ public interface RuntimeRepositoryProviderRegistryEventType
 
     REMOVED
   }
-
-  /**
-   * @return The type of change
-   */
-
-  @Value.Parameter
-  Change change();
-
-  /**
-   * @return The repository provider
-   */
-
-  @Value.Parameter
-  RuntimeRepositoryProviderType repositoryProvider();
 }

@@ -44,6 +44,12 @@ public enum RuntimeVMs
 
   private final String name;
 
+  RuntimeVMs(
+    final String in_name)
+  {
+    this.name = Objects.requireNonNull(in_name, "name");
+  }
+
   /**
    * @return The name of the VM
    */
@@ -51,11 +57,5 @@ public enum RuntimeVMs
   public String vmName()
   {
     return this.name;
-  }
-
-  RuntimeVMs(
-    final String in_name)
-  {
-    this.name = Objects.requireNonNull(in_name, "name");
   }
 }
