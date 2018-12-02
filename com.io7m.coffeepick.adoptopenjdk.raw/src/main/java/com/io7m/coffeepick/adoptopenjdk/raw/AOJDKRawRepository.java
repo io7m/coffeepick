@@ -38,6 +38,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,11 +59,13 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
   private static final List<URI> URIS =
     List.of(
       URI.create(
-        "https://raw.githubusercontent.com/AdoptOpenJDK/openjdk8-binaries/master/releases.json"),
+        "https://api.github.com/repos/AdoptOpenJDK/openjdk8-binaries/releases"),
       URI.create(
-        "https://raw.githubusercontent.com/AdoptOpenJDK/openjdk9-binaries/master/releases.json"),
+        "https://api.github.com/repos/AdoptOpenJDK/openjdk9-binaries/releases"),
       URI.create(
-        "https://raw.githubusercontent.com/AdoptOpenJDK/openjdk11-binaries/master/releases.json"));
+        "https://api.github.com/repos/AdoptOpenJDK/openjdk10-binaries/releases"),
+      URI.create(
+        "https://api.github.com/repos/AdoptOpenJDK/openjdk11-binaries/releases"));
 
   private final HttpClient http;
   private final AOJDKRuntimeDescriptionDatabase database;
@@ -129,7 +132,14 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
           .build());
 
       final var archives = new ArrayList<AOJDKArchive>(128);
-      for (final var uri : URIS) {
+
+      final var uris = new LinkedList<URI>();
+      uris.addAll(URIS);
+
+      while (!uris.isEmpty()) {
+        final var uri = uris.pop();
+        LOG.debug("processing: {}", uri);
+
         try {
           if (cancelled.getAsBoolean()) {
             throw new CancellationException();
@@ -154,6 +164,10 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
                 .append(response.statusCode())
                 .append(separator)
                 .toString());
+          }
+
+          for (final var link : response.headers().allValues("Link")) {
+            uris.addAll(AOJDKGitHubLinkParser.linkURIs(link));
           }
 
           final var parser = AOJDKDataParser.create(response.body());

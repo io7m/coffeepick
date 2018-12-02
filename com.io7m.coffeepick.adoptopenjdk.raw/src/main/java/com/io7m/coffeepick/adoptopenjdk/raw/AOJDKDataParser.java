@@ -74,6 +74,11 @@ public final class AOJDKDataParser
     final var name = tree.get("name");
     LOG.debug("name: {}", name);
 
+    final var pre_release = isPreRelease(tree);
+    if (pre_release) {
+      return List.of();
+    }
+
     final var results = new ArrayList<AOJDKArchive>(64);
     final var assets = tree.get("assets");
     if (assets != null && assets.isArray()) {
@@ -89,7 +94,7 @@ public final class AOJDKDataParser
 
       for (var index = 0; index < asset_array.size(); ++index) {
         try {
-          parseAsset(results, checksums, asset_array, index);
+          parseAsset(results, checksums, asset_array, pre_release, index);
         } catch (final Exception e) {
           LOG.error("unable to parse asset: ", e);
         }
@@ -97,6 +102,13 @@ public final class AOJDKDataParser
     }
 
     return results;
+  }
+
+  private static boolean isPreRelease(
+    final ObjectNode tree)
+  {
+    final var node = tree.get("prerelease");
+    return node.asBoolean(true);
   }
 
   private static void parseChecksums(
@@ -126,6 +138,7 @@ public final class AOJDKDataParser
     final ArrayList<AOJDKArchive> results,
     final HashMap<String, URI> checksums,
     final ArrayNode asset_array,
+    final boolean pre_release,
     final int index)
     throws URISyntaxException
   {
@@ -162,14 +175,18 @@ public final class AOJDKDataParser
           return;
         }
 
-        final var archive =
+        final var builder =
           AOJDKArchive.builder()
             .setMetadata(meta.get())
             .setArchiveURI(new URI(download_url))
             .setArchiveSize(size)
-            .setArchiveChecksumURI(checksum_uri)
-            .build();
+            .setArchiveChecksumURI(checksum_uri);
 
+        if (!pre_release) {
+          builder.addExtraTags("production");
+        }
+
+        final var archive = builder.build();
         results.add(archive);
       }
     }
@@ -234,7 +251,7 @@ public final class AOJDKDataParser
   {
     final var tree = this.mapper.readTree(this.stream);
     if (tree.isArray()) {
-      return AOJDKDataParser.parseArchives((ArrayNode) tree);
+      return parseArchives((ArrayNode) tree);
     }
     if (tree.isObject()) {
       return parseArchive((ObjectNode) tree);

@@ -20,6 +20,7 @@ import com.io7m.immutables.styles.ImmutablesStyleType;
 import org.immutables.value.Value;
 
 import java.net.URI;
+import java.util.Set;
 
 /**
  * Information parsed from AdoptOpenJDK metadata.
@@ -52,4 +53,10 @@ public interface AOJDKArchiveType
    */
 
   URI archiveChecksumURI();
+
+  /**
+   * @return The extra archive tags
+   */
+
+  Set<String> extraTags();
 }

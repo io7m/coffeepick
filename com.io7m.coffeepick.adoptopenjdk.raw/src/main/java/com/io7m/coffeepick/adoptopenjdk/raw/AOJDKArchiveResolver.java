@@ -168,7 +168,7 @@ public final class AOJDKArchiveResolver
         builder.addTags("large-heap");
       }
 
-      builder.addTags("production");
+      builder.addAllTags(archive.extraTags());
       return builder.build();
     } catch (final InterruptedException e) {
       throw new IOException(e);
