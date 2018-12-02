@@ -14,72 +14,51 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.runtime;
+package com.io7m.coffeepick.shipilev_net;
 
-import java.util.Objects;
+import com.io7m.coffeepick.runtime.RuntimeBuild;
+import com.io7m.immutables.styles.ImmutablesStyleType;
+import org.immutables.value.Value;
+
+import java.util.Optional;
+import java.util.Set;
 
 /**
- * Standard names for architectures.
+ * Information parsed from shipilev.net filenames.
  */
 
-public enum RuntimeArchitectures
+@ImmutablesStyleType
+@Value.Immutable
+public interface ASFilenameMetadataType
 {
   /**
-   * 32-bit x86
+   * @return The version
    */
 
-  X32("x32"),
+  Runtime.Version version();
 
   /**
-   * 64-bit x86
+   * @return The architecture
    */
 
-  X64("x64"),
+  String architecture();
 
   /**
-   * S390X
+   * @return The operating system
    */
 
-  S390X("s390x"),
+  String platform();
 
   /**
-   * PowerPC 64-bit Little-Endian
+   * @return The build information
    */
 
-  PPC64_LE("ppc64le"),
+  Optional<RuntimeBuild> build();
 
   /**
-   * PowerPC 64-bit Big-Endian
+   *
+   * @return The extra tags for the build
    */
 
-  PPC64_BE("ppc64"),
-
-  /**
-   * 64-bit ARM
-   */
-
-  AARCH_64("aarch64"),
-
-  /**
-   * 32-bit ARM with hardware floating point.
-   */
-
-  ARM32_HFLT("arm32-hflt");
-
-  private final String name;
-
-  /**
-   * @return The name of the architecture
-   */
-
-  public String architectureName()
-  {
-    return this.name;
-  }
-
-  RuntimeArchitectures(
-    final String in_name)
-  {
-    this.name = Objects.requireNonNull(in_name, "name");
-  }
+  Set<String> extraTags();
 }

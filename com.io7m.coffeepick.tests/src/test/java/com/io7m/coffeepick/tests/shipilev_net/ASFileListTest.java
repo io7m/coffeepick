@@ -14,72 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.runtime;
+package com.io7m.coffeepick.tests.shipilev_net;
 
-import java.util.Objects;
+import com.io7m.coffeepick.shipilev_net.ASFileList;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Standard names for architectures.
- */
+import java.net.http.HttpClient;
 
-public enum RuntimeArchitectures
+public final class ASFileListTest
 {
-  /**
-   * 32-bit x86
-   */
+  private static final Logger LOG =
+    LoggerFactory.getLogger(ASFileListTest.class);
 
-  X32("x32"),
-
-  /**
-   * 64-bit x86
-   */
-
-  X64("x64"),
-
-  /**
-   * S390X
-   */
-
-  S390X("s390x"),
-
-  /**
-   * PowerPC 64-bit Little-Endian
-   */
-
-  PPC64_LE("ppc64le"),
-
-  /**
-   * PowerPC 64-bit Big-Endian
-   */
-
-  PPC64_BE("ppc64"),
-
-  /**
-   * 64-bit ARM
-   */
-
-  AARCH_64("aarch64"),
-
-  /**
-   * 32-bit ARM with hardware floating point.
-   */
-
-  ARM32_HFLT("arm32-hflt");
-
-  private final String name;
-
-  /**
-   * @return The name of the architecture
-   */
-
-  public String architectureName()
+  @Test
+  public void testFileList()
+    throws Exception
   {
-    return this.name;
-  }
+    final var names =
+      ASFileList.fetch(HttpClient.newBuilder().build());
 
-  RuntimeArchitectures(
-    final String in_name)
-  {
-    this.name = Objects.requireNonNull(in_name, "name");
+    names.forEach(name -> LOG.debug("name: {}", name));
   }
 }

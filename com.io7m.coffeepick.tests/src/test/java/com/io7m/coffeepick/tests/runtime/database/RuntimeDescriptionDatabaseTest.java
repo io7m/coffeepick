@@ -14,12 +14,12 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.tests.adoptopenjdk.raw;
+package com.io7m.coffeepick.tests.runtime.database;
 
-import com.io7m.coffeepick.adoptopenjdk.raw.AOJDKRuntimeDescriptionDatabase;
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
+import com.io7m.coffeepick.runtime.database.RuntimeDescriptionDatabase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,10 +32,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-public final class AOJDKRuntimeDescriptionDatabaseTest
+public final class RuntimeDescriptionDatabaseTest
 {
   private static final Logger LOG =
-    LoggerFactory.getLogger(AOJDKRuntimeDescriptionDatabaseTest.class);
+    LoggerFactory.getLogger(RuntimeDescriptionDatabaseTest.class);
 
   private Path directory;
 
@@ -43,14 +43,14 @@ public final class AOJDKRuntimeDescriptionDatabaseTest
   public void setup()
     throws IOException
   {
-    this.directory = Files.createTempDirectory("coffeepick-aojdk-runtime-");
+    this.directory = Files.createTempDirectory("coffeepick--runtime-");
   }
 
   @Test
   public void testEmpty()
     throws IOException
   {
-    final var database = AOJDKRuntimeDescriptionDatabase.open(this.directory);
+    final var database = RuntimeDescriptionDatabase.open(this.directory);
     Assertions.assertEquals(0L, (long) database.descriptions().size());
   }
 
@@ -71,14 +71,14 @@ public final class AOJDKRuntimeDescriptionDatabaseTest
         .setVm("hotspot")
         .build();
 
-    final var database0 = AOJDKRuntimeDescriptionDatabase.open(this.directory);
+    final var database0 = RuntimeDescriptionDatabase.open(this.directory);
     Assertions.assertEquals(0L, (long) database0.descriptions().size());
 
     database0.add(description);
     Assertions.assertEquals(1L, (long) database0.descriptions().size());
     Assertions.assertTrue(database0.descriptions().values().contains(description));
 
-    final var database1 = AOJDKRuntimeDescriptionDatabase.open(this.directory);
+    final var database1 = RuntimeDescriptionDatabase.open(this.directory);
     Assertions.assertEquals(1L, (long) database1.descriptions().size());
     Assertions.assertTrue(database1.descriptions().values().contains(description));
   }
@@ -100,7 +100,7 @@ public final class AOJDKRuntimeDescriptionDatabaseTest
         .setVm("hotspot")
         .build();
 
-    final var database0 = AOJDKRuntimeDescriptionDatabase.open(this.directory);
+    final var database0 = RuntimeDescriptionDatabase.open(this.directory);
     Assertions.assertEquals(0L, (long) database0.descriptions().size());
 
     database0.add(description);
@@ -120,7 +120,7 @@ public final class AOJDKRuntimeDescriptionDatabaseTest
       })
       .forEach(p -> LOG.debug("path: {}", p));
 
-    final var database1 = AOJDKRuntimeDescriptionDatabase.open(this.directory);
+    final var database1 = RuntimeDescriptionDatabase.open(this.directory);
     Assertions.assertEquals(0L, (long) database1.descriptions().size());
   }
 }

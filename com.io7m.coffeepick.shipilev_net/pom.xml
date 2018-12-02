@@ -11,11 +11,11 @@
     <version>0.0.1</version>
   </parent>
 
-  <artifactId>com.io7m.coffeepick.adoptopenjdk.raw</artifactId>
+  <artifactId>com.io7m.coffeepick.shipilev_net</artifactId>
 
   <packaging>jar</packaging>
-  <name>com.io7m.coffeepick.adoptopenjdk.raw</name>
-  <description>Java runtime retrieval (AdoptOpenJDK Raw provider)</description>
+  <name>com.io7m.coffeepick.shipilev_net</name>
+  <description>Java runtime retrieval (Shipilev.net provider)</description>
   <url>http://github.com/io7m/coffeepick</url>
 
   <dependencies>
@@ -34,15 +34,15 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
 
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.tukaani</groupId>
+      <artifactId>xz</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.io7m.jcip</groupId>
       <artifactId>jcip-annotations</artifactId>

@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.adoptopenjdk.raw;
+package com.io7m.coffeepick.shipilev_net;
 
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventType;
@@ -35,44 +35,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.function.BooleanSupplier;
-
-import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
 
 /**
  * A repository based on the raw AdoptOpenJDK data.
  */
 
 @Component(service = RuntimeRepositoryType.class)
-public final class AOJDKRawRepository implements RuntimeRepositoryType
+public final class ASRepository implements RuntimeRepositoryType
 {
-  private static final Logger LOG = LoggerFactory.getLogger(AOJDKRawRepository.class);
-
-  private static final List<URI> URIS =
-    List.of(
-      URI.create(
-        "https://api.github.com/repos/AdoptOpenJDK/openjdk8-binaries/releases"),
-      URI.create(
-        "https://api.github.com/repos/AdoptOpenJDK/openjdk9-binaries/releases"),
-      URI.create(
-        "https://api.github.com/repos/AdoptOpenJDK/openjdk10-binaries/releases"),
-      URI.create(
-        "https://api.github.com/repos/AdoptOpenJDK/openjdk11-binaries/releases"));
+  private static final Logger LOG = LoggerFactory.getLogger(ASRepository.class);
 
   private final HttpClient http;
   private final RuntimeDescriptionDatabase database;
-  private final AOJDKRawRepositoryProvider provider;
   private final Subject<RuntimeRepositoryEventType> events;
-  private final AOJDKArchiveResolver resolver;
+  private final ASRepositoryProvider provider;
 
   /**
    * Construct a repository.
@@ -82,9 +64,9 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
    * @param context     The runtime context
    */
 
-  AOJDKRawRepository(
+  ASRepository(
     final HttpClient in_http,
-    final AOJDKRawRepositoryProvider in_provider,
+    final ASRepositoryProvider in_provider,
     final RuntimeRepositoryContextType context)
     throws IOException
   {
@@ -92,13 +74,12 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
       Objects.requireNonNull(in_http, "http");
     this.provider =
       Objects.requireNonNull(in_provider, "provider");
-    Objects.requireNonNull(context, "context");
 
     this.database =
-      RuntimeDescriptionDatabase.open(context.cacheDirectory().resolve("adoptopenjdk.raw"));
+      RuntimeDescriptionDatabase.open(context.cacheDirectory().resolve("shipilev.net"));
 
+    Objects.requireNonNull(context, "context");
     this.events = PublishSubject.<RuntimeRepositoryEventType>create().toSerialized();
-    this.resolver = AOJDKArchiveResolver.create(in_http);
   }
 
   @Override
@@ -132,71 +113,44 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
           .setProgress(0.0)
           .build());
 
-      final var archives = new ArrayList<AOJDKArchive>(128);
+      final var files = ASFileList.fetch(this.http);
+      final var resolver = ASArchiveResolver.create(this.http);
+      final var runtime_list = resolver.resolve(files);
 
-      final var uris = new LinkedList<URI>();
-      uris.addAll(URIS);
+      /*
+       * There may be runtimes with duplicate hashes in the case of zero-length files.
+       */
 
-      while (!uris.isEmpty()) {
-        final var uri = uris.pop();
-        LOG.debug("processing: {}", uri);
-
-        try {
-          if (cancelled.getAsBoolean()) {
-            throw new CancellationException();
-          }
-
-          final var request =
-            HttpRequest.newBuilder(uri)
-              .GET()
-              .build();
-
-          final var response = this.http.send(request, ofInputStream());
-          if (response.statusCode() >= 400) {
-            final var separator = System.lineSeparator();
-            throw new IOException(
-              new StringBuilder(128)
-                .append("HTTP error")
-                .append(separator)
-                .append("  URI:         ")
-                .append(uri)
-                .append(separator)
-                .append("  Status code: ")
-                .append(response.statusCode())
-                .append(separator)
-                .toString());
-          }
-
-          for (final var link : response.headers().allValues("Link")) {
-            uris.addAll(AOJDKGitHubLinkParser.linkURIs(link));
-          }
-
-          final var parser = AOJDKDataParser.create(response.body());
-          archives.addAll(parser.parse());
-        } catch (final InterruptedException e) {
-          Thread.currentThread().interrupt();
+      final var runtimes = new HashMap<String, RuntimeDescription>(runtime_list.size());
+      for (final var runtime : runtime_list) {
+        final var runtime_id = runtime.id();
+        if (runtimes.containsKey(runtime_id)) {
+          LOG.debug("duplicate runtime id: {}", runtime_id);
+          LOG.debug("  original: {}", runtime.archiveURI());
+          LOG.debug("  new:      {}", runtimes.get(runtime_id).archiveURI());
         }
+        runtimes.put(runtime_id, runtime);
       }
 
       var index = 0;
-      for (final var archive : archives) {
+      for (final var runtime : runtimes.values()) {
         if (cancelled.getAsBoolean()) {
           throw new CancellationException();
         }
 
-        try {
-          final var release = this.resolver.resolveOne(archive);
-          this.database.add(release);
-        } catch (final IOException e) {
-          LOG.error("unable to resolve archive {}: ", archive.archiveURI(), e);
-        }
-
+        this.database.add(runtime);
         this.events.onNext(
           RuntimeRepositoryEventUpdateRunning.builder()
             .setRepository(this.provider.uri())
-            .setProgress((double) index / (double) archives.size())
+            .setProgress((double) index / (double) runtimes.size())
             .build());
         ++index;
+      }
+
+      for (final var database_runtime : this.database.descriptions().keySet()) {
+        if (!runtimes.containsKey(database_runtime)) {
+          this.database.delete(database_runtime);
+        }
       }
 
       this.events.onNext(
@@ -223,9 +177,8 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
   public RuntimeRepositoryDescription description()
   {
     return RuntimeRepositoryDescription.builder()
-      .setUpdated(this.database.updated())
       .setId(this.provider.uri())
-      .setRuntimes(Map.copyOf(this.database.descriptions()))
+      .setRuntimes(Map.copyOf(this.runtimes()))
       .build();
   }
 }

@@ -14,72 +14,9 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.runtime;
-
-import java.util.Objects;
-
 /**
- * Standard names for architectures.
+ * Java runtime retrieval (Shipilev.net Provider)
  */
 
-public enum RuntimeArchitectures
-{
-  /**
-   * 32-bit x86
-   */
-
-  X32("x32"),
-
-  /**
-   * 64-bit x86
-   */
-
-  X64("x64"),
-
-  /**
-   * S390X
-   */
-
-  S390X("s390x"),
-
-  /**
-   * PowerPC 64-bit Little-Endian
-   */
-
-  PPC64_LE("ppc64le"),
-
-  /**
-   * PowerPC 64-bit Big-Endian
-   */
-
-  PPC64_BE("ppc64"),
-
-  /**
-   * 64-bit ARM
-   */
-
-  AARCH_64("aarch64"),
-
-  /**
-   * 32-bit ARM with hardware floating point.
-   */
-
-  ARM32_HFLT("arm32-hflt");
-
-  private final String name;
-
-  /**
-   * @return The name of the architecture
-   */
-
-  public String architectureName()
-  {
-    return this.name;
-  }
-
-  RuntimeArchitectures(
-    final String in_name)
-  {
-    this.name = Objects.requireNonNull(in_name, "name");
-  }
-}
+@org.osgi.annotation.bundle.Export
+package com.io7m.coffeepick.shipilev_net;

@@ -20,6 +20,7 @@ import com.io7m.immutables.styles.ImmutablesStyleType;
 import org.immutables.value.Value;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -89,6 +90,12 @@ public interface RuntimeDescriptionType
    */
 
   String vm();
+
+  /**
+   * @return The build information
+   */
+
+  Optional<RuntimeBuild> build();
 
   /**
    * @return A set of arbitrary tags added to the runtime

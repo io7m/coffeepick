@@ -14,72 +14,45 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.runtime;
+package com.io7m.coffeepick.shipilev_net;
 
-import java.util.Objects;
+import com.io7m.immutables.styles.ImmutablesStyleType;
+import org.immutables.value.Value;
+
+import java.util.Comparator;
 
 /**
- * Standard names for architectures.
+ * A file name and size.
  */
 
-public enum RuntimeArchitectures
+@ImmutablesStyleType
+@Value.Immutable
+public interface ASFileType extends Comparable<ASFileType>
 {
   /**
-   * 32-bit x86
+   * @return The directory name
    */
 
-  X32("x32"),
+  String directory();
 
   /**
-   * 64-bit x86
+   * @return The file name
    */
 
-  X64("x64"),
+  String name();
 
   /**
-   * S390X
+   * @return The file size
    */
 
-  S390X("s390x"),
+  long size();
 
-  /**
-   * PowerPC 64-bit Little-Endian
-   */
-
-  PPC64_LE("ppc64le"),
-
-  /**
-   * PowerPC 64-bit Big-Endian
-   */
-
-  PPC64_BE("ppc64"),
-
-  /**
-   * 64-bit ARM
-   */
-
-  AARCH_64("aarch64"),
-
-  /**
-   * 32-bit ARM with hardware floating point.
-   */
-
-  ARM32_HFLT("arm32-hflt");
-
-  private final String name;
-
-  /**
-   * @return The name of the architecture
-   */
-
-  public String architectureName()
+  @Override
+  default int compareTo(final ASFileType other)
   {
-    return this.name;
-  }
-
-  RuntimeArchitectures(
-    final String in_name)
-  {
-    this.name = Objects.requireNonNull(in_name, "name");
+    return Comparator.comparing(ASFileType::directory)
+      .thenComparing(ASFileType::name)
+      .thenComparingLong(ASFileType::size)
+      .compare(this, other);
   }
 }

@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.adoptopenjdk.raw;
+package com.io7m.coffeepick.runtime.database;
 
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeDescriptionType;
@@ -49,19 +49,19 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 /**
- * A persistent database of runtime runtimes.
+ * A persistent database of runtime descriptions.
  */
 
 @ThreadSafe
-public final class AOJDKRuntimeDescriptionDatabase
+public final class RuntimeDescriptionDatabase
 {
-  private static final Logger LOG = LoggerFactory.getLogger(AOJDKRuntimeDescriptionDatabase.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RuntimeDescriptionDatabase.class);
   private final Path path;
   private final ConcurrentHashMap<String, RuntimeDescription> descriptions;
   private volatile Optional<OffsetDateTime> updated;
   private final Map<String, RuntimeDescription> descriptions_read;
 
-  private AOJDKRuntimeDescriptionDatabase(
+  private RuntimeDescriptionDatabase(
     final Path in_path,
     final Map<String, RuntimeDescription> in_descriptions,
     final Optional<OffsetDateTime> in_updated)
@@ -78,7 +78,7 @@ public final class AOJDKRuntimeDescriptionDatabase
 
   /**
    * Open an existing, or create a new, on-disk cache. The cache will be populated from the contents
-   * of the given directory if it exists and contains runtime runtimes.
+   * of the given directory if it exists and contains runtime descriptions.
    *
    * @param path The directory
    *
@@ -87,7 +87,7 @@ public final class AOJDKRuntimeDescriptionDatabase
    * @throws IOException On I/O errors
    */
 
-  public static AOJDKRuntimeDescriptionDatabase open(
+  public static RuntimeDescriptionDatabase open(
     final Path path)
     throws IOException
   {
@@ -98,11 +98,11 @@ public final class AOJDKRuntimeDescriptionDatabase
     final var descriptions =
       Files.list(path)
         .filter(file -> Files.isRegularFile(file))
-        .filter(AOJDKRuntimeDescriptionDatabase::isNotUpdatedFile)
-        .flatMap(AOJDKRuntimeDescriptionDatabase::parseAsStream)
+        .filter(RuntimeDescriptionDatabase::isNotUpdatedFile)
+        .flatMap(RuntimeDescriptionDatabase::parseAsStream)
         .collect(Collectors.toMap(RuntimeDescriptionType::id, Function.identity()));
 
-    return new AOJDKRuntimeDescriptionDatabase(path, descriptions, updated);
+    return new RuntimeDescriptionDatabase(path, descriptions, updated);
   }
 
   private static Optional<OffsetDateTime> loadUpdatedFile(final Path path)
@@ -164,7 +164,7 @@ public final class AOJDKRuntimeDescriptionDatabase
   }
 
   /**
-   * Add a runtimes to the cache. The runtimes will be persisted to disk, but no exception will be
+   * Add a runtime to the cache. The runtime will be persisted to disk, but no exception will be
    * raised if persisting the file fails.
    *
    * @param description The runtimes to be added
@@ -173,6 +173,8 @@ public final class AOJDKRuntimeDescriptionDatabase
   public void add(
     final RuntimeDescription description)
   {
+    Objects.requireNonNull(description, "description");
+
     this.descriptions.put(description.id(), description);
 
     try {
@@ -182,6 +184,29 @@ public final class AOJDKRuntimeDescriptionDatabase
       this.writeUpdated(time);
     } catch (final IOException e) {
       LOG.debug("could not cache {}: ", description.id(), e);
+    }
+  }
+
+  /**
+   * Delete a runtime from the cache. The runtime will be deleted from disk, but no exception will
+   * be raised if deleting the file fails.
+   *
+   * @param id The runtimes to be added
+   */
+
+  public void delete(final String id)
+  {
+    Objects.requireNonNull(id, "id");
+
+    this.descriptions.remove(id);
+
+    try {
+      this.deleteFile(id);
+      final var time = OffsetDateTime.now(ZoneId.of("UTC"));
+      this.updated = Optional.of(time);
+      this.writeUpdated(time);
+    } catch (final IOException e) {
+      LOG.debug("could not delete {}: ", id, e);
     }
   }
 
@@ -198,6 +223,14 @@ public final class AOJDKRuntimeDescriptionDatabase
       output.write(ISO_OFFSET_DATE_TIME.format(time).getBytes(StandardCharsets.UTF_8));
       Files.move(file_tmp, file, ATOMIC_MOVE, REPLACE_EXISTING);
     }
+  }
+
+  private void deleteFile(
+    final String id)
+    throws IOException
+  {
+    final var file = this.path.resolve(id + ".properties");
+    Files.deleteIfExists(file);
   }
 
   private void write(

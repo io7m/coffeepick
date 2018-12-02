@@ -19,7 +19,9 @@ package com.io7m.coffeepick.tests.adoptopenjdk.raw;
 import com.io7m.coffeepick.adoptopenjdk.raw.AOJDKArchive;
 import com.io7m.coffeepick.adoptopenjdk.raw.AOJDKArchiveResolver;
 import com.io7m.coffeepick.adoptopenjdk.raw.AOJDKDataParser;
+import com.io7m.coffeepick.runtime.RuntimeArchitectures;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.RuntimePlatforms;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 import java.net.http.HttpClient;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,6 +78,14 @@ public final class AOJDKArchiveResolverTest
 
     releases.forEach(release -> LOG.debug("release: {}", release));
     Assertions.assertEquals(archives.size(), releases.size());
+
+    Assertions.assertAll(
+      releases.stream()
+        .map(description -> () -> {
+          isRecognizedArchitecture(description);
+          isRecognizedPlatform(description);
+          return;
+        }));
   }
 
   @Test
@@ -94,6 +105,14 @@ public final class AOJDKArchiveResolverTest
 
     releases.forEach(release -> LOG.debug("release: {}", release));
     Assertions.assertEquals(archives.size(), releases.size());
+
+    Assertions.assertAll(
+      releases.stream()
+        .map(description -> () -> {
+          isRecognizedArchitecture(description);
+          isRecognizedPlatform(description);
+          return;
+        }));
   }
 
   @Test
@@ -113,5 +132,35 @@ public final class AOJDKArchiveResolverTest
 
     releases.forEach(release -> LOG.debug("release: {}", release));
     Assertions.assertEquals(archives.size(), releases.size());
+
+    Assertions.assertAll(
+      releases.stream()
+        .map(description -> () -> {
+          isRecognizedArchitecture(description);
+          isRecognizedPlatform(description);
+          return;
+        }));
+  }
+
+  private static void isRecognizedArchitecture(
+    final RuntimeDescription description)
+  {
+    for (final var arch : RuntimeArchitectures.values()) {
+      if (Objects.equals(arch.architectureName(), description.architecture())) {
+        return;
+      }
+    }
+    throw new IllegalArgumentException("Unrecognized arch: " + description.architecture());
+  }
+
+  private static void isRecognizedPlatform(
+    final RuntimeDescription description)
+  {
+    for (final var arch : RuntimePlatforms.values()) {
+      if (Objects.equals(arch.platformName(), description.platform())) {
+        return;
+      }
+    }
+    throw new IllegalArgumentException("Unrecognized platform: " + description.platform());
   }
 }

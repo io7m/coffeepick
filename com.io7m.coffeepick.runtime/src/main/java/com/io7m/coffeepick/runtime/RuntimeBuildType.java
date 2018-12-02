@@ -16,70 +16,28 @@
 
 package com.io7m.coffeepick.runtime;
 
-import java.util.Objects;
+import com.io7m.immutables.styles.ImmutablesStyleType;
+import org.immutables.value.Value;
+
+import java.time.OffsetDateTime;
 
 /**
- * Standard names for architectures.
+ * Build information.
  */
 
-public enum RuntimeArchitectures
+@ImmutablesStyleType
+@Value.Immutable
+public interface RuntimeBuildType
 {
   /**
-   * 32-bit x86
+   * @return The build number
    */
 
-  X32("x32"),
+  String buildNumber();
 
   /**
-   * 64-bit x86
+   * @return The build time
    */
 
-  X64("x64"),
-
-  /**
-   * S390X
-   */
-
-  S390X("s390x"),
-
-  /**
-   * PowerPC 64-bit Little-Endian
-   */
-
-  PPC64_LE("ppc64le"),
-
-  /**
-   * PowerPC 64-bit Big-Endian
-   */
-
-  PPC64_BE("ppc64"),
-
-  /**
-   * 64-bit ARM
-   */
-
-  AARCH_64("aarch64"),
-
-  /**
-   * 32-bit ARM with hardware floating point.
-   */
-
-  ARM32_HFLT("arm32-hflt");
-
-  private final String name;
-
-  /**
-   * @return The name of the architecture
-   */
-
-  public String architectureName()
-  {
-    return this.name;
-  }
-
-  RuntimeArchitectures(
-    final String in_name)
-  {
-    this.name = Objects.requireNonNull(in_name, "name");
-  }
+  OffsetDateTime time();
 }

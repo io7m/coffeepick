@@ -11,36 +11,23 @@
     <version>0.0.1</version>
   </parent>
 
-  <artifactId>com.io7m.coffeepick.adoptopenjdk.raw</artifactId>
+  <artifactId>com.io7m.coffeepick.runtime.database</artifactId>
 
   <packaging>jar</packaging>
-  <name>com.io7m.coffeepick.adoptopenjdk.raw</name>
-  <description>Java runtime retrieval (AdoptOpenJDK Raw provider)</description>
+  <name>com.io7m.coffeepick.runtime.database</name>
+  <description>Java runtime retrieval (Runtime database)</description>
   <url>http://github.com/io7m/coffeepick</url>
 
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>com.io7m.coffeepick.repository.spi</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>com.io7m.coffeepick.runtime.database</artifactId>
+      <artifactId>com.io7m.coffeepick.runtime</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
     </dependency>
 
     <dependency>
