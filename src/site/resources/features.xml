@@ -6,6 +6,7 @@
     <li>Command-line shell for interacting with the API</li>
     <li>Fetch JDKs from <a href="https://jdk.java.net">jdk.java.net</a></li>
     <li>Fetch JDKs from <a href="https://adoptopenjdk.net">AdoptOpenJDK</a></li>
+    <li>Fetch JDKs from <a href="https://builds.shipilev.net">builds.shipilev.net</a></li>
     <li>Service provider interface for adding new repositories</li>
     <li>Strict, well-designed <a href="https://en.wikipedia.org/wiki/XML_Schema_(W3C)">XSD</a> schema for repository metadata</li>
     <li><a href="https://www.osgi.org/">OSGi</a>-ready</li>
