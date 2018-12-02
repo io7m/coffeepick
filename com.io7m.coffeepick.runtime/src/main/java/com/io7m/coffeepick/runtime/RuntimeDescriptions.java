@@ -131,7 +131,7 @@ public final class RuntimeDescriptions
     properties.setProperty(
       COFFEEPICK_RUNTIME_REPOSITORY, description.repository().toString());
     properties.setProperty(
-      COFFEEPICK_RUNTIME_TAGS, description.tags().stream().collect(Collectors.joining(" ")));
+      COFFEEPICK_RUNTIME_TAGS, String.join(" ", description.tags()));
     properties.setProperty(
       COFFEEPICK_RUNTIME_VERSION, description.version().toString());
 

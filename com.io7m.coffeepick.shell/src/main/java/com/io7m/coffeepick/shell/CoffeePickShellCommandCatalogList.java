@@ -76,19 +76,17 @@ public final class CoffeePickShellCommandCatalogList implements CoffeePickShellC
       .sorted(Comparator.comparing(RuntimeDescription::version)
                 .thenComparing(RuntimeDescription::architecture)
                 .thenComparing(RuntimeDescription::platform))
-      .forEach(description -> {
-        writer.printf(
-          "%-70s | %-12s | %-8s | %-12s | %-8s | %-4s | %-8.2fMB | %-28s | %s\n",
-          description.id(),
-          description.architecture(),
-          description.platform(),
-          description.version(),
-          description.vm(),
-          description.configuration().configurationName(),
-          Double.valueOf((double) description.archiveSize() / 1_000_000.0),
-          description.repository(),
-          description.tags().stream().sorted().collect(Collectors.joining(" ")));
-      });
+      .forEach(description -> writer.printf(
+        "%-70s | %-12s | %-8s | %-12s | %-8s | %-4s | %-8.2fMB | %-28s | %s\n",
+        description.id(),
+        description.architecture(),
+        description.platform(),
+        description.version(),
+        description.vm(),
+        description.configuration().configurationName(),
+        Double.valueOf((double) description.archiveSize() / 1_000_000.0),
+        description.repository(),
+        description.tags().stream().sorted().collect(Collectors.joining(" "))));
   }
 
   @Override

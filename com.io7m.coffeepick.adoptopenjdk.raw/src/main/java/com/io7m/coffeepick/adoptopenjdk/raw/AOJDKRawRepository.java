@@ -133,9 +133,7 @@ public final class AOJDKRawRepository implements RuntimeRepositoryType
           .build());
 
       final var archives = new ArrayList<AOJDKArchive>(128);
-
-      final var uris = new LinkedList<URI>();
-      uris.addAll(URIS);
+      final var uris = new LinkedList<>(URIS);
 
       while (!uris.isEmpty()) {
         final var uri = uris.pop();
