@@ -16,6 +16,11 @@
 
 package com.io7m.coffeepick.api;
 
+import com.io7m.coffeepick.runtime.parser.api.CoffeePickParsers;
+import com.io7m.coffeepick.runtime.parser.api.CoffeePickParsersType;
+import com.io7m.coffeepick.runtime.parser.api.CoffeePickSerializers;
+import com.io7m.coffeepick.runtime.parser.api.CoffeePickSerializersType;
+
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.nio.file.Path;
@@ -42,6 +47,8 @@ public interface CoffeePickClientProviderType
     throws IOException
   {
     return this.newClient(
+      CoffeePickParsers.createFromServiceLoader(),
+      CoffeePickSerializers.createFromServiceLoader(),
       base_directory,
       HttpClient.newBuilder()
         .followRedirects(HttpClient.Redirect.NORMAL)
@@ -52,6 +59,8 @@ public interface CoffeePickClientProviderType
    * Create a new client. The client will use the given directory for configuration data and
    * inventory.
    *
+   * @param parsers        The parser provider
+   * @param serializers    The serializer provider
    * @param base_directory The base directory
    * @param http           The HTTP client that will be used
    *
@@ -61,6 +70,8 @@ public interface CoffeePickClientProviderType
    */
 
   CoffeePickClientType newClient(
+    CoffeePickParsersType parsers,
+    CoffeePickSerializersType serializers,
     Path base_directory,
     HttpClient http)
     throws IOException;

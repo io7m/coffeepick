@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.OffsetDateTime;
 import java.util.Properties;
 
 public final class RuntimeDescriptionsTest
@@ -66,6 +67,11 @@ public final class RuntimeDescriptionsTest
         "https://www.io7m.com/", description_0.archiveURI().toString());
       Assertions.assertEquals(
         "urn:example", description_0.repository().toString());
+      Assertions.assertEquals(
+        "b12", description_0.build().get().buildNumber());
+      Assertions.assertEquals(
+        OffsetDateTime.parse("2018-01-01T00:00:00+00:00"),
+        description_0.build().get().time());
 
       final var output =
         RuntimeDescriptions.serializeToProperties(description_0);
@@ -130,6 +136,25 @@ public final class RuntimeDescriptionsTest
           () -> RuntimeDescriptions.parseFromProperties(properties));
 
       Assertions.assertTrue(ex.getMessage().contains("URI"));
+    }
+  }
+
+  @Test
+  public void testBrokenBuildTime()
+    throws Exception
+  {
+    try (var stream = resource("trivial.properties")) {
+      final var properties = new Properties();
+      properties.load(stream);
+
+      properties.setProperty("coffeepick.runtimeBuildTime", " ");
+
+      final var ex =
+        Assertions.assertThrows(
+          IOException.class,
+          () -> RuntimeDescriptions.parseFromProperties(properties));
+
+      Assertions.assertTrue(ex.getMessage().contains("Time"));
     }
   }
 
@@ -373,6 +398,25 @@ public final class RuntimeDescriptionsTest
           () -> RuntimeDescriptions.parseFromProperties(properties));
 
       Assertions.assertTrue(ex.getMessage().contains("Missing"));
+    }
+  }
+
+  @Test
+  public void testMissingBuildTime()
+    throws Exception
+  {
+    try (var stream = resource("trivial.properties")) {
+      final var properties = new Properties();
+      properties.load(stream);
+
+      properties.remove("coffeepick.runtimeBuildTime");
+
+      final var ex =
+        Assertions.assertThrows(
+          IOException.class,
+          () -> RuntimeDescriptions.parseFromProperties(properties));
+
+      Assertions.assertTrue(ex.getMessage().contains("Time"));
     }
   }
 }

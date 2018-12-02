@@ -20,27 +20,23 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.io7m.coffeepick.api.CoffeePickClientType;
-import com.io7m.coffeepick.api.CoffeePickInventoryType.UnpackOption;
 import org.jline.builtins.Completers;
 
 import java.io.PrintWriter;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static com.io7m.coffeepick.api.CoffeePickInventoryType.UnpackOption.STRIP_LEADING_DIRECTORY;
-import static com.io7m.coffeepick.api.CoffeePickInventoryType.UnpackOption.STRIP_NON_OWNER_WRITABLE;
 import static org.jline.builtins.Completers.TreeCompleter.node;
 
 /**
- * Inventory archive unpacking.
+ * Export a repository.
  */
 
-public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickShellCommandType
+public final class CoffeePickShellCommandRepositoryExport implements CoffeePickShellCommandType
 {
   private final CoffeePickClientType client;
   private final PrintWriter writer;
@@ -52,7 +48,7 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
    * @param in_writer The output terminal writer
    */
 
-  public CoffeePickShellCommandInventoryUnpack(
+  public CoffeePickShellCommandRepositoryExport(
     final CoffeePickClientType in_client,
     final PrintWriter in_writer)
   {
@@ -63,7 +59,7 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
   @Override
   public String name()
   {
-    return "unpack";
+    return "repository-export";
   }
 
   @Override
@@ -77,7 +73,7 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
     final var commander =
       JCommander.newBuilder()
         .addObject(parameters)
-        .programName("unpack")
+        .programName("repository-export")
         .build();
 
     try {
@@ -87,18 +83,10 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
         throw new ParameterException("Must specify exactly one ID");
       }
 
-      final Set<UnpackOption> options = EnumSet.noneOf(UnpackOption.class);
-      if (parameters.strip_leading_directory) {
-        options.add(STRIP_LEADING_DIRECTORY);
-      }
-      if (parameters.strip_non_owner_write) {
-        options.add(STRIP_NON_OWNER_WRITABLE);
-      }
-
-      return this.client.inventoryUnpack(
-        parameters.rest.get(0),
-        parameters.output_path,
-        options);
+      return this.client.repositoryExport(
+        URI.create(parameters.rest.get(0)),
+        parameters.format_name,
+        parameters.output_path);
 
     } catch (final ParameterException e) {
       final var sb = new StringBuilder(128);
@@ -117,24 +105,18 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
   private static final class Parameters
   {
     @Parameter(
-      description = "The output directory",
+      description = "The output file",
       required = true,
       names = "--output")
     Path output_path;
 
     @Parameter(
-      description = "Strip the leading directory from archives",
+      description = "The output format",
       required = false,
-      names = "--strip-leading-directory")
-    boolean strip_leading_directory = false;
+      names = "--format")
+    URI format_name = URI.create("urn:com.io7m.coffeepick:xml");
 
-    @Parameter(
-      description = "Remove write permissions for group/others on POSIX filesystems",
-      required = false,
-      names = "--strip-group-other-writes")
-    boolean strip_non_owner_write = true;
-
-    @Parameter(description = "<id>")
+    @Parameter(description = "<repository>")
     private List<String> rest = new ArrayList<>(1);
 
     Parameters()

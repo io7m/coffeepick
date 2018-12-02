@@ -16,6 +16,7 @@
 
 package com.io7m.coffeepick.runtime.format.xml;
 
+import com.io7m.coffeepick.runtime.RuntimeBuild;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
@@ -83,8 +84,8 @@ public final class FormatXMLElements
   /**
    * Serialize the given runtime, using the given document to create elements.
    *
-   * @param document         The target document
-   * @param runtime          The runtime
+   * @param document          The target document
+   * @param runtime           The runtime
    * @param append_repository True if the repository ID should be included in the element
    *
    * @return A serialized runtime
@@ -113,6 +114,7 @@ public final class FormatXMLElements
 
     e_runtime.appendChild(ofHash(document, runtime.archiveHash()));
     e_runtime.appendChild(ofTags(document, runtime.tags()));
+    runtime.build().ifPresent(build -> e_runtime.appendChild(ofBuild(document, build)));
     return e_runtime;
   }
 
@@ -179,6 +181,28 @@ public final class FormatXMLElements
     final var e_hash = document.createElementNS(NAMESPACE, "c:hash");
     e_hash.setAttribute("algorithm", hash.algorithm());
     e_hash.setAttribute("value", hash.value());
+    return e_hash;
+  }
+
+  /**
+   * Serialize the given build, using the given document to create elements.
+   *
+   * @param document The target document
+   * @param build    The build
+   *
+   * @return A serialized build
+   */
+
+  public static Element ofBuild(
+    final Document document,
+    final RuntimeBuild build)
+  {
+    Objects.requireNonNull(document, "document");
+    Objects.requireNonNull(build, "build");
+
+    final var e_hash = document.createElementNS(NAMESPACE, "c:build");
+    e_hash.setAttribute("number", build.buildNumber());
+    e_hash.setAttribute("time", ISO_OFFSET_DATE_TIME.format(build.time()));
     return e_hash;
   }
 

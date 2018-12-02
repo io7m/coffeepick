@@ -16,6 +16,9 @@
         <c:tag name="large-heap"/>
         <c:tag name="production"/>
       </c:tags>
+
+      <c:build number="b23"
+               time="2018-01-01T00:00:00+00:00"/>
     </c:runtime>
     <c:runtime configuration="jdk"
                platform="windows"

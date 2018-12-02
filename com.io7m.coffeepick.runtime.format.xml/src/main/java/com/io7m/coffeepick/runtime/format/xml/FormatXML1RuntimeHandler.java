@@ -70,12 +70,19 @@ public final class FormatXML1RuntimeHandler
     return new FormatXML1TagsHandler(locator).map(FormatXML1RuntimeChildTags::of);
   }
 
+  private static FormatXMLContentHandlerType<FormatXML1RuntimeChildType> buildHandler(
+    final Locator2 locator)
+  {
+    return new FormatXML1BuildHandler(locator).map(FormatXML1RuntimeChildBuild::of);
+  }
+
   @Override
   protected Map<String, Supplier<FormatXMLContentHandlerType<FormatXML1RuntimeChildType>>> onWantChildHandlers()
   {
     return Map.of(
       "tags", () -> tagsHandler(super.locator()),
-      "hash", () -> hashHandler(super.locator())
+      "hash", () -> hashHandler(super.locator()),
+      "build", () -> buildHandler(super.locator())
     );
   }
 
@@ -138,6 +145,11 @@ public final class FormatXML1RuntimeHandler
       case HASH: {
         final var hash = (FormatXML1RuntimeChildHash) value;
         this.runtime_builder.setArchiveHash(hash.hash());
+        break;
+      }
+      case BUILD: {
+        final var build = (FormatXML1RuntimeChildBuild) value;
+        this.runtime_builder.setBuild(build.build());
         break;
       }
     }

@@ -16,6 +16,7 @@
 
 package com.io7m.coffeepick.runtime.format.xml;
 
+import com.io7m.coffeepick.runtime.RuntimeBuild;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.immutables.styles.ImmutablesStyleType;
 import org.immutables.value.Value;
@@ -50,7 +51,13 @@ public interface FormatXML1RuntimeChildType
      * A hash element
      */
 
-    HASH
+    HASH,
+
+    /**
+     * A build element.
+     */
+
+    BUILD
   }
 
   /**
@@ -95,5 +102,27 @@ public interface FormatXML1RuntimeChildType
 
     @Value.Parameter
     RuntimeHash hash();
+  }
+
+  /**
+   * The build element.
+   */
+
+  @ImmutablesStyleType
+  @Value.Immutable
+  interface FormatXML1RuntimeChildBuildType extends FormatXML1RuntimeChildType
+  {
+    @Override
+    default Kind kind()
+    {
+      return Kind.BUILD;
+    }
+
+    /**
+     * @return The build information
+     */
+
+    @Value.Parameter
+    RuntimeBuild build();
   }
 }

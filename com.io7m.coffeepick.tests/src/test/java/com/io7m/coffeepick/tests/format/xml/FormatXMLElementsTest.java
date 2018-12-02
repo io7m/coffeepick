@@ -16,6 +16,7 @@
 
 package com.io7m.coffeepick.tests.format.xml;
 
+import com.io7m.coffeepick.runtime.RuntimeBuild;
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
@@ -145,6 +146,11 @@ public final class FormatXMLElementsTest
   {
     final var runtime_0 =
       RuntimeDescription.builder()
+        .setBuild(
+          RuntimeBuild.builder()
+            .setBuildNumber("b23")
+            .setTime(OffsetDateTime.parse("2018-01-01T00:00:00+00:00"))
+            .build())
         .setConfiguration(RuntimeConfiguration.JDK)
         .setRepository(URI.create("urn:repository"))
         .setVersion(Runtime.Version.parse("11"))
@@ -209,6 +215,11 @@ public final class FormatXMLElementsTest
   {
     final var runtime =
       RuntimeDescription.builder()
+        .setBuild(
+          RuntimeBuild.builder()
+            .setBuildNumber("b23")
+            .setTime(OffsetDateTime.parse("2018-01-01T00:00:00+00:00"))
+            .build())
         .setConfiguration(RuntimeConfiguration.JDK)
         .setRepository(URI.create("urn:repository"))
         .setVersion(Runtime.Version.parse("11"))

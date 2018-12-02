@@ -187,6 +187,46 @@
   <element name="hash"
            type="c:hashType"/>
 
+  <simpleType name="buildNumberType">
+    <annotation>
+      <documentation>
+        A build number string such as "b23".
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <pattern value="[A-Za-z0-9.-\\+]+"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="buildTimeType">
+    <annotation>
+      <documentation>
+        A build date.
+      </documentation>
+    </annotation>
+
+    <restriction base="dateTime"/>
+  </simpleType>
+
+  <complexType name="buildType">
+    <annotation>
+      <documentation>
+        Extra build information.
+      </documentation>
+    </annotation>
+
+    <attribute name="number"
+               type="c:buildNumberType"
+               use="required"/>
+    <attribute name="time"
+               type="c:buildTimeType"
+               use="required"/>
+  </complexType>
+
+  <element name="build"
+           type="c:buildType"/>
+
   <complexType name="runtimeType">
     <annotation>
       <documentation>
@@ -201,6 +241,10 @@
       <sequence minOccurs="0"
                 maxOccurs="1">
         <element ref="c:tags"/>
+      </sequence>
+      <sequence minOccurs="0"
+                maxOccurs="1">
+        <element ref="c:build"/>
       </sequence>
     </sequence>
 

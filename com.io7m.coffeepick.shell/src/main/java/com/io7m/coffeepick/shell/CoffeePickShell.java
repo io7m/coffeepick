@@ -114,6 +114,7 @@ public final class CoffeePickShell
               new CoffeePickShellCommandInventoryUnpack(client, writer),
               new CoffeePickShellCommandRepositoryList(client, writer),
               new CoffeePickShellCommandRepositoryUpdate(client, writer),
+              new CoffeePickShellCommandRepositoryExport(client, writer),
               new CoffeePickShellCommandRuntimeShow(client, writer),
               new CoffeePickShellCommandVerify(client, writer),
               new CoffeePickShellCommandVersion(client, writer)

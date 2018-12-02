@@ -117,6 +117,14 @@ public final class FormatXMLParserProviderTest
         .build(),
       runtime.archiveHash());
 
+    Assertions.assertTrue(runtime.build().isPresent());
+    Assertions.assertEquals(
+      OffsetDateTime.parse("2018-01-01T00:00:00+00:00"),
+      runtime.build().get().time());
+    Assertions.assertEquals(
+      "b23",
+      runtime.build().get().buildNumber());
+
     Assertions.assertEquals(0L, (long) event_log.size());
   }
 
@@ -164,6 +172,15 @@ public final class FormatXMLParserProviderTest
         URI.create("https://www.example.com/jre.tar.gz"), runtime.archiveURI());
       Assertions.assertEquals(
         100L, runtime.archiveSize());
+
+      Assertions.assertTrue(runtime.build().isPresent());
+      Assertions.assertEquals(
+        OffsetDateTime.parse("2018-01-01T00:00:00+00:00"),
+        runtime.build().get().time());
+      Assertions.assertEquals(
+        "b23",
+        runtime.build().get().buildNumber());
+
       Assertions.assertEquals(
         Runtime.Version.parse("11"), runtime.version());
       Assertions.assertEquals(

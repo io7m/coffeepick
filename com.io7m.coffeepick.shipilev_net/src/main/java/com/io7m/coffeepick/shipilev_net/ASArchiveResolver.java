@@ -130,6 +130,7 @@ public final class ASArchiveResolver
     if (metadata_opt.isPresent()) {
       final var metadata = metadata_opt.get();
       builder.setArchitecture(metadata.architecture());
+      builder.setBuild(metadata.build());
       builder.setPlatform(metadata.platform());
       builder.setVersion(metadata.version());
       builder.setVm("hotspot");

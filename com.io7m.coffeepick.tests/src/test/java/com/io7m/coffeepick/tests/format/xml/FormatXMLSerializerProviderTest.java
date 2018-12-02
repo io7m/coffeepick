@@ -16,6 +16,7 @@
 
 package com.io7m.coffeepick.tests.format.xml;
 
+import com.io7m.coffeepick.runtime.RuntimeBuild;
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
@@ -109,6 +110,11 @@ public final class FormatXMLSerializerProviderTest
         .setVersion(Runtime.Version.parse("11"))
         .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
         .setArchitecture("x64")
+        .setBuild(
+          RuntimeBuild.builder()
+            .setBuildNumber("b23")
+            .setTime(OffsetDateTime.parse("2018-01-01T00:00:00+00:00"))
+            .build())
         .setPlatform("linux")
         .setArchiveURI(URI.create("http://example.com/a.tar.gz"))
         .setArchiveSize(100L)

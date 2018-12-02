@@ -30,6 +30,10 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.parser.api.CoffeePickParsersType;
+import com.io7m.coffeepick.runtime.parser.api.CoffeePickSerializersType;
+import com.io7m.coffeepick.runtime.parser.spi.FormatDescription;
+import com.io7m.coffeepick.runtime.parser.spi.FormatVersion;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.Subject;
@@ -39,6 +43,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
@@ -93,10 +98,14 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
 
   @Override
   public CoffeePickClientType newClient(
+    final CoffeePickParsersType parsers,
+    final CoffeePickSerializersType serializers,
     final Path base_directory,
     final HttpClient http)
     throws IOException
   {
+    Objects.requireNonNull(parsers, "parsers");
+    Objects.requireNonNull(serializers, "serializers");
     Objects.requireNonNull(base_directory, "base_directory");
     Objects.requireNonNull(http, "http");
 
@@ -117,7 +126,16 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     final var inventory =
       CoffeePickInventory.open(inventory_events, base_directory.resolve("inventory"));
 
-    return new Client(events, inventory, catalog, context, this.repositories, base_directory, http);
+    return new Client(
+      events,
+      inventory,
+      catalog,
+      context,
+      this.repositories,
+      base_directory,
+      http,
+      parsers,
+      serializers);
   }
 
   private static final class Client implements CoffeePickClientType
@@ -131,6 +149,8 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     private final AtomicBoolean closed;
     private final Subject<CoffeePickEventType> events;
     private final HttpClient http;
+    private final CoffeePickParsersType parsers;
+    private final CoffeePickSerializersType serializers;
 
     Client(
       final Subject<CoffeePickEventType> in_events,
@@ -139,7 +159,9 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       final RuntimeRepositoryContextType in_context,
       final RuntimeRepositoryProviderRegistryType in_repositories,
       final Path in_base_directory,
-      final HttpClient in_http)
+      final HttpClient in_http,
+      final CoffeePickParsersType in_parsers,
+      final CoffeePickSerializersType in_serializers)
     {
       this.events =
         Objects.requireNonNull(in_events, "events");
@@ -155,6 +177,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
         Objects.requireNonNull(in_repositories, "repositories");
       this.http =
         Objects.requireNonNull(in_http, "http");
+      this.parsers =
+        Objects.requireNonNull(in_parsers, "parsers");
+      this.serializers =
+        Objects.requireNonNull(in_serializers, "serializers");
 
       this.executor = Executors.newFixedThreadPool(1, runnable -> {
         final var thread = new Thread(runnable);
@@ -351,10 +377,112 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
           .collect(Collectors.toList()));
     }
 
-    private interface TaskType<T>
+    @Override
+    public CompletableFuture<Void> repositoryExport(
+      final URI repository,
+      final URI format,
+      final Path output_path)
     {
-      T execute(CompletableFuture<T> future)
-        throws Exception;
+      Objects.requireNonNull(repository, "uri");
+      Objects.requireNonNull(format, "format");
+      Objects.requireNonNull(output_path, "output_path");
+
+      final CompletableFuture<FormatDescription> find_format =
+        this.submit(future -> this.doFindFormat(format));
+
+      return find_format.thenCompose(
+        description -> this.repositoryExport(repository, description, output_path));
+    }
+
+    @Override
+    public CompletableFuture<Void> repositoryExport(
+      final URI repository,
+      final FormatDescription format,
+      final FormatVersion version,
+      final Path output_path)
+    {
+      Objects.requireNonNull(repository, "uri");
+      Objects.requireNonNull(format, "format");
+      Objects.requireNonNull(version, "version");
+      Objects.requireNonNull(output_path, "output_path");
+
+      return this.submit(future -> this.doExport(repository, format, version, output_path));
+    }
+
+    @Override
+    public CompletableFuture<Void> repositoryExport(
+      final URI repository,
+      final FormatDescription format,
+      final Path output_path)
+    {
+      Objects.requireNonNull(repository, "uri");
+      Objects.requireNonNull(format, "format");
+      Objects.requireNonNull(output_path, "output_path");
+
+      final CompletableFuture<FormatVersion> find_format =
+        this.submit(future -> this.doFindFormatVersion(format));
+
+      return find_format.thenCompose(
+        version -> this.submit(future -> this.doExport(repository, format, version, output_path)));
+    }
+
+    private Void doExport(
+      final URI repository,
+      final FormatDescription format,
+      final FormatVersion version,
+      final Path output_path)
+      throws IOException
+    {
+      final var repos =
+        this.catalog.listRepositories()
+          .stream()
+          .filter(p -> Objects.equals(p.description().id(), repository))
+          .findFirst()
+          .orElseThrow(() -> new IllegalArgumentException("No such repository: " + repository));
+
+      try (var output = Files.newOutputStream(output_path)) {
+        try (var serial = this.serializers.createSerializer(format, version, output)) {
+          serial.serialize(repos.description());
+        }
+        output.flush();
+      }
+      return null;
+    }
+
+    private FormatVersion doFindFormatVersion(
+      final FormatDescription format)
+      throws IOException
+    {
+      final var supported = this.serializers.findSupportedVersions(format);
+      if (supported.isEmpty()) {
+        throw new IOException(
+          new StringBuilder(128)
+            .append("No suitable format provider.")
+            .append(System.lineSeparator())
+            .append("  Format: ")
+            .append(format.name())
+            .append(' ')
+            .append(format.description())
+            .append(System.lineSeparator())
+            .toString());
+      }
+      return supported.last();
+    }
+
+    private FormatDescription doFindFormat(
+      final URI format)
+      throws IOException
+    {
+      return this.serializers.findFormat(format)
+        .orElseThrow(() ->
+                       new IOException(
+                         new StringBuilder(128)
+                           .append("No suitable format provider.")
+                           .append(System.lineSeparator())
+                           .append("  Format: ")
+                           .append(format)
+                           .append(System.lineSeparator())
+                           .toString()));
     }
 
     private <T> CompletableFuture<T> submit(
@@ -379,6 +507,12 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       if (this.closed.get()) {
         throw new IllegalStateException("Client is closed");
       }
+    }
+
+    private interface TaskType<T>
+    {
+      T execute(CompletableFuture<T> future)
+        throws Exception;
     }
   }
 }

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static org.jline.builtins.Completers.TreeCompleter.node;
 
 /**
@@ -102,6 +103,12 @@ public final class CoffeePickShellCommandRuntimeShow implements CoffeePickShellC
       "Archive Size",
       Long.toUnsignedString(description.archiveSize()));
     this.writer.printf("%-16s: %-32s\n", "Archive URI", description.archiveURI());
+
+    description.build().ifPresent(build -> {
+      this.writer.printf("%-16s: %-32s\n", "Build Number", build.buildNumber());
+      this.writer.printf("%-16s: %-32s\n", "Build Date", ISO_OFFSET_DATE_TIME.format(build.time()));
+    });
+
     this.writer.printf("%-16s: %-32s\n", "Configuration", description.configuration());
     this.writer.printf("%-16s: %-32s\n", "Platform", description.platform());
     this.writer.printf("%-16s: %-32s\n", "Repository", description.repository());

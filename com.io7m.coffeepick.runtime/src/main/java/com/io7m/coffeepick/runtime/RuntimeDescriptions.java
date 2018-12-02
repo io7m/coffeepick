@@ -19,10 +19,15 @@ package com.io7m.coffeepick.runtime;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.DateTimeException;
+import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 /**
  * Functions to parse inventory items.
@@ -54,6 +59,10 @@ public final class RuntimeDescriptions
     "coffeepick.runtimeArchiveHashValue";
   private static final String COFFEEPICK_RUNTIME_TAGS =
     "coffeepick.runtimeTags";
+  private static final String COFFEEPICK_RUNTIME_BUILD_NUMBER =
+    "coffeepick.runtimeBuildNumber";
+  private static final String COFFEEPICK_RUNTIME_BUILD_TIME =
+    "coffeepick.runtimeBuildTime";
 
   private RuntimeDescriptions()
   {
@@ -101,6 +110,14 @@ public final class RuntimeDescriptions
       COFFEEPICK_RUNTIME_ARCHIVE_HASH_ALGORITHM, description.archiveHash().algorithm());
     properties.setProperty(
       COFFEEPICK_RUNTIME_ARCHIVE_HASH_VALUE, description.archiveHash().value());
+
+    description.build().ifPresent(build -> {
+      properties.setProperty(
+        COFFEEPICK_RUNTIME_BUILD_NUMBER, build.buildNumber());
+      properties.setProperty(
+        COFFEEPICK_RUNTIME_BUILD_TIME, ISO_OFFSET_DATE_TIME.format(build.time()));
+    });
+
     properties.setProperty(
       COFFEEPICK_RUNTIME_CONFIGURATION, description.configuration().configurationName());
     properties.setProperty(
@@ -197,6 +214,13 @@ public final class RuntimeDescriptions
       exception = accumulateException(exception, e);
     }
 
+    Optional<RuntimeBuild> build = Optional.empty();
+    try {
+      build = parseBuild(properties);
+    } catch (final IOException e) {
+      exception = accumulateException(exception, e);
+    }
+
     URI repository = null;
     try {
       repository = parseRepositoryURI(properties);
@@ -243,6 +267,7 @@ public final class RuntimeDescriptions
       .setArchiveHash(archive_hash)
       .setArchiveSize(archive_size)
       .setArchiveURI(archive_uri)
+      .setBuild(build)
       .setConfiguration(configuration)
       .setPlatform(platform)
       .setRepository(repository)
@@ -251,8 +276,46 @@ public final class RuntimeDescriptions
       .setVersion(version)
       .build();
   }
-
   // CHECKSTYLE:ON
+
+  private static Optional<RuntimeBuild> parseBuild(
+    final Properties properties)
+    throws IOException
+  {
+    if (properties.containsKey(COFFEEPICK_RUNTIME_BUILD_NUMBER)) {
+      final var number =
+        requireField(properties, COFFEEPICK_RUNTIME_BUILD_NUMBER).trim();
+      final var time_text =
+        requireField(properties, COFFEEPICK_RUNTIME_BUILD_TIME).trim();
+
+      try {
+        final var time = OffsetDateTime.from(ISO_OFFSET_DATE_TIME.parse(time_text));
+        return Optional.of(
+          RuntimeBuild.builder()
+            .setBuildNumber(number)
+            .setTime(time)
+            .build());
+      } catch (final DateTimeException e) {
+        final var separator = System.lineSeparator();
+        throw new IOException(
+          new StringBuilder(64)
+            .append("Unparseable configuration")
+            .append(separator)
+            .append("  Field: ")
+            .append(COFFEEPICK_RUNTIME_BUILD_TIME)
+            .append(separator)
+            .append("  Expected: A date/time value")
+            .append(separator)
+            .append("  Received: ")
+            .append(time_text)
+            .append(separator)
+            .toString(),
+          e);
+      }
+    }
+
+    return Optional.empty();
+  }
 
   private static Set<String> parseTags(
     final Properties properties)

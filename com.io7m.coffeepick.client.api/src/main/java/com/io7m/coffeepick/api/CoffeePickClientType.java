@@ -18,6 +18,8 @@ package com.io7m.coffeepick.api;
 
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.parser.spi.FormatDescription;
+import com.io7m.coffeepick.runtime.parser.spi.FormatVersion;
 import io.reactivex.Observable;
 
 import java.io.Closeable;
@@ -212,4 +214,52 @@ public interface CoffeePickClientType extends Closeable
    */
 
   CompletableFuture<List<RuntimeRepositoryType>> repositoryList();
+
+  /**
+   * Export the repository with the given URI, using the default format.
+   *
+   * @param repository  The repository
+   * @param format      The format name
+   * @param output_path The output file
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<Void> repositoryExport(
+    URI repository,
+    URI format,
+    Path output_path);
+
+  /**
+   * Export the repository with the given URI.
+   *
+   * @param repository  The repository
+   * @param output_path The output file
+   * @param format      The output format
+   * @param version     The output format version
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<Void> repositoryExport(
+    URI repository,
+    FormatDescription format,
+    FormatVersion version,
+    Path output_path);
+
+  /**
+   * Export the repository with the given URI. The client will pick the highest supported format
+   * version.
+   *
+   * @param repository  The repository
+   * @param output_path The output file
+   * @param format      The output format
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<Void> repositoryExport(
+    URI repository,
+    FormatDescription format,
+    Path output_path);
 }
