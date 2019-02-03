@@ -105,6 +105,11 @@
         <version>0.0.1</version>
       </dependency>
       <dependency>
+        <groupId>com.io7m.junreachable</groupId>
+        <artifactId>com.io7m.junreachable.core</artifactId>
+        <version>2.1.1</version>
+      </dependency>
+      <dependency>
         <groupId>com.io7m.jlexing</groupId>
         <artifactId>com.io7m.jlexing.core</artifactId>
         <version>2.0.0</version>
@@ -227,6 +232,22 @@
           <artifactId>spotbugs-maven-plugin</artifactId>
           <configuration>
             <excludeFilterFile>spotbugs-filter.xml</excludeFilterFile>
+          </configuration>
+        </plugin>
+
+        <!-- Ignore dependencies that bytecode analysis gets wrong. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <configuration>
+            <failOnWarning>true</failOnWarning>
+            <ignoredUnusedDeclaredDependencies>
+              <ignoredUnusedDeclaredDependency>org.immutables:value:*</ignoredUnusedDeclaredDependency>
+              <ignoredUnusedDeclaredDependency>com.io7m.immutables.style:com.io7m.immutables.style:*</ignoredUnusedDeclaredDependency>
+              <ignoredUnusedDeclaredDependency>org.osgi:org.osgi.service.component.annotations:*</ignoredUnusedDeclaredDependency>
+              <ignoredUnusedDeclaredDependency>org.osgi:org.osgi.annotation.bundle:*</ignoredUnusedDeclaredDependency>
+              <ignoredUnusedDeclaredDependency>org.osgi:org.osgi.annotation:*</ignoredUnusedDeclaredDependency>
+            </ignoredUnusedDeclaredDependencies>
           </configuration>
         </plugin>
       </plugins>
