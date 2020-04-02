@@ -132,7 +132,7 @@ public final class RuntimeDescriptions
     properties.setProperty(
       COFFEEPICK_RUNTIME_TAGS, String.join(" ", description.tags()));
     properties.setProperty(
-      COFFEEPICK_RUNTIME_VERSION, description.version().toString());
+      COFFEEPICK_RUNTIME_VERSION, description.version().toExternalString());
 
     return properties;
   }
@@ -241,7 +241,7 @@ public final class RuntimeDescriptions
       exception = accumulateException(exception, e);
     }
 
-    Runtime.Version version = null;
+    RuntimeVersion version = null;
     try {
       version = parseVersion(properties);
     } catch (final IOException e) {
@@ -366,14 +366,14 @@ public final class RuntimeDescriptions
     }
   }
 
-  private static Runtime.Version parseVersion(
+  private static RuntimeVersion parseVersion(
     final Properties properties)
     throws IOException
   {
     final var text = requireField(properties, COFFEEPICK_RUNTIME_VERSION);
 
     try {
-      return Runtime.Version.parse(text);
+      return RuntimeVersions.parse(text);
     } catch (final Exception e) {
       final var separator = System.lineSeparator();
       throw new IOException(

@@ -17,6 +17,7 @@
 package com.io7m.coffeepick.shipilev_net;
 
 import com.io7m.coffeepick.runtime.RuntimeBuild;
+import com.io7m.coffeepick.runtime.RuntimeVersions;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -84,7 +85,7 @@ public final class ASFilenameMetadataParsing
           0,
           ZoneOffset.UTC);
 
-      builder.setVersion(Runtime.Version.parse(build_version));
+      builder.setVersion(RuntimeVersions.parse(build_version));
       builder.setBuild(
         RuntimeBuild.builder()
           .setBuildNumber(build_number)

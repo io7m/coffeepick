@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+
 <configuration xmlns="http://ch.qos.logback/xml/ns/logback">
 
   <appender name="STDERR"
@@ -11,6 +12,9 @@
 
   <logger name="com.io7m.coffeepick.shipilev_net.ASFileList"
           level="DEBUG"/>
+
+  <logger name="net.adoptopenjdk.v3"
+          level="INFO"/>
 
   <root level="TRACE">
     <appender-ref ref="STDERR"/>

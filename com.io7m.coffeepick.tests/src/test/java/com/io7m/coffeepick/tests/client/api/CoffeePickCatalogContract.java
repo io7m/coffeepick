@@ -27,6 +27,7 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
+import com.io7m.coffeepick.runtime.RuntimeVersions;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import org.junit.jupiter.api.Assertions;
@@ -105,7 +106,7 @@ public abstract class CoffeePickCatalogContract
         .setArchiveURI(URI.create("https://www.example.com"))
         .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
-        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVersion(RuntimeVersions.parse("11.0.1"))
         .setVm("hotspot")
         .build();
 
@@ -145,7 +146,7 @@ public abstract class CoffeePickCatalogContract
         .setArchiveURI(URI.create("https://www.example.com"))
         .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
-        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVersion(RuntimeVersions.parse("11.0.1"))
         .setVm("hotspot")
         .build();
 

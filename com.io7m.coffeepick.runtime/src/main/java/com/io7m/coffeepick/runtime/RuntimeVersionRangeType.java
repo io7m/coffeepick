@@ -34,7 +34,7 @@ public interface RuntimeVersionRangeType
    */
 
   @Value.Parameter
-  Runtime.Version lower();
+  RuntimeVersion lower();
 
   /**
    * @return {@code true} iff the lower bound is exclusive
@@ -48,7 +48,7 @@ public interface RuntimeVersionRangeType
    */
 
   @Value.Parameter
-  Runtime.Version upper();
+  RuntimeVersion upper();
 
   /**
    * @return {@code true} iff the upper bound is exclusive
@@ -89,7 +89,7 @@ public interface RuntimeVersionRangeType
    */
 
   default boolean includes(
-    final Runtime.Version version)
+    final RuntimeVersion version)
   {
     Objects.requireNonNull(version, "version");
 

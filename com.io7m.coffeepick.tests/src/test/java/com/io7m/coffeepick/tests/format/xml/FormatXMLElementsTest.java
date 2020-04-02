@@ -21,6 +21,7 @@ import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
+import com.io7m.coffeepick.runtime.RuntimeVersions;
 import com.io7m.coffeepick.runtime.format.xml.FormatXMLElements;
 import com.io7m.coffeepick.runtime.format.xml.FormatXMLSPIParserProvider;
 import com.io7m.coffeepick.runtime.parser.spi.ParsedRepository;
@@ -153,7 +154,7 @@ public final class FormatXMLElementsTest
             .build())
         .setConfiguration(RuntimeConfiguration.JDK)
         .setRepository(URI.create("urn:repository"))
-        .setVersion(Runtime.Version.parse("11"))
+        .setVersion(RuntimeVersions.parse("11.0.0"))
         .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
         .setArchitecture("x64")
         .setPlatform("linux")
@@ -167,7 +168,7 @@ public final class FormatXMLElementsTest
       RuntimeDescription.builder()
         .setConfiguration(RuntimeConfiguration.JDK)
         .setRepository(URI.create("urn:repository"))
-        .setVersion(Runtime.Version.parse("11"))
+        .setVersion(RuntimeVersions.parse("11.0.0"))
         .setArchiveHash(RuntimeHash.of("SHA-256", "bdec"))
         .setArchitecture("x64")
         .setPlatform("linux")
@@ -181,7 +182,7 @@ public final class FormatXMLElementsTest
       RuntimeDescription.builder()
         .setConfiguration(RuntimeConfiguration.JDK)
         .setRepository(URI.create("urn:repository"))
-        .setVersion(Runtime.Version.parse("11"))
+        .setVersion(RuntimeVersions.parse("11.0.0"))
         .setArchiveHash(RuntimeHash.of("SHA-256", "ffff"))
         .setArchitecture("x64")
         .setPlatform("linux")
@@ -222,7 +223,7 @@ public final class FormatXMLElementsTest
             .build())
         .setConfiguration(RuntimeConfiguration.JDK)
         .setRepository(URI.create("urn:repository"))
-        .setVersion(Runtime.Version.parse("11"))
+        .setVersion(RuntimeVersions.parse("11.0.0"))
         .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
         .setArchitecture("x64")
         .setPlatform("linux")

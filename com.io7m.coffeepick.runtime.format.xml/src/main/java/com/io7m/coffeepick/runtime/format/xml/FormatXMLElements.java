@@ -105,7 +105,7 @@ public final class FormatXMLElements
     e_runtime.setAttribute("archiveSize", Long.toUnsignedString(runtime.archiveSize()));
     e_runtime.setAttribute("configuration", runtime.configuration().configurationName());
     e_runtime.setAttribute("platform", runtime.platform());
-    e_runtime.setAttribute("version", runtime.version().toString());
+    e_runtime.setAttribute("version", runtime.version().toExternalString());
     e_runtime.setAttribute("vm", runtime.vm());
 
     if (append_repository) {

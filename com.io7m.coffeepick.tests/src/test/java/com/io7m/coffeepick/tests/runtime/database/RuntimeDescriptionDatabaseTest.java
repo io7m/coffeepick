@@ -19,6 +19,7 @@ package com.io7m.coffeepick.tests.runtime.database;
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
+import com.io7m.coffeepick.runtime.RuntimeVersions;
 import com.io7m.coffeepick.runtime.database.RuntimeDescriptionDatabase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +63,7 @@ public final class RuntimeDescriptionDatabaseTest
       RuntimeDescription.builder()
         .setConfiguration(RuntimeConfiguration.JDK)
         .setRepository(URI.create("urn:repository"))
-        .setVersion(Runtime.Version.parse("11"))
+        .setVersion(RuntimeVersions.parse("11.0.0"))
         .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
         .setArchitecture("x64")
         .setPlatform("linux")
@@ -91,7 +92,7 @@ public final class RuntimeDescriptionDatabaseTest
       RuntimeDescription.builder()
         .setConfiguration(RuntimeConfiguration.JDK)
         .setRepository(URI.create("urn:repository"))
-        .setVersion(Runtime.Version.parse("11"))
+        .setVersion(RuntimeVersions.parse("11"))
         .setArchiveHash(RuntimeHash.of("SHA-256", "abcd"))
         .setArchitecture("x64")
         .setPlatform("linux")

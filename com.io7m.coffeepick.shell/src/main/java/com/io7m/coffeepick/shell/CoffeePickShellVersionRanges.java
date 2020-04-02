@@ -17,6 +17,7 @@
 package com.io7m.coffeepick.shell;
 
 import com.io7m.coffeepick.runtime.RuntimeVersionRange;
+import com.io7m.coffeepick.runtime.RuntimeVersions;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -87,7 +88,7 @@ public final class CoffeePickShellVersionRanges
         }
       }
 
-      final var version = Runtime.Version.parse(text);
+      final var version = RuntimeVersions.parse(text);
       return RuntimeVersionRange.builder()
         .setLowerExclusive(false)
         .setLower(version)
@@ -106,9 +107,9 @@ public final class CoffeePickShellVersionRanges
   {
     return RuntimeVersionRange.builder()
       .setLowerExclusive(lower_ex)
-      .setLower(Runtime.Version.parse(matcher.group(1)))
+      .setLower(RuntimeVersions.parse(matcher.group(1)))
       .setUpperExclusive(upper_ex)
-      .setUpper(Runtime.Version.parse(matcher.group(2)))
+      .setUpper(RuntimeVersions.parse(matcher.group(2)))
       .build();
   }
 }

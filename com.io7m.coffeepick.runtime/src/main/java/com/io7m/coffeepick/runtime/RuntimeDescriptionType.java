@@ -41,7 +41,7 @@ public interface RuntimeDescriptionType
    * @return The runtime version
    */
 
-  Runtime.Version version();
+  RuntimeVersion version();
 
   /**
    * @return The JVM configuration

@@ -14,51 +14,13 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.shipilev_net;
-
-import com.io7m.coffeepick.runtime.RuntimeBuild;
-import com.io7m.coffeepick.runtime.RuntimeVersion;
-import com.io7m.immutables.styles.ImmutablesStyleType;
-import org.immutables.value.Value;
-
-import java.util.Optional;
-import java.util.Set;
-
 /**
- * Information parsed from shipilev.net filenames.
+ * Java runtime retrieval (AdoptOpenJDK v3 provider)
  */
 
-@ImmutablesStyleType
-@Value.Immutable
-public interface ASFilenameMetadataType
-{
-  /**
-   * @return The version
-   */
+@Export
+@Version("1.0.0")
+package com.io7m.coffeepick.adoptopenjdk_v3;
 
-  RuntimeVersion version();
-
-  /**
-   * @return The architecture
-   */
-
-  String architecture();
-
-  /**
-   * @return The operating system
-   */
-
-  String platform();
-
-  /**
-   * @return The build information
-   */
-
-  Optional<RuntimeBuild> build();
-
-  /**
-   * @return The extra tags for the build
-   */
-
-  Set<String> extraTags();
-}
+import org.osgi.annotation.bundle.Export;
+import org.osgi.annotation.versioning.Version;

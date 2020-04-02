@@ -17,6 +17,7 @@
 package com.io7m.coffeepick.api;
 
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.RuntimeVersion;
 import com.io7m.coffeepick.runtime.RuntimeVersionRange;
 
 import java.util.Objects;
@@ -104,11 +105,10 @@ public final class CoffeePickSearches
   }
 
   private static boolean matchesVersionRange(
-    final Runtime.Version version,
+    final RuntimeVersion version,
     final Optional<RuntimeVersionRange> range)
   {
-    return range.map(version_range -> Boolean.valueOf(version_range.includes(version)))
-      .orElse(Boolean.TRUE)
-      .booleanValue();
+    return range.map(vRange -> Boolean.valueOf(vRange.includes(version)))
+      .orElse(Boolean.TRUE).booleanValue();
   }
 }

@@ -215,48 +215,50 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
   private static void writeLockedArchive(
     final RuntimeDescription description,
     final RuntimeCancellableArchiveWriterType writer,
-    final Path archive_tmp,
+    final Path archiveTmp,
     final Path archive)
     throws IOException
   {
-    LOG.debug("write archive {}", archive_tmp);
-    try (var stream = Files.newOutputStream(archive_tmp, TRUNCATE_EXISTING, CREATE, WRITE)) {
-      final var expected_hash = description.archiveHash();
-      final var digest = MessageDigest.getInstance(expected_hash.algorithm());
-      try (var digest_stream = new DigestOutputStream(stream, digest)) {
-        writer.write(digest_stream);
-        digest_stream.flush();
+    LOG.debug("write archive {}", archiveTmp);
+    try (var stream = Files.newOutputStream(archiveTmp, TRUNCATE_EXISTING, CREATE, WRITE)) {
+      final var expectedHash = description.archiveHash();
+      final var digest = MessageDigest.getInstance(expectedHash.algorithm());
+      try (var digestStream = new DigestOutputStream(stream, digest)) {
+        writer.write(digestStream);
+        digestStream.flush();
 
-        final var received_hash =
-          RuntimeHash.of(expected_hash.algorithm(), Hex.encodeHexString(digest.digest(), true));
+        final var encodedDigest =
+          Hex.encodeHexString(digest.digest(), true);
+        final var receivedHash =
+          RuntimeHash.of(expectedHash.algorithm(), encodedDigest);
 
-        if (!Objects.equals(expected_hash, received_hash)) {
+        if (!Objects.equals(expectedHash, receivedHash)) {
           final var separator = System.lineSeparator();
           throw new IOException(
             new StringBuilder(64)
               .append("Final archive hash does not match expected hash.")
               .append(separator)
               .append("  Expected: ")
-              .append(expected_hash.algorithm())
+              .append(expectedHash.algorithm())
               .append(" ")
-              .append(expected_hash.value())
+              .append(expectedHash.value())
               .append(separator)
               .append("  Received: ")
-              .append(received_hash.algorithm())
+              .append(receivedHash.algorithm())
               .append(" ")
-              .append(received_hash.value())
+              .append(receivedHash.value())
               .append(separator)
               .toString());
         }
 
-        LOG.debug("rename {} -> {}", archive_tmp, archive);
-        Files.move(archive_tmp, archive, REPLACE_EXISTING, ATOMIC_MOVE);
+        LOG.debug("rename {} -> {}", archiveTmp, archive);
+        Files.move(archiveTmp, archive, REPLACE_EXISTING, ATOMIC_MOVE);
       }
     } catch (final NoSuchAlgorithmException e) {
       throw new IOException(e);
     } finally {
-      LOG.debug("unlink {}", archive_tmp);
-      Files.deleteIfExists(archive_tmp);
+      LOG.debug("unlink {}", archiveTmp);
+      Files.deleteIfExists(archiveTmp);
     }
   }
 

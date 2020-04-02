@@ -57,7 +57,7 @@ public final class RuntimeDescriptionsTest
       Assertions.assertEquals(
         "linux", description_0.platform());
       Assertions.assertEquals(
-        "11.0.1", description_0.version().toString());
+        "11.0.1", description_0.version().toExternalString());
       Assertions.assertEquals(
         CoffeePickInventoryContract.HASH_VALUE,
         description_0.archiveHash().value());

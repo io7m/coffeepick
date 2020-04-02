@@ -18,6 +18,7 @@ package com.io7m.coffeepick.runtime.format.xml;
 
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.RuntimeVersions;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.Locator2;
@@ -123,7 +124,7 @@ public final class FormatXML1RuntimeHandler
       this.runtime_builder.setArchitecture(
         attributes.getValue("architecture"));
       this.runtime_builder.setVersion(
-        Runtime.Version.parse(attributes.getValue("version")));
+        RuntimeVersions.parse(attributes.getValue("version")));
       this.runtime_builder.setVm(
         attributes.getValue("vm"));
 

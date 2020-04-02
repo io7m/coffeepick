@@ -26,6 +26,8 @@ import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.coffeepick.runtime.RuntimeVersionRange;
+import com.io7m.coffeepick.runtime.RuntimeVersions;
+import com.io7m.coffeepick.tests.TestDirectories;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import org.apache.commons.codec.binary.Hex;
@@ -83,7 +85,7 @@ public abstract class CoffeePickInventoryContract
   public final void setup()
     throws IOException
   {
-    this.directory = Files.createTempDirectory("coffee-pick-inventory-");
+    this.directory = TestDirectories.createTempDirectory();
     this.event_log = new ArrayList<>();
     this.events = PublishSubject.create();
     this.events.subscribe(e -> {
@@ -117,7 +119,7 @@ public abstract class CoffeePickInventoryContract
         .setArchiveURI(URI.create("https://www.example.com"))
         .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
-        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVersion(RuntimeVersions.parse("11.0.1"))
         .setVm("hotspot")
         .build();
 
@@ -151,7 +153,7 @@ public abstract class CoffeePickInventoryContract
         .setArchiveURI(URI.create("https://www.example.com"))
         .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
-        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVersion(RuntimeVersions.parse("11.0.1"))
         .setVm("hotspot")
         .build();
 
@@ -176,7 +178,7 @@ public abstract class CoffeePickInventoryContract
         .mapToObj(major -> IntStream.rangeClosed(0, 9)
           .mapToObj(minor -> {
             var version_name =
-              String.format("%d+%d", Integer.valueOf(major), Integer.valueOf(minor));
+              String.format("%d.0.0+%d", Integer.valueOf(major), Integer.valueOf(minor));
 
             return RuntimeDescription.builder()
               .setRepository(URI.create("urn:example"))
@@ -186,7 +188,7 @@ public abstract class CoffeePickInventoryContract
               .setArchiveURI(URI.create("https://www.example.com"))
               .setConfiguration(RuntimeConfiguration.JDK)
               .setPlatform("linux")
-              .setVersion(Runtime.Version.parse(version_name))
+              .setVersion(RuntimeVersions.parse(version_name))
               .setVm("hotspot")
               .build();
           })
@@ -197,7 +199,7 @@ public abstract class CoffeePickInventoryContract
     for (final var description : descriptions) {
       inventory.write(
         description,
-        stream -> stream.write(description.version().toString().getBytes(UTF_8)));
+        stream -> stream.write(description.version().toExternalString().getBytes(UTF_8)));
     }
 
     final var results =
@@ -209,9 +211,9 @@ public abstract class CoffeePickInventoryContract
           .setPlatform("linux")
           .setVersionRange(
             RuntimeVersionRange.builder()
-              .setLower(Runtime.Version.parse("8+0"))
+              .setLower(RuntimeVersions.parse("8"))
               .setLowerExclusive(false)
-              .setUpper(Runtime.Version.parse("12+0"))
+              .setUpper(RuntimeVersions.parse("12"))
               .setUpperExclusive(true)
               .build())
           .setVm("hotspot")
@@ -248,18 +250,18 @@ public abstract class CoffeePickInventoryContract
       IntStream.rangeClosed(8, 11)
         .mapToObj(major -> IntStream.rangeClosed(0, 9)
           .mapToObj(minor -> {
-            var version_name =
-              String.format("%d+%d", Integer.valueOf(major), Integer.valueOf(minor));
+            var versionName =
+              String.format("%d.0.0+%d", Integer.valueOf(major), Integer.valueOf(minor));
 
             return RuntimeDescription.builder()
               .setRepository(URI.create("urn:example"))
               .setArchitecture("x64")
-              .setArchiveHash(RuntimeHash.of("SHA-256", hashOf(version_name)))
+              .setArchiveHash(RuntimeHash.of("SHA-256", hashOf(versionName)))
               .setArchiveSize(100L)
               .setArchiveURI(URI.create("https://www.example.com"))
               .setConfiguration(RuntimeConfiguration.JDK)
               .setPlatform("linux")
-              .setVersion(Runtime.Version.parse(version_name))
+              .setVersion(RuntimeVersions.parse(versionName))
               .setVm("hotspot")
               .build();
           })
@@ -269,7 +271,7 @@ public abstract class CoffeePickInventoryContract
 
     for (final var description : descriptions) {
       inventory.write(description, stream -> {
-        stream.write(description.version().toString().getBytes(UTF_8));
+        stream.write(description.version().toExternalString().getBytes(UTF_8));
       });
     }
 
@@ -317,7 +319,7 @@ public abstract class CoffeePickInventoryContract
         .setArchiveURI(URI.create("https://www.example.com"))
         .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
-        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVersion(RuntimeVersions.parse("11.0.1"))
         .setVm("hotspot")
         .build();
 
@@ -333,9 +335,9 @@ public abstract class CoffeePickInventoryContract
           .setPlatform("linux")
           .setVersionRange(
             RuntimeVersionRange.builder()
-              .setLower(Runtime.Version.parse("11.0.2"))
+              .setLower(RuntimeVersions.parse("11.0.2"))
               .setLowerExclusive(false)
-              .setUpper(Runtime.Version.parse("11.0.3"))
+              .setUpper(RuntimeVersions.parse("11.0.3"))
               .setUpperExclusive(false)
               .build())
           .setVm("hotspot")
@@ -381,7 +383,7 @@ public abstract class CoffeePickInventoryContract
         .setArchiveURI(URI.create("https://www.example.com"))
         .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
-        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVersion(RuntimeVersions.parse("11.0.1"))
         .setVm("hotspot")
         .build();
 
@@ -409,7 +411,7 @@ public abstract class CoffeePickInventoryContract
         .setArchiveURI(URI.create("https://www.example.com"))
         .setConfiguration(RuntimeConfiguration.JDK)
         .setPlatform("linux")
-        .setVersion(Runtime.Version.parse("11.0.1"))
+        .setVersion(RuntimeVersions.parse("11.0.1"))
         .setVm("hotspot")
         .build();
 

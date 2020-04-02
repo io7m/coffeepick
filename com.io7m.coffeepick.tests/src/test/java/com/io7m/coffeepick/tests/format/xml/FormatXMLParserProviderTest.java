@@ -18,6 +18,7 @@ package com.io7m.coffeepick.tests.format.xml;
 
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeHash;
+import com.io7m.coffeepick.runtime.RuntimeVersions;
 import com.io7m.coffeepick.runtime.format.xml.FormatXMLSPIParserProvider;
 import com.io7m.coffeepick.runtime.parser.spi.ParseError;
 import com.io7m.coffeepick.runtime.parser.spi.ParserFailureException;
@@ -105,7 +106,7 @@ public final class FormatXMLParserProviderTest
     Assertions.assertEquals(
       100L, runtime.archiveSize());
     Assertions.assertEquals(
-      Runtime.Version.parse("11"), runtime.version());
+      RuntimeVersions.parse("11"), runtime.version());
     Assertions.assertEquals(
       "hotspot", runtime.vm());
     Assertions.assertEquals(
@@ -182,7 +183,7 @@ public final class FormatXMLParserProviderTest
         runtime.build().get().buildNumber());
 
       Assertions.assertEquals(
-        Runtime.Version.parse("11"), runtime.version());
+        RuntimeVersions.parse("11"), runtime.version());
       Assertions.assertEquals(
         "hotspot", runtime.vm());
       Assertions.assertEquals(
@@ -210,7 +211,7 @@ public final class FormatXMLParserProviderTest
       Assertions.assertEquals(
         200L, runtime.archiveSize());
       Assertions.assertEquals(
-        Runtime.Version.parse("11.0.1"), runtime.version());
+        RuntimeVersions.parse("11.0.1"), runtime.version());
       Assertions.assertEquals(
         "openj9", runtime.vm());
       Assertions.assertEquals(
