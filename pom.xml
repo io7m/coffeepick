@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.io7m.primogenitor</groupId>
     <artifactId>com.io7m.primogenitor.full</artifactId>
-    <version>3.1.0</version>
+    <version>3.5.0</version>
   </parent>
 
   <groupId>com.io7m.coffeepick</groupId>
@@ -28,7 +28,6 @@
     <module>com.io7m.coffeepick.tests</module>
     <module>com.io7m.coffeepick.runtime</module>
     <module>com.io7m.coffeepick.shell</module>
-    <module>com.io7m.coffeepick.adoptopenjdk.raw</module>
     <module>com.io7m.coffeepick.runtime.parser.api</module>
     <module>com.io7m.coffeepick.runtime.parser.spi</module>
     <module>com.io7m.coffeepick.runtime.format.xml</module>

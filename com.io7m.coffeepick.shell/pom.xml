@@ -36,11 +36,6 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>com.io7m.coffeepick.adoptopenjdk.raw</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>com.io7m.coffeepick.shipilev_net</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -52,6 +47,11 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>com.io7m.coffeepick.runtime.format.xml</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>com.io7m.coffeepick.repository.spi</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -72,16 +72,6 @@
       <artifactId>jcommander</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.immutables</groupId>
-      <artifactId>value</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.io7m.immutables.style</groupId>
-      <artifactId>com.io7m.immutables.style</artifactId>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.annotation.bundle</artifactId>
@@ -126,6 +116,20 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <!-- Ignore dependencies that bytecode analysis gets wrong. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <failOnWarning>true</failOnWarning>
+          <ignoredUnusedDeclaredDependencies>
+            <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.jdk_java_net:*</ignoredUnusedDeclaredDependency>
+            <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.shipilev_net:*</ignoredUnusedDeclaredDependency>
+            <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.runtime.format.xml:*</ignoredUnusedDeclaredDependency>
+          </ignoredUnusedDeclaredDependencies>
+        </configuration>
       </plugin>
 
       <plugin>

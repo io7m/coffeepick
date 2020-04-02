@@ -22,6 +22,7 @@ import com.io7m.coffeepick.runtime.RuntimePlatforms;
 import com.io7m.coffeepick.shipilev_net.ASArchiveResolver;
 import com.io7m.coffeepick.shipilev_net.ASFileList;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,7 @@ public final class ASArchiveResolverTest
   }
 
   @Test
+  @Disabled("Currently, Shipilev.net is not publishing dated binaries")
   public void testResolve()
     throws Exception
   {
@@ -64,11 +66,16 @@ public final class ASArchiveResolverTest
       HttpClient.newBuilder().build();
     final var names =
       ASFileList.fetch(client);
+
+    Assertions.assertTrue(
+      names.size() > 0,
+      String.format("Must have received more than 0 names (got %d)", Integer.valueOf(names.size())));
+
     final var runtimes =
       ASArchiveResolver.create(client)
         .resolve(names);
 
-    Assertions.assertTrue(runtimes.size() > 250);
+    Assertions.assertEquals(names.size(), runtimes.size());
     Assertions.assertAll(
       runtimes.stream()
         .map(description -> () -> {

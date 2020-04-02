@@ -56,24 +56,4 @@ public final class ASRepositoryTest
     final var repository = provider.openRepository(context);
     repository.update(() -> false);
   }
-
-  @Test
-  public void testUpdateCancelled()
-    throws Exception
-  {
-    final var context = Mockito.mock(RuntimeRepositoryContextType.class);
-    Mockito.when(context.httpClient())
-      .thenReturn(HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .build());
-    Mockito.when(context.cacheDirectory())
-      .thenReturn(this.directory);
-
-    final var provider = new ASRepositoryProvider();
-    final var repository = provider.openRepository(context);
-
-    Assertions.assertThrows(CancellationException.class, () -> {
-      repository.update(() -> true);
-    });
-  }
 }

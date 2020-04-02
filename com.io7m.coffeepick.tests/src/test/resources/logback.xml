@@ -9,6 +9,9 @@
     <target>System.err</target>
   </appender>
 
+  <logger name="com.io7m.coffeepick.shipilev_net.ASFileList"
+          level="DEBUG"/>
+
   <root level="TRACE">
     <appender-ref ref="STDERR"/>
   </root>
