@@ -32,7 +32,8 @@
 
     <dependency>
       <groupId>com.io7m.jcip</groupId>
-      <artifactId>jcip-annotations</artifactId>
+      <artifactId>com.io7m.jcip.annotations</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.immutables</groupId>
@@ -52,6 +53,11 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.annotation.bundle</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.annotation.versioning</artifactId>
       <scope>provided</scope>
     </dependency>
   </dependencies>

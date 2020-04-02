@@ -18,5 +18,9 @@
  * Java runtime retrieval (Runtime XML format)
  */
 
-@org.osgi.annotation.bundle.Export
+@Export
+@Version("1.0.0")
 package com.io7m.coffeepick.runtime.format.xml;
+
+import org.osgi.annotation.bundle.Export;
+import org.osgi.annotation.versioning.Version;

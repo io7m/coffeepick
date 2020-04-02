@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Mark Raynsford <code@io7m.com> http://io7m.com
+ * Copyright © 2020 Mark Raynsford <code@io7m.com> http://io7m.com
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,15 @@
  */
 
 /**
- * Java runtime retrieval (Runtime parser SPI)
+ * Java runtime retrieval (Runtime types)
  */
 
-@Export
-@Version("1.0.0")
-package com.io7m.coffeepick.runtime.parser.spi;
+module com.io7m.coffeepick.runtime
+{
+  requires static com.io7m.immutables.style;
+  requires static org.immutables.value;
+  requires static org.osgi.annotation.bundle;
+  requires static org.osgi.annotation.versioning;
 
-import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.versioning.Version;
+  exports com.io7m.coffeepick.runtime;
+}

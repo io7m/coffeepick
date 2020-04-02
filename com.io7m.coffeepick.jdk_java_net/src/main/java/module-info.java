@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Mark Raynsford <code@io7m.com> http://io7m.com
+ * Copyright © 2020 Mark Raynsford <code@io7m.com> http://io7m.com
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,13 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import com.io7m.coffeepick.jdk_java_net.OJNRepositoryProvider;
+import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderType;
+
 /**
  * Java runtime retrieval (openjdk.java.net Provider)
  */
 
-@Export
-@Version("1.0.0")
-package com.io7m.coffeepick.jdk_java_net;
+module com.io7m.coffeepick.jdk_java_net
+{
+  requires static com.io7m.immutables.style;
+  requires static org.immutables.value;
+  requires static org.osgi.annotation.bundle;
+  requires static org.osgi.annotation.versioning;
+  requires static org.osgi.service.component.annotations;
 
-import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.versioning.Version;
+  requires com.io7m.coffeepick.repository.spi;
+  requires com.io7m.coffeepick.runtime;
+  requires io.reactivex.rxjava2;
+  requires org.slf4j;
+
+  provides RuntimeRepositoryProviderType with OJNRepositoryProvider;
+
+  exports com.io7m.coffeepick.jdk_java_net;
+}

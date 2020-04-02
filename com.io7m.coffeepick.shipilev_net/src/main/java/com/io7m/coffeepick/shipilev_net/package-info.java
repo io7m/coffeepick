@@ -18,5 +18,9 @@
  * Java runtime retrieval (Shipilev.net Provider)
  */
 
-@org.osgi.annotation.bundle.Export
+@Export
+@Version("1.0.0")
 package com.io7m.coffeepick.shipilev_net;
+
+import org.osgi.annotation.bundle.Export;
+import org.osgi.annotation.versioning.Version;

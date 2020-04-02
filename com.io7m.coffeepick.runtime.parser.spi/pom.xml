@@ -40,11 +40,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.annotation</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>com.io7m.immutables.style</groupId>
       <artifactId>com.io7m.immutables.style</artifactId>
       <scope>provided</scope>
@@ -57,6 +52,11 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.annotation.bundle</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.annotation.versioning</artifactId>
       <scope>provided</scope>
     </dependency>
   </dependencies>
