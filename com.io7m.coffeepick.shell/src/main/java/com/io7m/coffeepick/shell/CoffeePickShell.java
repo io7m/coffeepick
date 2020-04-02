@@ -19,9 +19,10 @@ package com.io7m.coffeepick.shell;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.io7m.coffeepick.api.CoffeePickUserDirectory;
 import com.io7m.coffeepick.client.vanilla.CoffeePickClients;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoaderProvider;
+import com.io7m.jade.api.ApplicationDirectories;
+import com.io7m.jade.spi.ApplicationDirectoryConfiguration;
 import org.jline.builtins.Completers.TreeCompleter;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReaderBuilder;
@@ -67,6 +68,16 @@ public final class CoffeePickShell
     final String[] args)
     throws IOException
   {
+    final var directoryConfiguration =
+      ApplicationDirectoryConfiguration.builder()
+        .setOverridePropertyName("com.io7m.coffeepick.home")
+        .setPortablePropertyName("com.io7m.coffeepick.portableHome")
+        .setApplicationName("com.io7m.coffeepick")
+        .build();
+
+    final var directories =
+      ApplicationDirectories.get(directoryConfiguration);
+
     final var parameters = new Parameters();
     final var console = new CoffeePickStringConsole();
     final var commander =
@@ -91,8 +102,7 @@ public final class CoffeePickShell
 
     try (var terminal = createTerminal()) {
       try (var writer = terminal.writer()) {
-
-        final var directory = CoffeePickUserDirectory.detectUserDirectory();
+        final var directory = directories.dataDirectory();
         writer.printf("User directory: %s\n", directory);
         writer.flush();
         Files.createDirectories(directory);
