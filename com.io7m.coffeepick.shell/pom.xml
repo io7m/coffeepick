@@ -84,6 +84,10 @@
       <groupId>com.io7m.jade</groupId>
       <artifactId>com.io7m.jade.vanilla</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.io7m.jade</groupId>
+      <artifactId>com.io7m.jade.spi</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.osgi</groupId>
@@ -138,10 +142,11 @@
         <configuration>
           <failOnWarning>true</failOnWarning>
           <ignoredUnusedDeclaredDependencies>
-            <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.jdk_java_net:*</ignoredUnusedDeclaredDependency>
-            <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.shipilev_net:*</ignoredUnusedDeclaredDependency>
             <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.adoptopenjdk_v3:*</ignoredUnusedDeclaredDependency>
+            <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.jdk_java_net:*</ignoredUnusedDeclaredDependency>
             <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.runtime.format.xml:*</ignoredUnusedDeclaredDependency>
+            <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.shipilev_net:*</ignoredUnusedDeclaredDependency>
+            <ignoredUnusedDeclaredDependency>com.io7m.jade:com.io7m.jade.vanilla:*</ignoredUnusedDeclaredDependency>
           </ignoredUnusedDeclaredDependencies>
         </configuration>
       </plugin>

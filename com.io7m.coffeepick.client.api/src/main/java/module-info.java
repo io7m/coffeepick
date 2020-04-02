@@ -32,7 +32,6 @@ module com.io7m.coffeepick.client.api
   requires com.io7m.coffeepick.runtime;
   requires io.reactivex.rxjava2;
   requires java.net.http;
-  requires org.slf4j;
 
   exports com.io7m.coffeepick.api;
 }

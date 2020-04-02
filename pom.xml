@@ -229,6 +229,11 @@
         <artifactId>com.io7m.jade.vanilla</artifactId>
         <version>${com.io7m.jade.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.io7m.jade</groupId>
+        <artifactId>com.io7m.jade.spi</artifactId>
+        <version>${com.io7m.jade.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
