@@ -34,6 +34,7 @@
     <module>com.io7m.coffeepick.shipilev_net</module>
     <module>com.io7m.coffeepick.runtime.database</module>
     <module>com.io7m.coffeepick.adoptopenjdk_v3</module>
+    <module>com.io7m.coffeepick.documentation</module>
   </modules>
 
   <properties>
@@ -210,6 +211,11 @@
         <groupId>net.adoptopenjdk</groupId>
         <artifactId>net.adoptopenjdk.v3.api</artifactId>
         <version>${net.adoptopenjdk.v3.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.primogenitor</groupId>
+        <artifactId>com.io7m.primogenitor.support</artifactId>
+        <version>3.5.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

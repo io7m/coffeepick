@@ -13,7 +13,6 @@
 
   <artifactId>com.io7m.coffeepick.client.api</artifactId>
 
-  <packaging>jar</packaging>
   <name>com.io7m.coffeepick.client.api</name>
   <description>Java runtime retrieval (Client API)</description>
   <url>http://github.com/io7m/coffeepick</url>
