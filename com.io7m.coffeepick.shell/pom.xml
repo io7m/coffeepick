@@ -31,6 +31,11 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>com.io7m.coffeepick.adoptopenjdk_v3</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>com.io7m.coffeepick.jdk_java_net</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -127,6 +132,7 @@
           <ignoredUnusedDeclaredDependencies>
             <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.jdk_java_net:*</ignoredUnusedDeclaredDependency>
             <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.shipilev_net:*</ignoredUnusedDeclaredDependency>
+            <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.adoptopenjdk_v3:*</ignoredUnusedDeclaredDependency>
             <ignoredUnusedDeclaredDependency>com.io7m.coffeepick:com.io7m.coffeepick.runtime.format.xml:*</ignoredUnusedDeclaredDependency>
           </ignoredUnusedDeclaredDependencies>
         </configuration>

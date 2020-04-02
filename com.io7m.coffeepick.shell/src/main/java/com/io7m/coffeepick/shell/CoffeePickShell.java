@@ -68,9 +68,11 @@ public final class CoffeePickShell
     throws IOException
   {
     final var parameters = new Parameters();
+    final var console = new CoffeePickStringConsole();
     final var commander =
       JCommander.newBuilder()
         .addObject(parameters)
+        .console(console)
         .programName("coffeepick")
         .build();
 
@@ -78,9 +80,8 @@ public final class CoffeePickShell
       commander.parse(args);
     } catch (final ParameterException e) {
       LOG.error("parameter error: {}", e.getMessage());
-      final var sb = new StringBuilder(128);
-      commander.usage(sb);
-      LOG.info("usage: {}", sb.toString());
+      commander.usage();
+      LOG.info("usage: {}", console.stringBuilder().toString());
       System.exit(1);
     }
 
@@ -231,4 +232,5 @@ public final class CoffeePickShell
 
     }
   }
+
 }

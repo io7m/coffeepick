@@ -166,6 +166,7 @@ public final class AOJRepository implements RuntimeRepositoryType
       final var releases = releaseRequest.execute();
       final var releaseCount = releases.availableReleases().size();
       var releaseIndex = 0;
+      var processed = 0;
 
       for (final var release : releases.availableReleases()) {
         if (cancelled.getAsBoolean()) {
@@ -179,9 +180,12 @@ public final class AOJRepository implements RuntimeRepositoryType
             .setProgress(progress)
             .build());
 
-        this.processForRelease(cancelled, this.fetchForRelease(release));
+        processed +=
+          this.processForRelease(cancelled, this.fetchForRelease(release));
         ++releaseIndex;
       }
+
+      LOG.info("processed {} runtimes", Integer.valueOf(processed));
 
       this.events.onNext(
         RuntimeRepositoryEventUpdateFinished.builder()
@@ -197,10 +201,11 @@ public final class AOJRepository implements RuntimeRepositoryType
     }
   }
 
-  private void processForRelease(
+  private int processForRelease(
     final BooleanSupplier cancelled,
     final ArrayList<AOV3Release> releases)
   {
+    var processed = 0;
     for (final var release : releases) {
       for (final var binary : release.binaries()) {
         if (cancelled.getAsBoolean()) {
@@ -212,15 +217,8 @@ public final class AOJRepository implements RuntimeRepositoryType
           final var checksumOpt = package_.checksum();
           if (checksumOpt.isPresent()) {
             final var checksum = checksumOpt.get();
-            if (checksum.isBlank()) {
-              LOG.warn(
-                "received invalid blank checksum for release {}",
-                release.id());
-              continue;
-            }
-
             if (binary.imageType() == AOV3ImageKind.TESTIMAGE) {
-              LOG.debug(
+              LOG.trace(
                 "ignoring {} for release {}",
                 binary.imageType(),
                 release.id());
@@ -246,12 +244,14 @@ public final class AOJRepository implements RuntimeRepositoryType
                 .build();
 
             this.database.add(runtimeDescription);
+            ++processed;
           }
         } catch (final Exception e) {
           LOG.error("error parsing runtime: ", e);
         }
       }
     }
+    return processed;
   }
 
   private static RuntimeVersion versionOfAOV3VersionData(

@@ -22,6 +22,7 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventType;
 import com.io7m.coffeepick.tests.TestDirectories;
 import io.reactivex.disposables.Disposable;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -73,10 +74,9 @@ public final class AOJRepositoryProviderTest
       provider.openRepository(this.context);
 
     this.subscription = repository.events().subscribe(this::logEvent);
+    repository.update(() -> false);
 
-    repository.update(() -> {
-      return false;
-    });
+    Assertions.assertTrue(repository.runtimes().size() > 60);
   }
 
   private void logEvent(

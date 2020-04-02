@@ -28,8 +28,8 @@ import java.net.URI;
 import java.util.Objects;
 
 @Component(service = RuntimeRepositoryProviderType.class)
-public final class AOJRepositoryProvider implements
-  RuntimeRepositoryProviderType
+public final class AOJRepositoryProvider
+  implements RuntimeRepositoryProviderType
 {
   /**
    * The URI of the provider.

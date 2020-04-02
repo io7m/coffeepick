@@ -74,9 +74,11 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
     arguments.subList(1, arguments.size()).toArray(args);
 
     final var parameters = new Parameters();
+    final var console = new CoffeePickStringConsole();
     final var commander =
       JCommander.newBuilder()
         .addObject(parameters)
+        .console(console)
         .programName("unpack")
         .build();
 
@@ -101,9 +103,8 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
         options);
 
     } catch (final ParameterException e) {
-      final var sb = new StringBuilder(128);
-      commander.usage(sb);
-      this.writer.println(sb.toString());
+      commander.usage();
+      this.writer.println(console.stringBuilder().toString());
       return CompletableFuture.completedFuture(null);
     }
   }
