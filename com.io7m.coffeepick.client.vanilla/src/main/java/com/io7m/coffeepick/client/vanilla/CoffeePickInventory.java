@@ -25,6 +25,7 @@ import com.io7m.coffeepick.api.CoffeePickIsCancelledType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
 import com.io7m.coffeepick.api.CoffeePickSearches;
 import com.io7m.coffeepick.api.CoffeePickVerification;
+import com.io7m.coffeepick.client.vanilla.internal.CoffeePickArchiveEntries;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeDescriptionType;
 import com.io7m.coffeepick.runtime.RuntimeDescriptions;

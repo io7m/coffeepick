@@ -24,7 +24,11 @@ import com.io7m.coffeepick.api.CoffeePickEventType;
 import com.io7m.coffeepick.api.CoffeePickInventoryEventType;
 import com.io7m.coffeepick.api.CoffeePickInventoryType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
+import com.io7m.coffeepick.api.CoffeePickTaskEventFailed;
+import com.io7m.coffeepick.api.CoffeePickTaskEventStarted;
+import com.io7m.coffeepick.api.CoffeePickTaskEventSucceeded;
 import com.io7m.coffeepick.api.CoffeePickVerification;
+import com.io7m.coffeepick.client.vanilla.internal.CoffeePickStrings;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoaderProvider;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
@@ -119,14 +123,21 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     @SuppressWarnings("unchecked") final var catalog_events =
       (Subject<CoffeePickCatalogEventType>) (Object) events;
     final var catalog =
-      CoffeePickCatalog.create(catalog_events, http, context, this.repositories);
+      CoffeePickCatalog.create(
+        catalog_events,
+        http,
+        context,
+        this.repositories);
 
     @SuppressWarnings("unchecked") final var inventory_events =
       (Subject<CoffeePickInventoryEventType>) (Object) events;
     final var inventory =
-      CoffeePickInventory.open(inventory_events, base_directory.resolve("inventory"));
+      CoffeePickInventory.open(
+        inventory_events,
+        base_directory.resolve("inventory"));
 
     return new Client(
+      CoffeePickStrings.of(CoffeePickStrings.getResourceBundle()),
       events,
       inventory,
       catalog,
@@ -147,12 +158,14 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     private final RuntimeRepositoryProviderRegistryType repositories;
     private final ExecutorService executor;
     private final AtomicBoolean closed;
+    private final CoffeePickStrings strings;
     private final Subject<CoffeePickEventType> events;
     private final HttpClient http;
     private final CoffeePickParsersType parsers;
     private final CoffeePickSerializersType serializers;
 
     Client(
+      final CoffeePickStrings in_strings,
       final Subject<CoffeePickEventType> in_events,
       final CoffeePickInventoryType in_inventory,
       final CoffeePickCatalogType in_catalog,
@@ -163,6 +176,8 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       final CoffeePickParsersType in_parsers,
       final CoffeePickSerializersType in_serializers)
     {
+      this.strings =
+        Objects.requireNonNull(in_strings, "strings");
       this.events =
         Objects.requireNonNull(in_events, "events");
       this.inventory =
@@ -216,10 +231,12 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(id, "id");
       this.checkNotClosed();
-      return this.submit(future -> {
-        this.inventory.delete(id);
-        return null;
-      });
+      return this.submit(
+        this.strings.inventoryDelete(id),
+        future -> {
+          this.inventory.delete(id);
+          return null;
+        });
     }
 
     @Override
@@ -228,7 +245,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(id, "id");
       this.checkNotClosed();
-      return this.submit(future -> this.inventory.verify(id, future::isCancelled));
+      return this.submit(
+        this.strings.inventoryVerify(id),
+        future -> this.inventory.verify(id, future::isCancelled)
+      );
     }
 
     @Override
@@ -237,7 +257,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(parameters, "parameters");
       this.checkNotClosed();
-      return this.submit(future -> this.inventory.search(parameters));
+      return this.submit(
+        this.strings.inventorySearch(),
+        future -> this.inventory.search(parameters)
+      );
     }
 
     @Override
@@ -246,7 +269,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(id, "id");
       this.checkNotClosed();
-      return this.submit(future -> this.inventory.searchExact(id));
+      return this.submit(
+        this.strings.inventorySearch(),
+        future -> this.inventory.searchExact(id)
+      );
     }
 
     @Override
@@ -255,7 +281,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     {
       Objects.requireNonNull(parameters, "parameters");
       this.checkNotClosed();
-      return this.submit(future -> this.catalog.search(parameters));
+      return this.submit(
+        this.strings.catalogSearch(),
+        future -> this.catalog.search(parameters)
+      );
     }
 
     @Override
@@ -268,7 +297,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       @SuppressWarnings("unchecked") final var catalog_events =
         (Subject<CoffeePickCatalogEventType>) (Object) this.events;
 
-      return this.submit(future -> this.doDownload(id, catalog_events, future));
+      return this.submit(
+        this.strings.catalogDownload(id),
+        future -> this.doDownload(id, catalog_events, future)
+      );
     }
 
     private Path doDownload(
@@ -321,13 +353,15 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       @SuppressWarnings("unchecked") final var catalog_events =
         (Subject<CoffeePickCatalogEventType>) (Object) this.events;
 
-      return this.submit(future -> {
-        final var result = this.inventory.pathOf(id);
-        if (result.isPresent()) {
-          return result.get();
-        }
-        return this.doDownload(id, catalog_events, future);
-      });
+      return this.submit(
+        this.strings.catalogDownload(id),
+        future -> {
+          final var result = this.inventory.pathOf(id);
+          if (result.isPresent()) {
+            return result.get();
+          }
+          return this.doDownload(id, catalog_events, future);
+        });
     }
 
     @Override
@@ -337,7 +371,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       Objects.requireNonNull(id, "id");
       this.checkNotClosed();
 
-      return this.submit(future -> this.inventory.pathOf(id));
+      return this.submit(
+        this.strings.inventoryPathOf(id),
+        future -> this.inventory.pathOf(id)
+      );
     }
 
     @Override
@@ -351,7 +388,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       Objects.requireNonNull(options, "options");
       this.checkNotClosed();
 
-      return this.submit(future -> this.inventory.unpack(id, path, future::isCancelled, options));
+      return this.submit(
+        this.strings.inventoryUnpack(id, path),
+        future -> this.inventory.unpack(id, path, future::isCancelled, options)
+      );
     }
 
     @Override
@@ -361,16 +401,19 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       Objects.requireNonNull(uri, "uri");
       this.checkNotClosed();
 
-      return this.submit(future -> {
-        this.catalog.updateRepository(uri);
-        return null;
-      });
+      return this.submit(
+        this.strings.repositoryUpdate(uri),
+        future -> {
+          this.catalog.updateRepository(uri);
+          return null;
+        });
     }
 
     @Override
     public CompletableFuture<List<RuntimeRepositoryType>> repositoryList()
     {
       return this.submit(
+        this.strings.repositoryList(),
         future -> this.catalog.listRepositories()
           .stream()
           .sorted(Comparator.comparing(repos -> repos.description().id()))
@@ -388,10 +431,16 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       Objects.requireNonNull(output_path, "output_path");
 
       final CompletableFuture<FormatDescription> find_format =
-        this.submit(future -> this.doFindFormat(format));
+        this.submit(
+          this.strings.repositoryExport(repository, format, output_path),
+          future -> this.doFindFormat(format)
+        );
 
       return find_format.thenCompose(
-        description -> this.repositoryExport(repository, description, output_path));
+        description -> this.repositoryExport(
+          repository,
+          description,
+          output_path));
     }
 
     @Override
@@ -406,7 +455,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       Objects.requireNonNull(version, "version");
       Objects.requireNonNull(output_path, "output_path");
 
-      return this.submit(future -> this.doExport(repository, format, version, output_path));
+      return this.submit(
+        this.strings.repositoryExport(repository, format.name(), output_path),
+        future -> this.doExport(repository, format, version, output_path)
+      );
     }
 
     @Override
@@ -420,10 +472,17 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
       Objects.requireNonNull(output_path, "output_path");
 
       final CompletableFuture<FormatVersion> find_format =
-        this.submit(future -> this.doFindFormatVersion(format));
+        this.submit(
+          this.strings.repositoryExport(repository, format.name(), output_path),
+          future -> this.doFindFormatVersion(format)
+        );
 
       return find_format.thenCompose(
-        version -> this.submit(future -> this.doExport(repository, format, version, output_path)));
+        version -> this.submit(
+          this.strings.repositoryExport(repository, format.name(), output_path),
+          future -> this.doExport(repository, format, version, output_path)
+        )
+      );
     }
 
     private Void doExport(
@@ -441,7 +500,10 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
           .orElseThrow(() -> new IllegalArgumentException("No such repository: " + repository));
 
       try (var output = Files.newOutputStream(output_path)) {
-        try (var serial = this.serializers.createSerializer(format, version, output)) {
+        try (var serial = this.serializers.createSerializer(
+          format,
+          version,
+          output)) {
           serial.serialize(repos.description());
         }
         output.flush();
@@ -486,16 +548,36 @@ public final class CoffeePickClients implements CoffeePickClientProviderType
     }
 
     private <T> CompletableFuture<T> submit(
+      final String message,
       final TaskType<T> callable)
     {
+      Objects.requireNonNull(message, "message");
       Objects.requireNonNull(callable, "callable");
 
       final var future = new CompletableFuture<T>();
       this.executor.execute(() -> {
         try {
+          this.events.onNext(
+            CoffeePickTaskEventStarted.builder()
+              .setDescription(message)
+              .build()
+          );
+
           future.complete(callable.execute(future));
+
+          this.events.onNext(
+            CoffeePickTaskEventSucceeded.builder()
+              .setDescription(message)
+              .build()
+          );
         } catch (final Throwable ex) {
           future.completeExceptionally(ex);
+
+          this.events.onNext(
+            CoffeePickTaskEventFailed.builder()
+              .setDescription(message)
+              .build()
+          );
         }
       });
 
