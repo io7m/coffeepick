@@ -50,7 +50,7 @@ public final class OJNRepositoryTests
       final var runtimes = repository.runtimes();
       runtimes.values().forEach(description -> LOG.debug("runtime: {}", description));
 
-      Assertions.assertEquals(8, runtimes.size());
+      Assertions.assertEquals(9, runtimes.size());
       Assertions.assertTrue(
         runtimes.values().stream()
           .anyMatch(run -> Objects.equals(run.platform(), PLATFORM_LINUX.platformName())),
