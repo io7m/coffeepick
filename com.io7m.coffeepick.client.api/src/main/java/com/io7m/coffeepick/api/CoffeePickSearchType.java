@@ -39,7 +39,7 @@ public interface CoffeePickSearchType
    * @return The repository URI
    */
 
-  Optional<URI> repository();
+  Optional<String> repository();
 
   /**
    * @return The range of acceptable runtime versions

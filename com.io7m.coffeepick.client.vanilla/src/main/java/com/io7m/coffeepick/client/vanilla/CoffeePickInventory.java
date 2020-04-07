@@ -469,7 +469,7 @@ public final class CoffeePickInventory implements CoffeePickInventoryType
 
     return this.runtimes.values()
       .stream()
-      .filter(runtime -> CoffeePickSearches.matches(runtime, parameters))
+      .filter(runtime -> CoffeePickSearches.matchesExact(runtime, parameters))
       .collect(Collectors.toMap(RuntimeDescriptionType::id, d -> d));
   }
 

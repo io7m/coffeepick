@@ -225,7 +225,7 @@ public final class CoffeePickShellSearchParameters
       final CoffeePickSearch.Builder builder,
       final String value)
     {
-      builder.setRepository(URI.create(value));
+      builder.setRepository(value);
     }
   }
 

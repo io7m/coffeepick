@@ -29,6 +29,38 @@ import java.util.stream.Stream;
 public final class RuntimeVersionTest
 {
   @Test
+  public void testVersionMinimalString0()
+    throws IOException
+  {
+    final var version = RuntimeVersions.parse("3.0.0+0");
+    Assertions.assertEquals("3", version.toExternalMinimalString());
+  }
+
+  @Test
+  public void testVersionMinimalString1()
+    throws IOException
+  {
+    final var version = RuntimeVersions.parse("3.1.0+0");
+    Assertions.assertEquals("3.1", version.toExternalMinimalString());
+  }
+
+  @Test
+  public void testVersionMinimalString2()
+    throws IOException
+  {
+    final var version = RuntimeVersions.parse("3.0.1+0");
+    Assertions.assertEquals("3.0.1", version.toExternalMinimalString());
+  }
+
+  @Test
+  public void testVersionMinimalString3()
+    throws IOException
+  {
+    final var version = RuntimeVersions.parse("3.0.1+1");
+    Assertions.assertEquals("3.0.1+1", version.toExternalMinimalString());
+  }
+
+  @Test
   public void testVersion0()
     throws IOException
   {
@@ -37,6 +69,7 @@ public final class RuntimeVersionTest
     Assertions.assertEquals(2, version.minor().intValue());
     Assertions.assertEquals(1, version.patch().intValue());
     Assertions.assertEquals(20, version.build().get().intValue());
+    Assertions.assertEquals("3.2.1+20", version.toExternalString());
   }
 
   @Test
@@ -48,6 +81,7 @@ public final class RuntimeVersionTest
     Assertions.assertEquals(2, version.minor().intValue());
     Assertions.assertEquals(1, version.patch().intValue());
     Assertions.assertEquals(Optional.empty(), version.build());
+    Assertions.assertEquals("3.2.1", version.toExternalString());
   }
 
   @TestFactory

@@ -89,4 +89,51 @@ public interface RuntimeVersionType extends Comparable<RuntimeVersionType>
     });
     return builder.toString();
   }
+
+  /**
+   * @return The version as an external string (such as "3.2.1+200")
+   */
+
+  default String toExternalMinimalString()
+  {
+    final var builder = new StringBuilder(32);
+
+    if (this.isBuildNonZero()) {
+      return this.toExternalString();
+    }
+
+    if (this.isPatchNonZero()) {
+      builder.append(this.major());
+      builder.append('.');
+      builder.append(this.minor());
+      builder.append('.');
+      builder.append(this.patch());
+      return builder.toString();
+    }
+
+    if (this.isMinorNonZero()) {
+      builder.append(this.major());
+      builder.append('.');
+      builder.append(this.minor());
+      return builder.toString();
+    }
+
+    builder.append(this.major());
+    return builder.toString();
+  }
+
+  private boolean isBuildNonZero()
+  {
+    return this.build().orElse(BigInteger.ZERO).compareTo(BigInteger.ZERO) > 0;
+  }
+
+  private boolean isMinorNonZero()
+  {
+    return this.minor().compareTo(BigInteger.ZERO) > 0;
+  }
+
+  private boolean isPatchNonZero()
+  {
+    return this.patch().compareTo(BigInteger.ZERO) > 0;
+  }
 }

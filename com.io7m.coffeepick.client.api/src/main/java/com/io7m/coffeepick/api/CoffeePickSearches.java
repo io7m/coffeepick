@@ -20,6 +20,7 @@ import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeVersion;
 import com.io7m.coffeepick.runtime.RuntimeVersionRange;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -45,6 +46,16 @@ public final class CoffeePickSearches
       .booleanValue();
   }
 
+  private static <T> boolean matchesFieldInexact(
+    final String field,
+    final Optional<String> matcher)
+  {
+    return matcher.map(match -> Boolean.valueOf(
+      field.toUpperCase(Locale.ROOT).contains(match.toUpperCase(Locale.ROOT))))
+      .orElse(Boolean.TRUE)
+      .booleanValue();
+  }
+
   /**
    * @param runtime    The runtime runtimes
    * @param parameters The search parameters
@@ -52,22 +63,57 @@ public final class CoffeePickSearches
    * @return {@code true} if the given runtime is matched by the given search parameters
    */
 
-  public static boolean matches(
+  public static boolean matchesExact(
     final RuntimeDescription runtime,
     final CoffeePickSearch parameters)
   {
     Objects.requireNonNull(runtime, "runtime");
     Objects.requireNonNull(parameters, "parameters");
 
-    return matchesArchive(runtime, parameters) && matchesRuntime(runtime, parameters);
+    return matchesArchive(runtime, parameters)
+      && matchesExactRuntime(runtime, parameters);
   }
 
-  // CHECKSTYLE:OFF
-  private static boolean matchesRuntime(
+  /**
+   * @param runtime    The runtime runtimes
+   * @param parameters The search parameters
+   *
+   * @return {@code true} if the given runtime is matched by the given search parameters
+   */
+
+  public static boolean matchesInexact(
     final RuntimeDescription runtime,
     final CoffeePickSearch parameters)
   {
-    return matchesField(runtime.repository(), parameters.repository())
+    Objects.requireNonNull(runtime, "runtime");
+    Objects.requireNonNull(parameters, "parameters");
+
+    return matchesArchive(runtime, parameters)
+      && matchesInexactRuntime(runtime, parameters);
+  }
+
+  // CHECKSTYLE:OFF
+  private static boolean matchesInexactRuntime(
+    final RuntimeDescription runtime,
+    final CoffeePickSearch parameters)
+  {
+    return matchesFieldInexact(runtime.repository().toString(), parameters.repository())
+      && matchesField(runtime.configuration(), parameters.configuration())
+      && matchesFieldInexact(runtime.id(), parameters.id())
+      && matchesFieldInexact(runtime.platform(), parameters.platform())
+      && matchesFieldInexact(runtime.architecture(), parameters.architecture())
+      && matchesFieldInexact(runtime.vm(), parameters.vm())
+      && matchesTags(runtime.tags(), parameters.requiredTags())
+      && matchesVersionRange(runtime.version(), parameters.versionRange());
+  }
+  // CHECKSTYLE:ON
+
+  // CHECKSTYLE:OFF
+  private static boolean matchesExactRuntime(
+    final RuntimeDescription runtime,
+    final CoffeePickSearch parameters)
+  {
+    return matchesField(runtime.repository().toString(), parameters.repository())
       && matchesField(runtime.configuration(), parameters.configuration())
       && matchesField(runtime.id(), parameters.id())
       && matchesField(runtime.platform(), parameters.platform())
@@ -88,10 +134,10 @@ public final class CoffeePickSearches
   }
 
   private static boolean matchesTags(
-    final Set<String> received_tags,
-    final Set<String> required_tags)
+    final Set<String> receivedTags,
+    final Set<String> requiredTags)
   {
-    return received_tags.containsAll(required_tags);
+    return receivedTags.containsAll(requiredTags);
   }
 
   private static boolean matchesArchiveSize(

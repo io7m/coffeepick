@@ -249,7 +249,7 @@ public final class CoffeePickCatalog implements CoffeePickCatalogType
     return this.runtime_repositories.values()
       .stream()
       .flatMap(m -> m.runtimes().values().stream())
-      .filter(r -> CoffeePickSearches.matches(r, parameters))
+      .filter(r -> CoffeePickSearches.matchesExact(r, parameters))
       .collect(Collectors.toMap(RuntimeDescriptionType::id, Function.identity()));
   }
 

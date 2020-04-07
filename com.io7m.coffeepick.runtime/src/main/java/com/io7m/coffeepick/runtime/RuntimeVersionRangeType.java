@@ -83,6 +83,32 @@ public interface RuntimeVersionRangeType
   }
 
   /**
+   * @return The current range as an external string (such as {@code [1.2.3,2.0.0)}).
+   */
+
+  default String toExternalString()
+  {
+    final var builder = new StringBuilder(32);
+    if (this.lowerExclusive()) {
+      builder.append('(');
+    } else {
+      builder.append('[');
+    }
+
+    builder.append(this.lower().toExternalMinimalString());
+    builder.append(',');
+    builder.append(this.upper().toExternalMinimalString());
+
+    if (this.upperExclusive()) {
+      builder.append(')');
+    } else {
+      builder.append(']');
+    }
+
+    return builder.toString();
+  }
+
+  /**
    * @param version The runtime version
    *
    * @return {@code true} if the given version is within the current range
