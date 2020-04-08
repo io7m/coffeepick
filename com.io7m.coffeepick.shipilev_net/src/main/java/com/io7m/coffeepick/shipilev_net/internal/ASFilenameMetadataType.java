@@ -14,45 +14,51 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.shipilev_net;
+package com.io7m.coffeepick.shipilev_net.internal;
 
+import com.io7m.coffeepick.runtime.RuntimeBuild;
+import com.io7m.coffeepick.runtime.RuntimeVersion;
 import com.io7m.immutables.styles.ImmutablesStyleType;
 import org.immutables.value.Value;
 
-import java.util.Comparator;
+import java.util.Optional;
+import java.util.Set;
 
 /**
- * A file name and size.
+ * Information parsed from shipilev.net filenames.
  */
 
 @ImmutablesStyleType
 @Value.Immutable
-public interface ASFileType extends Comparable<ASFileType>
+public interface ASFilenameMetadataType
 {
   /**
-   * @return The directory name
+   * @return The version
    */
 
-  String directory();
+  RuntimeVersion version();
 
   /**
-   * @return The file name
+   * @return The architecture
    */
 
-  String name();
+  String architecture();
 
   /**
-   * @return The file size
+   * @return The operating system
    */
 
-  long size();
+  String platform();
 
-  @Override
-  default int compareTo(final ASFileType other)
-  {
-    return Comparator.comparing(ASFileType::directory)
-      .thenComparing(ASFileType::name)
-      .thenComparingLong(ASFileType::size)
-      .compare(this, other);
-  }
+  /**
+   * @return The build information
+   */
+
+  Optional<RuntimeBuild> build();
+
+  /**
+   * @return The extra tags for the build
+   */
+
+  Set<String> extraTags();
 }

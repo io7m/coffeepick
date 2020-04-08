@@ -17,6 +17,7 @@
 package com.io7m.coffeepick.runtime.format.xml;
 
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryBranding;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
@@ -37,7 +38,7 @@ import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
  */
 
 public final class FormatXML1RepositoryHandler
-  extends FormatXMLAbstractContentHandler<List<RuntimeDescription>, RuntimeRepositoryDescription>
+  extends FormatXMLAbstractContentHandler<Object, RuntimeRepositoryDescription>
 {
   private final RuntimeRepositoryDescription.Builder repository_builder;
   private URI repository_uri;
@@ -56,11 +57,25 @@ public final class FormatXML1RepositoryHandler
   }
 
   @Override
-  protected Map<String, Supplier<FormatXMLContentHandlerType<List<RuntimeDescription>>>> onWantChildHandlers()
+  protected Map<String, Supplier<FormatXMLContentHandlerType<Object>>> onWantChildHandlers()
   {
-    return Map.of(
-      "runtimes", () -> new FormatXML1RuntimesHandler(this.repository_uri, super.locator())
+    return Map.ofEntries(
+      Map.entry("runtimes", this::runtimesHandler),
+      Map.entry("branding", this::brandingHandler)
     );
+  }
+
+  private FormatXMLContentHandlerType<Object> runtimesHandler()
+  {
+    return new FormatXML1RuntimesHandler(
+      this.repository_uri,
+      this.locator()
+    ).map(r -> r);
+  }
+
+  private FormatXMLContentHandlerType<Object> brandingHandler()
+  {
+    return new FormatXML1BrandingHandler(this.locator()).map(r -> r);
   }
 
   @Override
@@ -103,10 +118,17 @@ public final class FormatXML1RepositoryHandler
   }
 
   @Override
-  protected void onChildResultReceived(final List<RuntimeDescription> runtimes)
+  protected void onChildResultReceived(
+    final Object childValue)
   {
-    for (final var runtime : runtimes) {
-      this.repository_builder.putRuntimes(runtime.id(), runtime);
+    if (childValue instanceof List) {
+      final var childList = (List<RuntimeDescription>) childValue;
+      for (final var runtime : childList) {
+        this.repository_builder.putRuntimes(runtime.id(), runtime);
+      }
+    } else if (childValue instanceof RuntimeRepositoryBranding) {
+      this.repository_builder.setBranding(
+        (RuntimeRepositoryBranding) childValue);
     }
   }
 }

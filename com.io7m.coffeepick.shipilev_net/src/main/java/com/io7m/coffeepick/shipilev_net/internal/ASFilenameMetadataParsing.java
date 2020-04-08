@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.shipilev_net;
+package com.io7m.coffeepick.shipilev_net.internal;
 
 import com.io7m.coffeepick.runtime.RuntimeBuild;
 import com.io7m.coffeepick.runtime.RuntimeVersions;
@@ -34,13 +34,22 @@ import java.util.regex.Pattern;
 public final class ASFilenameMetadataParsing
 {
   private static final Pattern BUILD_NUMBERS_WITH_DATE =
-    Pattern.compile("^([a-z0-9]+)-([0-9]{4})([0-9]{2})([0-9]{2})-jdk-([a-z0-9+.]+)-(.*)");
+    Pattern.compile(
+      "^([a-z0-9]+)-([0-9]{4})([0-9]{2})([0-9]{2})-jdk-([a-z0-9+.]+)-(.*)");
 
   private static final Pattern BUILD_PLATFORM_ARCH_TAGS =
-    Pattern.compile("^([a-z0-9]+)-([a-z0-9_-]+)-(release|fastdebug|slowdebug)(.*)");
+    Pattern.compile(
+      "^([a-z0-9]+)-([a-z0-9_-]+)-(release|fastdebug|slowdebug)(.*)");
 
   private static final Set<String> TAG_NAMES =
-    Set.of("loom", "panama", "portola", "shenandoah", "valhalla", "zgc", "redhat");
+    Set.of(
+      "loom",
+      "panama",
+      "portola",
+      "shenandoah",
+      "valhalla",
+      "zgc",
+      "redhat");
 
   private ASFilenameMetadataParsing()
   {

@@ -10,7 +10,7 @@
     <target>System.err</target>
   </appender>
 
-  <logger name="com.io7m.coffeepick.shipilev_net.ASFileList"
+  <logger name="com.io7m.coffeepick.shipilev_net.internal.ASFileList"
           level="DEBUG"/>
 
   <logger name="net.adoptopenjdk.v3"

@@ -52,6 +52,12 @@ public interface RuntimeRepositoryDescriptionType
   Map<String, RuntimeDescription> runtimes();
 
   /**
+   * @return Branding information for the repository
+   */
+
+  RuntimeRepositoryBranding branding();
+
+  /**
    * Check preconditions for the type.
    */
 

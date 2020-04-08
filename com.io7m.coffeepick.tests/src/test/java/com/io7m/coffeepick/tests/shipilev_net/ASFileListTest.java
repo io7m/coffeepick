@@ -16,7 +16,7 @@
 
 package com.io7m.coffeepick.tests.shipilev_net;
 
-import com.io7m.coffeepick.shipilev_net.ASFileList;
+import com.io7m.coffeepick.shipilev_net.internal.ASFileList;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

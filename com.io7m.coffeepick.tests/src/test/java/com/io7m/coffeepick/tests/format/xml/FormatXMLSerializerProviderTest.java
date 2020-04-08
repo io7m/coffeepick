@@ -20,6 +20,7 @@ import com.io7m.coffeepick.runtime.RuntimeBuild;
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryBranding;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import com.io7m.coffeepick.runtime.RuntimeVersions;
 import com.io7m.coffeepick.runtime.format.xml.FormatXMLSPIParserProvider;
@@ -93,6 +94,14 @@ public final class FormatXMLSerializerProviderTest
   {
     final var repository =
       RuntimeRepositoryDescription.builder()
+        .setBranding(
+          RuntimeRepositoryBranding.builder()
+            .setLogo(URI.create("https://www.example.com/logo.png"))
+            .setSite(URI.create("https://www.example.com/"))
+            .setSubtitle("Subtitle")
+            .setTitle("Title")
+            .build()
+        )
         .setUpdated(OffsetDateTime.now(ZoneId.of("UTC")))
         .setId(URI.create("urn:repository"))
         .build();
@@ -155,6 +164,14 @@ public final class FormatXMLSerializerProviderTest
 
     final var repository =
       RuntimeRepositoryDescription.builder()
+        .setBranding(
+          RuntimeRepositoryBranding.builder()
+            .setLogo(URI.create("https://www.example.com/logo.png"))
+            .setSite(URI.create("https://www.example.com/"))
+            .setSubtitle("Subtitle")
+            .setTitle("Title")
+            .build()
+        )
         .setUpdated(OffsetDateTime.now(ZoneId.of("UTC")))
         .setId(URI.create("urn:repository"))
         .putRuntimes(runtime_0.id(), runtime_0)

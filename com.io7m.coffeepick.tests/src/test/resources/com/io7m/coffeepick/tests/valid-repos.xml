@@ -2,6 +2,10 @@
 <c:runtime-repository xmlns:c="urn:com.io7m.coffeepick:xml:1.0"
                       id="urn:com.io7m.coffeepick.example"
                       updated="2018-01-01T00:00:00+00:00">
+  <c:branding title="Example Repository"
+              subtitle="Providing example runtimes since 2020"
+              logo="https://www.example.com/logo.png"
+              site="https://www.example.com/"/>
   <c:runtimes>
     <c:runtime configuration="jre"
                platform="linux"

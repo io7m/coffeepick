@@ -14,11 +14,12 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.shipilev_net;
+package com.io7m.coffeepick.shipilev_net.internal;
 
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
+import com.io7m.coffeepick.shipilev_net.ASRepositoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +92,9 @@ public final class ASArchiveResolver
         .setArchiveHash(hashOf(checksum_file, checksums, file))
         .setRepository(ASRepositoryProvider.PROVIDER_URI);
 
-    final var metadata_opt = ASFilenameMetadataParsing.parseFilename(directory, file.name());
+    final var metadata_opt = ASFilenameMetadataParsing.parseFilename(
+      directory,
+      file.name());
     if (metadata_opt.isPresent()) {
       final var metadata = metadata_opt.get();
       builder.setArchitecture(metadata.architecture());
@@ -172,12 +175,19 @@ public final class ASArchiveResolver
     final var runtimes = new ArrayList<RuntimeDescription>(files.size());
     final var grouped = groupByDirectory(files);
     for (final var directory : grouped.keySet()) {
-      final var checksum_uri = URI.create(String.format("%s/%s/SHA1SUMS", BASE_URI, directory));
+      final var checksum_uri = URI.create(String.format(
+        "%s/%s/SHA1SUMS",
+        BASE_URI,
+        directory));
       LOG.debug("{}", checksum_uri);
 
       final var checksums = this.fetchChecksums(checksum_uri);
       for (final var file : grouped.get(directory)) {
-        final var uri = URI.create(String.format("%s/%s/%s", BASE_URI, directory, file.name()));
+        final var uri = URI.create(String.format(
+          "%s/%s/%s",
+          BASE_URI,
+          directory,
+          file.name()));
         LOG.debug("{}", uri);
         runtimeOf(checksum_uri, checksums, directory, file, uri)
           .ifPresent(runtimes::add);
@@ -214,7 +224,9 @@ public final class ASArchiveResolver
 
     final Map<String, String> checksums = new HashMap<>(128);
     try (var stream = response.body()) {
-      try (var buffered = new BufferedReader(new InputStreamReader(stream, UTF_8))) {
+      try (var buffered = new BufferedReader(new InputStreamReader(
+        stream,
+        UTF_8))) {
         buffered.lines().forEach(line -> {
           final var segments = List.of(WHITESPACE.split(line.trim()));
           if (segments.size() == 2) {

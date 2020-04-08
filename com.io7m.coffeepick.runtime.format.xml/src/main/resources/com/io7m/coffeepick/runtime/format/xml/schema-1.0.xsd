@@ -24,9 +24,8 @@
   <simpleType name="configurationType">
     <annotation>
       <documentation>
-        A string specifying the configuration of the runtime. A JDK contains the
-        full compiler and development code. A JRE purely contains code useful
-        for running average Java programs.
+        A string specifying the configuration of the runtime. A JDK contains the full compiler and development code. A
+        JRE purely contains code useful for running average Java programs.
       </documentation>
     </annotation>
 
@@ -39,8 +38,8 @@
   <simpleType name="architectureType">
     <annotation>
       <documentation>
-        A short string identifying the CPU architecture upon which this runtime
-        will execute (such as "x64", "x32", "s390x", "ppc64", etc).
+        A short string identifying the CPU architecture upon which this runtime will execute (such as "x64", "x32",
+        "s390x", "ppc64", etc).
       </documentation>
     </annotation>
 
@@ -52,8 +51,8 @@
   <simpleType name="platformType">
     <annotation>
       <documentation>
-        A short string identifying the operating system upon which this runtime
-        will execute (such as "linux", "windows", "macos", etc).
+        A short string identifying the operating system upon which this runtime will execute (such as "linux",
+        "windows", "macos", etc).
       </documentation>
     </annotation>
 
@@ -65,11 +64,10 @@
   <simpleType name="versionType">
     <annotation>
       <documentation>
-        A java.lang.Runtime.Version string. This schema does not attempt to
-        enforce version number formats strictly, but authors of documents should
-        be aware that consumers will inevitably try to parse values of this
-        type as java.lang.Runtime.Version values. See the JDK JavaDoc for
-        the precise regular expression that defines valid version strings.
+        A java.lang.Runtime.Version string. This schema does not attempt to enforce version number formats strictly, but
+        authors of documents should be aware that consumers will inevitably try to parse values of this type as
+        java.lang.Runtime.Version values. See the JDK JavaDoc for the precise regular expression that defines valid
+        version strings.
       </documentation>
     </annotation>
 
@@ -81,8 +79,7 @@
   <simpleType name="vmType">
     <annotation>
       <documentation>
-        A short string identifying the VM implementation (such as "hotspot",
-        "graal", "openj9", etc).
+        A short string identifying the VM implementation (such as "hotspot", "graal", "openj9", etc).
       </documentation>
     </annotation>
 
@@ -94,9 +91,8 @@
   <simpleType name="tagNameType">
     <annotation>
       <documentation>
-        A short string intended to add extra descriptive information to the
-        runtime. One such tag is "production", indicating that the runtime has
-        been subjected to extensive testing and is believed to be suitable for
+        A short string intended to add extra descriptive information to the runtime. One such tag is "production",
+        indicating that the runtime has been subjected to extensive testing and is believed to be suitable for
         production use.
       </documentation>
     </annotation>
@@ -158,8 +154,7 @@
   <simpleType name="hashAlgorithmType">
     <annotation>
       <documentation>
-        A hash algorithm name (such as "SHA-256"). Names should be one of the
-        JCA standard algorithm names: See
+        A hash algorithm name (such as "SHA-256"). Names should be one of the JCA standard algorithm names: See
         https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#MessageDigest
       </documentation>
     </annotation>
@@ -230,8 +225,8 @@
   <complexType name="runtimeType">
     <annotation>
       <documentation>
-        The description of a runtime, including the information needed to
-        download the runtime and to verify that the download was correct.
+        The description of a runtime, including the information needed to download the runtime and to verify that the
+        download was correct.
       </documentation>
     </annotation>
 
@@ -315,6 +310,7 @@
 
     <sequence minOccurs="0"
               maxOccurs="1">
+      <element ref="c:branding"/>
       <element ref="c:runtimes"/>
     </sequence>
 
@@ -327,14 +323,36 @@
                use="required"/>
   </complexType>
 
+  <element name="branding">
+    <annotation>
+      <documentation>
+        Branding information for a repository.
+      </documentation>
+    </annotation>
+
+    <complexType>
+      <attribute name="title"
+                 type="string"
+                 use="required"/>
+      <attribute name="subtitle"
+                 type="string"
+                 use="required"/>
+      <attribute name="logo"
+                 type="anyURI"
+                 use="required"/>
+      <attribute name="site"
+                 type="anyURI"
+                 use="required"/>
+    </complexType>
+  </element>
+
   <element name="runtime-repository"
            type="c:runtimeRepositoryType">
     <unique name="runtimeHashesAreUnique">
       <annotation>
         <documentation>
-          The combination of hash algorithm and value must be unique within a
-          repository for any given runtime. The URI for each runtime must be
-          unique within a repository.
+          The combination of hash algorithm and value must be unique within a repository for any given runtime. The URI
+          for each runtime must be unique within a repository.
         </documentation>
       </annotation>
 

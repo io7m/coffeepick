@@ -28,6 +28,7 @@ import com.io7m.coffeepick.runtime.RuntimeBuild;
 import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryBranding;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import com.io7m.coffeepick.runtime.RuntimeVersion;
 import com.io7m.coffeepick.runtime.database.RuntimeDescriptionDatabase;
@@ -50,6 +51,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -71,7 +74,7 @@ public final class AOJRepository implements RuntimeRepositoryType
   private final PublishSubject<RuntimeRepositoryEventType> events;
   private final RuntimeRepositoryProviderType provider;
   private final RuntimeDescriptionDatabase database;
-  private final RuntimeRepositoryDescription description;
+  private volatile RuntimeRepositoryDescription description;
 
   private AOJRepository(
     final AOV3ClientType inClient,
@@ -110,6 +113,7 @@ public final class AOJRepository implements RuntimeRepositoryType
 
     final var description =
       RuntimeRepositoryDescription.builder()
+        .setBranding(createBranding())
         .setId(AOJRepositoryProvider.PROVIDER_URI)
         .setUpdated(OffsetDateTime.now(ZoneId.of("UTC")))
         .build();
@@ -127,6 +131,100 @@ public final class AOJRepository implements RuntimeRepositoryType
       database,
       description
     );
+  }
+
+  private static RuntimeVersion versionOfAOV3VersionData(
+    final AOV3VersionData versionData)
+  {
+    return RuntimeVersion.builder()
+      .setMajor(versionData.major())
+      .setMinor(versionData.minor())
+      .setPatch(versionData.security())
+      .setBuild(versionData.adoptBuildNumber())
+      .build();
+  }
+
+  private static RuntimeConfiguration configurationOfAOV3Binary(
+    final AOV3ImageKind image)
+  {
+    switch (image) {
+      case JDK:
+        return RuntimeConfiguration.JDK;
+      case JRE:
+        return RuntimeConfiguration.JRE;
+      case TESTIMAGE:
+        throw new UnreachableCodeException();
+    }
+    throw new UnreachableCodeException();
+  }
+
+  private static String vmOfAOV3JVM(
+    final AOV3JVMImplementation jvmImplementation)
+  {
+    return jvmImplementation.nameText().toLowerCase(Locale.ROOT);
+  }
+
+  private static RuntimeBuild buildOfAOV3Build(
+    final OffsetDateTime timestamp,
+    final AOV3VersionData version)
+  {
+    return RuntimeBuild.builder()
+      .setBuildNumber(version.adoptBuildNumber().toString())
+      .setTime(timestamp)
+      .build();
+  }
+
+  private static String platformOfAOV3OperatingSystem(
+    final AOV3OperatingSystem operatingSystem)
+  {
+    switch (operatingSystem) {
+      case AIX:
+        return "aix";
+      case LINUX:
+        return "linux";
+      case MAC:
+        return "macos";
+      case SOLARIS:
+        return "solaris";
+      case WINDOWS:
+        return "windows";
+    }
+    throw new UnreachableCodeException();
+  }
+
+  private static String archOfAOV3Architecture(
+    final AOV3Architecture architecture)
+  {
+    return architecture.nameText().toLowerCase(Locale.ROOT);
+  }
+
+  private static void onAOv3Error(
+    final AOV3Error error)
+  {
+    LOG.error("error: {}", error.show());
+    error.exception().ifPresent(ex -> LOG.error("exception: ", ex));
+  }
+
+  private static RuntimeRepositoryBranding createBranding()
+  {
+    try {
+      return RuntimeRepositoryBranding.builder()
+        .setLogo(logoURI())
+        .setSite(URI.create("https://www.adoptopenjdk.net"))
+        .setSubtitle("Prebuilt OpenJDK Binaries for Free!")
+        .setTitle("AdoptOpenJDK")
+        .build();
+    } catch (final URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static URI logoURI()
+    throws URISyntaxException
+  {
+    return AOJRepository.class.getResource(
+      "/com/io7m/coffeepick/adoptopenjdk_v3/logo128.png"
+    ).toURI();
   }
 
   @Override
@@ -186,6 +284,8 @@ public final class AOJRepository implements RuntimeRepositoryType
       }
 
       LOG.info("processed {} runtimes", Integer.valueOf(processed));
+      this.description =
+        this.description.withUpdated(OffsetDateTime.now(ZoneId.of("UTC")));
 
       this.events.onNext(
         RuntimeRepositoryEventUpdateFinished.builder()
@@ -254,71 +354,6 @@ public final class AOJRepository implements RuntimeRepositoryType
     return processed;
   }
 
-  private static RuntimeVersion versionOfAOV3VersionData(
-    final AOV3VersionData versionData)
-  {
-    return RuntimeVersion.builder()
-      .setMajor(versionData.major())
-      .setMinor(versionData.minor())
-      .setPatch(versionData.security())
-      .setBuild(versionData.adoptBuildNumber())
-      .build();
-  }
-
-  private static RuntimeConfiguration configurationOfAOV3Binary(
-    final AOV3ImageKind image)
-  {
-    switch (image) {
-      case JDK:
-        return RuntimeConfiguration.JDK;
-      case JRE:
-        return RuntimeConfiguration.JRE;
-      case TESTIMAGE:
-        throw new UnreachableCodeException();
-    }
-    throw new UnreachableCodeException();
-  }
-
-  private static String vmOfAOV3JVM(
-    final AOV3JVMImplementation jvmImplementation)
-  {
-    return jvmImplementation.nameText().toLowerCase(Locale.ROOT);
-  }
-
-  private static RuntimeBuild buildOfAOV3Build(
-    final OffsetDateTime timestamp,
-    final AOV3VersionData version)
-  {
-    return RuntimeBuild.builder()
-      .setBuildNumber(version.adoptBuildNumber().toString())
-      .setTime(timestamp)
-      .build();
-  }
-
-  private static String platformOfAOV3OperatingSystem(
-    final AOV3OperatingSystem operatingSystem)
-  {
-    switch (operatingSystem) {
-      case AIX:
-        return "aix";
-      case LINUX:
-        return "linux";
-      case MAC:
-        return "macos";
-      case SOLARIS:
-        return "solaris";
-      case WINDOWS:
-        return "windows";
-    }
-    throw new UnreachableCodeException();
-  }
-
-  private static String archOfAOV3Architecture(
-    final AOV3Architecture architecture)
-  {
-    return architecture.nameText().toLowerCase(Locale.ROOT);
-  }
-
   private ArrayList<AOV3Release> fetchForRelease(
     final BigInteger release)
     throws AOV3Exception
@@ -383,13 +418,6 @@ public final class AOJRepository implements RuntimeRepositoryType
     return releases;
   }
 
-  private static void onAOv3Error(
-    final AOV3Error error)
-  {
-    LOG.error("error: {}", error.show());
-    error.exception().ifPresent(ex -> LOG.error("exception: ", ex));
-  }
-
   @Override
   public Map<String, RuntimeDescription> runtimes()
   {
@@ -399,9 +427,8 @@ public final class AOJRepository implements RuntimeRepositoryType
   @Override
   public RuntimeRepositoryDescription description()
   {
-    return RuntimeRepositoryDescription.builder()
-      .setId(this.provider.uri())
-      .setRuntimes(Map.copyOf(this.runtimes()))
-      .build();
+    return this.description.withRuntimes(
+      Map.copyOf(this.runtimes())
+    );
   }
 }

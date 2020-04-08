@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.shipilev_net;
+package com.io7m.coffeepick.shipilev_net.internal;
 
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 
@@ -92,7 +92,9 @@ public final class ASFileList
 
     try (var stream = response.body()) {
       try (var input = new XZCompressorInputStream(stream)) {
-        try (var buffered = new BufferedReader(new InputStreamReader(input, UTF_8))) {
+        try (var buffered = new BufferedReader(new InputStreamReader(
+          input,
+          UTF_8))) {
           return buffered.lines()
             .flatMap(ASFileList::toFile)
             .filter(ASFileList::isRelease)

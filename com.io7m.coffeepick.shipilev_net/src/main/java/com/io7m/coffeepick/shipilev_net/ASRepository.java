@@ -25,8 +25,11 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateStarted;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryBranding;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import com.io7m.coffeepick.runtime.database.RuntimeDescriptionDatabase;
+import com.io7m.coffeepick.shipilev_net.internal.ASArchiveResolver;
+import com.io7m.coffeepick.shipilev_net.internal.ASFileList;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -35,6 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.util.HashMap;
 import java.util.Map;
@@ -167,6 +172,28 @@ public final class ASRepository implements RuntimeRepositoryType
     }
   }
 
+  private static RuntimeRepositoryBranding createBranding()
+  {
+    try {
+      return RuntimeRepositoryBranding.builder()
+        .setLogo(logoURI())
+        .setSite(URI.create("https://builds.shipilev.net"))
+        .setSubtitle("Supporting (OpenJDK) maintenance, development, and testing")
+        .setTitle("builds.shipilev.net")
+        .build();
+    } catch (final URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static URI logoURI()
+    throws URISyntaxException
+  {
+    return ASRepository.class.getResource(
+      "/com/io7m/coffeepick/shipilev_net/shipilev128.png"
+    ).toURI();
+  }
+
   @Override
   public Map<String, RuntimeDescription> runtimes()
   {
@@ -177,6 +204,7 @@ public final class ASRepository implements RuntimeRepositoryType
   public RuntimeRepositoryDescription description()
   {
     return RuntimeRepositoryDescription.builder()
+      .setBranding(createBranding())
       .setId(this.provider.uri())
       .setRuntimes(Map.copyOf(this.runtimes()))
       .build();

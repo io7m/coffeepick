@@ -19,6 +19,7 @@ package com.io7m.coffeepick.runtime.format.xml;
 import com.io7m.coffeepick.runtime.RuntimeBuild;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
+import com.io7m.coffeepick.runtime.RuntimeRepositoryBranding;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -66,19 +67,45 @@ public final class FormatXMLElements
     Objects.requireNonNull(document, "document");
     Objects.requireNonNull(repository, "repository");
 
-    final var root = document.createElementNS(NAMESPACE, "c:runtime-repository");
+    final var root =
+      document.createElementNS(NAMESPACE, "c:runtime-repository");
 
     root.setAttribute("id", repository.id().toString());
     repository.updated()
-      .ifPresent(time -> root.setAttribute("updated", ISO_OFFSET_DATE_TIME.format(time)));
+      .ifPresent(time -> root.setAttribute(
+        "updated",
+        ISO_OFFSET_DATE_TIME.format(time)));
 
-    final var runtimes = document.createElementNS(NAMESPACE, "c:runtimes");
+    root.appendChild(ofBranding(document, repository.branding()));
+    final var runtimes =
+      document.createElementNS(NAMESPACE, "c:runtimes");
     root.appendChild(runtimes);
 
     for (final var runtime : repository.runtimes().values()) {
       runtimes.appendChild(ofRuntime(document, runtime, false));
     }
     return root;
+  }
+
+  /**
+   * Serialize the given branding, using the given document to create elements.
+   *
+   * @param document The target document
+   * @param branding The branding
+   *
+   * @return A serialized branding
+   */
+
+  public static Element ofBranding(
+    final Document document,
+    final RuntimeRepositoryBranding branding)
+  {
+    final var eBranding = document.createElementNS(NAMESPACE, "c:branding");
+    eBranding.setAttribute("title", branding.title());
+    eBranding.setAttribute("subtitle", branding.subtitle());
+    eBranding.setAttribute("logo", branding.logo().toString());
+    eBranding.setAttribute("site", branding.site().toString());
+    return eBranding;
   }
 
   /**
@@ -102,8 +129,12 @@ public final class FormatXMLElements
     final var e_runtime = document.createElementNS(NAMESPACE, "c:runtime");
     e_runtime.setAttribute("architecture", runtime.architecture());
     e_runtime.setAttribute("archive", runtime.archiveURI().toString());
-    e_runtime.setAttribute("archiveSize", Long.toUnsignedString(runtime.archiveSize()));
-    e_runtime.setAttribute("configuration", runtime.configuration().configurationName());
+    e_runtime.setAttribute(
+      "archiveSize",
+      Long.toUnsignedString(runtime.archiveSize()));
+    e_runtime.setAttribute(
+      "configuration",
+      runtime.configuration().configurationName());
     e_runtime.setAttribute("platform", runtime.platform());
     e_runtime.setAttribute("version", runtime.version().toExternalString());
     e_runtime.setAttribute("vm", runtime.vm());
@@ -114,7 +145,9 @@ public final class FormatXMLElements
 
     e_runtime.appendChild(ofHash(document, runtime.archiveHash()));
     e_runtime.appendChild(ofTags(document, runtime.tags()));
-    runtime.build().ifPresent(build -> e_runtime.appendChild(ofBuild(document, build)));
+    runtime.build().ifPresent(build -> e_runtime.appendChild(ofBuild(
+      document,
+      build)));
     return e_runtime;
   }
 

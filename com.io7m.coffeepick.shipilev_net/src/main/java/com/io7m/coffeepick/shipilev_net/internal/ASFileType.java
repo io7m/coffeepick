@@ -14,27 +14,45 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.tests.runtime;
+package com.io7m.coffeepick.shipilev_net.internal;
 
-import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Test;
+import com.io7m.immutables.styles.ImmutablesStyleType;
+import org.immutables.value.Value;
+
+import java.util.Comparator;
 
 /**
- * Runtime repository runtimes tests.
+ * A file name and size.
  */
 
-public final class RuntimeRepositoryDescriptionTest
+@ImmutablesStyleType
+@Value.Immutable
+public interface ASFileType extends Comparable<ASFileType>
 {
-  @Test
-  public void testEquals()
+  /**
+   * @return The directory name
+   */
+
+  String directory();
+
+  /**
+   * @return The file name
+   */
+
+  String name();
+
+  /**
+   * @return The file size
+   */
+
+  long size();
+
+  @Override
+  default int compareTo(final ASFileType other)
   {
-    EqualsVerifier.forClass(RuntimeRepositoryDescription.class)
-      .withNonnullFields(
-        "branding",
-        "id",
-        "updated",
-        "runtimes")
-      .verify();
+    return Comparator.comparing(ASFileType::directory)
+      .thenComparing(ASFileType::name)
+      .thenComparingLong(ASFileType::size)
+      .compare(this, other);
   }
 }

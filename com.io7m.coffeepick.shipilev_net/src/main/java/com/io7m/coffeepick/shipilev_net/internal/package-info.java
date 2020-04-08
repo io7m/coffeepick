@@ -14,27 +14,8 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.tests.runtime;
-
-import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Test;
-
 /**
- * Runtime repository runtimes tests.
+ * Java runtime retrieval (Shipilev.net Provider internal packages)
  */
 
-public final class RuntimeRepositoryDescriptionTest
-{
-  @Test
-  public void testEquals()
-  {
-    EqualsVerifier.forClass(RuntimeRepositoryDescription.class)
-      .withNonnullFields(
-        "branding",
-        "id",
-        "updated",
-        "runtimes")
-      .verify();
-  }
-}
+package com.io7m.coffeepick.shipilev_net.internal;

@@ -16,7 +16,7 @@
 
 package com.io7m.coffeepick.tests.shipilev_net;
 
-import com.io7m.coffeepick.shipilev_net.ASFilenameMetadataParsing;
+import com.io7m.coffeepick.shipilev_net.internal.ASFilenameMetadataParsing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

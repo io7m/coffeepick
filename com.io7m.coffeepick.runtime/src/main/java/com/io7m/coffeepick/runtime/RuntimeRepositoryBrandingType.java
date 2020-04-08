@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Mark Raynsford <code@io7m.com> http://io7m.com
+ * Copyright © 2020 Mark Raynsford <code@io7m.com> http://io7m.com
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,51 +14,44 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.coffeepick.shipilev_net;
+package com.io7m.coffeepick.runtime;
 
-import com.io7m.coffeepick.runtime.RuntimeBuild;
-import com.io7m.coffeepick.runtime.RuntimeVersion;
 import com.io7m.immutables.styles.ImmutablesStyleType;
 import org.immutables.value.Value;
 
-import java.util.Optional;
-import java.util.Set;
+import java.net.URI;
 
 /**
- * Information parsed from shipilev.net filenames.
+ * Branding information for a repository.
  */
 
 @ImmutablesStyleType
 @Value.Immutable
-public interface ASFilenameMetadataType
+public interface RuntimeRepositoryBrandingType
 {
   /**
-   * @return The version
+   * A reference to a 128x128 PNG logo.
+   *
+   * @return A logo URI
    */
 
-  RuntimeVersion version();
+  URI logo();
 
   /**
-   * @return The architecture
+   * @return The humanly-readable title of the repository
    */
 
-  String architecture();
+  String title();
 
   /**
-   * @return The operating system
+   * @return The humanly-readable subtitle of the repository
    */
 
-  String platform();
+  String subtitle();
 
   /**
-   * @return The build information
+   * @return The URI of the repository's web site
    */
 
-  Optional<RuntimeBuild> build();
-
-  /**
-   * @return The extra tags for the build
-   */
-
-  Set<String> extraTags();
+  URI site();
 }
