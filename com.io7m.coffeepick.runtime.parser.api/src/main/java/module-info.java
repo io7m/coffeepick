@@ -33,5 +33,8 @@ module com.io7m.coffeepick.runtime.parser.api
   requires io.reactivex.rxjava3;
   requires org.slf4j;
 
+  uses com.io7m.coffeepick.runtime.parser.spi.SPISerializerProviderType;
+  uses com.io7m.coffeepick.runtime.parser.spi.SPIParserProviderType;
+
   exports com.io7m.coffeepick.runtime.parser.api;
 }
