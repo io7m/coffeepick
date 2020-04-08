@@ -16,7 +16,7 @@
 
 package com.io7m.coffeepick.runtime.parser.spi;
 
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 import org.osgi.annotation.versioning.ProviderType;
 
 import java.io.Closeable;

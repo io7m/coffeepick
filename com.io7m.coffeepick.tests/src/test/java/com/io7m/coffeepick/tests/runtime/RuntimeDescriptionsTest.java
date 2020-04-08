@@ -318,7 +318,9 @@ public final class RuntimeDescriptionsTest
       final var properties = new Properties();
       properties.load(stream);
 
-      properties.setProperty("coffeepick.formatVersion", Integer.toString(Integer.MAX_VALUE));
+      properties.setProperty(
+        "coffeepick.formatVersion",
+        Integer.toString(Integer.MAX_VALUE));
 
       final var ex =
         Assertions.assertThrows(

@@ -28,8 +28,8 @@ import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.coffeepick.runtime.RuntimeVersionRange;
 import com.io7m.coffeepick.runtime.RuntimeVersions;
 import com.io7m.coffeepick.tests.TestDirectories;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,8 +100,8 @@ public abstract class CoffeePickInventoryContract
   {
     final var inventory = this.inventory(this.events, this.directory);
     final var results = inventory.search(CoffeePickSearch.builder().build());
-    Assertions.assertEquals(0L, (long) results.size());
-    Assertions.assertEquals(0L, (long) this.event_log.size());
+    Assertions.assertEquals(0L, results.size());
+    Assertions.assertEquals(0L, this.event_log.size());
   }
 
   @Test
@@ -123,18 +123,22 @@ public abstract class CoffeePickInventoryContract
         .setVm("hotspot")
         .build();
 
-    inventory.write(description, stream -> stream.write("hello".getBytes(UTF_8)));
+    inventory.write(
+      description,
+      stream -> stream.write("hello".getBytes(UTF_8)));
 
     final var results = inventory.search(CoffeePickSearch.builder().build());
-    Assertions.assertEquals(1L, (long) results.size());
+    Assertions.assertEquals(1L, results.size());
     Assertions.assertTrue(results.containsKey(HASH_VALUE));
 
     Assertions.assertEquals(
       this.directory.resolve(HASH_VALUE).resolve("archive"),
       inventory.pathOf(HASH_VALUE).get());
 
-    Assertions.assertEquals(1L, (long) this.event_log.size());
-    final var event = this.eventFor(CoffeePickInventoryEventRuntimeLoaded.class, 0);
+    Assertions.assertEquals(1L, this.event_log.size());
+    final var event = this.eventFor(
+      CoffeePickInventoryEventRuntimeLoaded.class,
+      0);
     Assertions.assertEquals(HASH_VALUE, event.id());
   }
 
@@ -164,7 +168,7 @@ public abstract class CoffeePickInventoryContract
     });
 
     final var results = inventory.search(CoffeePickSearch.builder().build());
-    Assertions.assertEquals(0L, (long) results.size());
+    Assertions.assertEquals(0L, results.size());
   }
 
   @Test
@@ -178,7 +182,10 @@ public abstract class CoffeePickInventoryContract
         .mapToObj(major -> IntStream.rangeClosed(0, 9)
           .mapToObj(minor -> {
             var version_name =
-              String.format("%d.0.0+%d", Integer.valueOf(major), Integer.valueOf(minor));
+              String.format(
+                "%d.0.0+%d",
+                Integer.valueOf(major),
+                Integer.valueOf(minor));
 
             return RuntimeDescription.builder()
               .setRepository(URI.create("urn:example"))
@@ -199,7 +206,8 @@ public abstract class CoffeePickInventoryContract
     for (final var description : descriptions) {
       inventory.write(
         description,
-        stream -> stream.write(description.version().toExternalString().getBytes(UTF_8)));
+        stream -> stream.write(description.version().toExternalString().getBytes(
+          UTF_8)));
     }
 
     final var results =
@@ -226,18 +234,22 @@ public abstract class CoffeePickInventoryContract
     }
 
     for (final var description : descriptions) {
-      Assertions.assertEquals(description, inventory.searchExact(description.id()).get());
+      Assertions.assertEquals(
+        description,
+        inventory.searchExact(description.id()).get());
     }
 
-    Assertions.assertEquals(40L, (long) this.event_log.size());
+    Assertions.assertEquals(40L, this.event_log.size());
 
     final var remaining = new HashSet<>(results.keySet());
     for (var index = 0; index < 40; ++index) {
-      final var event = this.eventFor(CoffeePickInventoryEventRuntimeLoaded.class, index);
+      final var event = this.eventFor(
+        CoffeePickInventoryEventRuntimeLoaded.class,
+        index);
       remaining.remove(event.id());
     }
 
-    Assertions.assertEquals(0L, (long) remaining.size());
+    Assertions.assertEquals(0L, remaining.size());
   }
 
   @Test
@@ -251,7 +263,10 @@ public abstract class CoffeePickInventoryContract
         .mapToObj(major -> IntStream.rangeClosed(0, 9)
           .mapToObj(minor -> {
             var versionName =
-              String.format("%d.0.0+%d", Integer.valueOf(major), Integer.valueOf(minor));
+              String.format(
+                "%d.0.0+%d",
+                Integer.valueOf(major),
+                Integer.valueOf(minor));
 
             return RuntimeDescription.builder()
               .setRepository(URI.create("urn:example"))
@@ -283,24 +298,28 @@ public abstract class CoffeePickInventoryContract
       inventory.search(CoffeePickSearch.builder().build());
 
     Assertions.assertEquals(0, results.size());
-    Assertions.assertEquals(80L, (long) this.event_log.size());
+    Assertions.assertEquals(80L, this.event_log.size());
 
     {
       final var remaining = new HashSet<>(results.keySet());
       for (var index = 0; index < 40; ++index) {
-        final var event = this.eventFor(CoffeePickInventoryEventRuntimeLoaded.class, index);
+        final var event = this.eventFor(
+          CoffeePickInventoryEventRuntimeLoaded.class,
+          index);
         remaining.remove(event.id());
       }
-      Assertions.assertEquals(0L, (long) remaining.size());
+      Assertions.assertEquals(0L, remaining.size());
     }
 
     {
       final var remaining = new HashSet<>(results.keySet());
       for (var index = 40; index < 80; ++index) {
-        final var event = this.eventFor(CoffeePickInventoryEventRuntimeDeleted.class, index);
+        final var event = this.eventFor(
+          CoffeePickInventoryEventRuntimeDeleted.class,
+          index);
         remaining.remove(event.id());
       }
-      Assertions.assertEquals(0L, (long) remaining.size());
+      Assertions.assertEquals(0L, remaining.size());
     }
   }
 
@@ -323,7 +342,9 @@ public abstract class CoffeePickInventoryContract
         .setVm("hotspot")
         .build();
 
-    inventory.write(description, stream -> stream.write("hello".getBytes(UTF_8)));
+    inventory.write(
+      description,
+      stream -> stream.write("hello".getBytes(UTF_8)));
 
     final var results =
       inventory.search(
@@ -343,10 +364,12 @@ public abstract class CoffeePickInventoryContract
           .setVm("hotspot")
           .build());
 
-    Assertions.assertEquals(0L, (long) results.size());
+    Assertions.assertEquals(0L, results.size());
 
-    Assertions.assertEquals(1L, (long) this.event_log.size());
-    final var event = this.eventFor(CoffeePickInventoryEventRuntimeLoaded.class, 0);
+    Assertions.assertEquals(1L, this.event_log.size());
+    final var event = this.eventFor(
+      CoffeePickInventoryEventRuntimeLoaded.class,
+      0);
     Assertions.assertEquals(HASH_VALUE, event.id());
   }
 
@@ -361,8 +384,10 @@ public abstract class CoffeePickInventoryContract
 
     final var inventory = this.inventory(this.events, this.directory);
 
-    Assertions.assertEquals(1L, (long) this.event_log.size());
-    final var event = this.eventFor(CoffeePickInventoryEventRuntimeLoadFailed.class, 0);
+    Assertions.assertEquals(1L, this.event_log.size());
+    final var event = this.eventFor(
+      CoffeePickInventoryEventRuntimeLoadFailed.class,
+      0);
     Assertions.assertEquals(
       "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
       event.id());
@@ -387,7 +412,9 @@ public abstract class CoffeePickInventoryContract
         .setVm("hotspot")
         .build();
 
-    inventory.write(description, stream -> stream.write("hello".getBytes(UTF_8)));
+    inventory.write(
+      description,
+      stream -> stream.write("hello".getBytes(UTF_8)));
     final var result = inventory.verify(HASH_VALUE);
     Assertions.assertTrue(result.isVerified());
     Assertions.assertEquals("SHA-256", result.expectedHash().algorithm());
@@ -415,7 +442,9 @@ public abstract class CoffeePickInventoryContract
         .setVm("hotspot")
         .build();
 
-    inventory.write(description, stream -> stream.write("hello".getBytes(UTF_8)));
+    inventory.write(
+      description,
+      stream -> stream.write("hello".getBytes(UTF_8)));
 
     Assertions.assertThrows(CancellationException.class, () -> {
       inventory.verify(HASH_VALUE, () -> true);

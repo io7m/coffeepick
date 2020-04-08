@@ -33,9 +33,9 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeDescriptionType;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.subjects.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

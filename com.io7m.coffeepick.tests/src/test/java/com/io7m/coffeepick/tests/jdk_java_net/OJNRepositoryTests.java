@@ -48,20 +48,28 @@ public final class OJNRepositoryTests
     Assertions.assertTimeout(Duration.ofSeconds(60L), () -> {
       final var repository = provider.openRepository(context);
       final var runtimes = repository.runtimes();
-      runtimes.values().forEach(description -> LOG.debug("runtime: {}", description));
+      runtimes.values().forEach(description -> LOG.debug(
+        "runtime: {}",
+        description));
 
       Assertions.assertEquals(9, runtimes.size());
       Assertions.assertTrue(
         runtimes.values().stream()
-          .anyMatch(run -> Objects.equals(run.platform(), PLATFORM_LINUX.platformName())),
+          .anyMatch(run -> Objects.equals(
+            run.platform(),
+            PLATFORM_LINUX.platformName())),
         "Linux present");
       Assertions.assertTrue(
         runtimes.values().stream()
-          .anyMatch(run -> Objects.equals(run.platform(), PLATFORM_MACOS.platformName())),
+          .anyMatch(run -> Objects.equals(
+            run.platform(),
+            PLATFORM_MACOS.platformName())),
         "MacOS present");
       Assertions.assertTrue(
         runtimes.values().stream()
-          .anyMatch(run -> Objects.equals(run.platform(), PLATFORM_WINDOWS.platformName())),
+          .anyMatch(run -> Objects.equals(
+            run.platform(),
+            PLATFORM_WINDOWS.platformName())),
         "Windows present");
     });
   }

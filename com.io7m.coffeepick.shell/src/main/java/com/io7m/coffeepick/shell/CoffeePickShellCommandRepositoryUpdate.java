@@ -22,7 +22,7 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateFailed;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateFinished;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateRunning;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventUpdateStarted;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import org.jline.builtins.Completers;
 
 import java.io.PrintWriter;

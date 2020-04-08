@@ -26,9 +26,9 @@ import com.io7m.coffeepick.runtime.RuntimeDescriptionType;
 import com.io7m.coffeepick.runtime.RuntimeDescriptions;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryBranding;
 import com.io7m.coffeepick.runtime.RuntimeRepositoryDescription;
-import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

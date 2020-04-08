@@ -31,7 +31,7 @@ module com.io7m.coffeepick.adoptopenjdk_v3
   requires com.io7m.coffeepick.runtime.database;
   requires com.io7m.coffeepick.runtime;
   requires com.io7m.junreachable.core;
-  requires io.reactivex.rxjava2;
+  requires io.reactivex.rxjava3;
   requires net.adoptopenjdk.v3.api;
   requires net.adoptopenjdk.v3.vanilla;
   requires org.slf4j;

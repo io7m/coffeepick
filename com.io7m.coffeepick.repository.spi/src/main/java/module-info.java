@@ -28,7 +28,7 @@ module com.io7m.coffeepick.repository.spi
   requires static org.osgi.service.component.annotations;
 
   requires com.io7m.coffeepick.runtime;
-  requires io.reactivex.rxjava2;
+  requires io.reactivex.rxjava3;
   requires java.net.http;
 
   uses com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderType;

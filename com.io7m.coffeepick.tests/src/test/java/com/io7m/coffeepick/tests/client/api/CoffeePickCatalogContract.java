@@ -28,8 +28,8 @@ import com.io7m.coffeepick.runtime.RuntimeConfiguration;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.RuntimeHash;
 import com.io7m.coffeepick.runtime.RuntimeVersions;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,7 +81,7 @@ public abstract class CoffeePickCatalogContract
     Mockito.when(repositories.events()).thenReturn(repo_events);
 
     final var catalog = this.catalog(this.events, http, context, repositories);
-    Assertions.assertEquals(0L, (long) catalog.searchAll().size());
+    Assertions.assertEquals(0L, catalog.searchAll().size());
   }
 
   @Test
@@ -117,13 +117,19 @@ public abstract class CoffeePickCatalogContract
     Mockito.when(provider.openRepository(context)).thenReturn(repository);
 
     Mockito.when(repository.provider()).thenReturn(provider);
-    Mockito.when(repository.runtimes()).thenReturn(Map.of(description.id(), description));
+    Mockito.when(repository.runtimes()).thenReturn(Map.of(
+      description.id(),
+      description));
 
     final var catalog = this.catalog(this.events, http, context, repositories);
-    repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(ADDED, provider));
+    repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(
+      ADDED,
+      provider));
 
-    Assertions.assertEquals(1L, (long) catalog.searchAll().size());
-    Assertions.assertEquals(description, catalog.searchExact(description.id()).get());
+    Assertions.assertEquals(1L, catalog.searchAll().size());
+    Assertions.assertEquals(
+      description,
+      catalog.searchExact(description.id()).get());
   }
 
   @Test
@@ -155,11 +161,17 @@ public abstract class CoffeePickCatalogContract
 
     final var repository = Mockito.mock(RuntimeRepositoryType.class);
     Mockito.when(repository.provider()).thenReturn(provider);
-    Mockito.when(repository.runtimes()).thenReturn(Map.of(description.id(), description));
+    Mockito.when(repository.runtimes()).thenReturn(Map.of(
+      description.id(),
+      description));
 
     final var catalog = this.catalog(this.events, http, context, repositories);
-    repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(ADDED, provider));
-    repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(REMOVED, provider));
-    Assertions.assertEquals(0L, (long) catalog.searchAll().size());
+    repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(
+      ADDED,
+      provider));
+    repo_events.onNext(RuntimeRepositoryProviderRegistryEvent.of(
+      REMOVED,
+      provider));
+    Assertions.assertEquals(0L, catalog.searchAll().size());
   }
 }

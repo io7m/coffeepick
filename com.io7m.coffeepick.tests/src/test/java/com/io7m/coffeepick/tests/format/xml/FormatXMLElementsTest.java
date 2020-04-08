@@ -68,7 +68,9 @@ public final class FormatXMLElementsTest
       final var transformer = transformers.newTransformer();
       transformer.setOutputProperty(OutputKeys.METHOD, "xml");
       transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-      transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "5");
+      transformer.setOutputProperty(
+        "{http://xml.apache.org/xslt}indent-amount",
+        "5");
 
       final var source = new DOMSource(document);
       final var result = new StreamResult(output);

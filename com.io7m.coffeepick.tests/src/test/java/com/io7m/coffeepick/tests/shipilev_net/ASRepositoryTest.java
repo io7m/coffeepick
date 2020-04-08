@@ -18,7 +18,6 @@ package com.io7m.coffeepick.tests.shipilev_net;
 
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.shipilev_net.ASRepositoryProvider;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,7 +26,6 @@ import java.io.IOException;
 import java.net.http.HttpClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CancellationException;
 
 public final class ASRepositoryTest
 {

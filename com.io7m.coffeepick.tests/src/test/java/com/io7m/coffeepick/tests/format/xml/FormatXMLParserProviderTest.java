@@ -114,7 +114,8 @@ public final class FormatXMLParserProviderTest
     Assertions.assertEquals(
       RuntimeHash.builder()
         .setAlgorithm("SHA-256")
-        .setValue("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")
+        .setValue(
+          "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")
         .build(),
       runtime.archiveHash());
 
@@ -126,7 +127,7 @@ public final class FormatXMLParserProviderTest
       "b23",
       runtime.build().get().buildNumber());
 
-    Assertions.assertEquals(0L, (long) event_log.size());
+    Assertions.assertEquals(0L, event_log.size());
   }
 
   @Test
@@ -155,13 +156,14 @@ public final class FormatXMLParserProviderTest
       repository.updated().get());
 
     final var runtimes = repository.runtimes();
-    Assertions.assertEquals(2L, (long) runtimes.size());
+    Assertions.assertEquals(2L, runtimes.size());
     Assertions.assertTrue(runtimes.containsKey(
       "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"));
 
     {
       final var runtime =
-        runtimes.get("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824");
+        runtimes.get(
+          "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824");
 
       Assertions.assertEquals(
         RuntimeConfiguration.JRE, runtime.configuration());
@@ -191,14 +193,16 @@ public final class FormatXMLParserProviderTest
       Assertions.assertEquals(
         RuntimeHash.builder()
           .setAlgorithm("SHA-256")
-          .setValue("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")
+          .setValue(
+            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")
           .build(),
         runtime.archiveHash());
     }
 
     {
       final var runtime =
-        runtimes.get("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9823");
+        runtimes.get(
+          "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9823");
 
       Assertions.assertEquals(
         RuntimeConfiguration.JDK, runtime.configuration());
@@ -207,7 +211,8 @@ public final class FormatXMLParserProviderTest
       Assertions.assertEquals(
         "x32", runtime.architecture());
       Assertions.assertEquals(
-        URI.create("https://www.example.com/jre2.tar.gz"), runtime.archiveURI());
+        URI.create("https://www.example.com/jre2.tar.gz"),
+        runtime.archiveURI());
       Assertions.assertEquals(
         200L, runtime.archiveSize());
       Assertions.assertEquals(
@@ -219,12 +224,13 @@ public final class FormatXMLParserProviderTest
       Assertions.assertEquals(
         RuntimeHash.builder()
           .setAlgorithm("SHA-256")
-          .setValue("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9823")
+          .setValue(
+            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9823")
           .build(),
         runtime.archiveHash());
     }
 
-    Assertions.assertEquals(0L, (long) event_log.size());
+    Assertions.assertEquals(0L, event_log.size());
   }
 
   @Test
@@ -241,7 +247,7 @@ public final class FormatXMLParserProviderTest
 
     final var event_log = logEvents(parser);
     Assertions.assertThrows(ParserFailureException.class, parser::parse);
-    Assertions.assertEquals(1L, (long) event_log.size());
+    Assertions.assertEquals(1L, event_log.size());
   }
 
   @Test
@@ -258,7 +264,7 @@ public final class FormatXMLParserProviderTest
 
     final var event_log = logEvents(parser);
     Assertions.assertThrows(ParserFailureException.class, parser::parse);
-    Assertions.assertEquals(1L, (long) event_log.size());
+    Assertions.assertEquals(1L, event_log.size());
   }
 
   @Test
@@ -275,6 +281,6 @@ public final class FormatXMLParserProviderTest
 
     final var event_log = logEvents(parser);
     Assertions.assertThrows(ParserFailureException.class, parser::parse);
-    Assertions.assertEquals(0L, (long) event_log.size());
+    Assertions.assertEquals(0L, event_log.size());
   }
 }

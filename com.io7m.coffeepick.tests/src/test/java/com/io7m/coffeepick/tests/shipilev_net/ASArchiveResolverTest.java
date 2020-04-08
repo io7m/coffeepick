@@ -69,7 +69,9 @@ public final class ASArchiveResolverTest
 
     Assertions.assertTrue(
       names.size() > 0,
-      String.format("Must have received more than 0 names (got %d)", Integer.valueOf(names.size())));
+      String.format(
+        "Must have received more than 0 names (got %d)",
+        Integer.valueOf(names.size())));
 
     final var runtimes =
       ASArchiveResolver.create(client)

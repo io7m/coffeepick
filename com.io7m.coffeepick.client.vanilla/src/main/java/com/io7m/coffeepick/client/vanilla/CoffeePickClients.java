@@ -38,9 +38,9 @@ import com.io7m.coffeepick.runtime.parser.api.CoffeePickParsersType;
 import com.io7m.coffeepick.runtime.parser.api.CoffeePickSerializersType;
 import com.io7m.coffeepick.runtime.parser.spi.FormatDescription;
 import com.io7m.coffeepick.runtime.parser.spi.FormatVersion;
-import io.reactivex.Observable;
-import io.reactivex.subjects.BehaviorSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.subjects.BehaviorSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 
 import java.io.IOException;
 import java.net.URI;

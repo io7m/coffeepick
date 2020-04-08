@@ -19,7 +19,7 @@ package com.io7m.coffeepick.runtime.format.xml;
 import com.io7m.coffeepick.runtime.parser.spi.ParseError;
 import com.io7m.coffeepick.runtime.parser.spi.ParserResultType;
 import com.io7m.jlexing.core.LexicalPosition;
-import io.reactivex.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;

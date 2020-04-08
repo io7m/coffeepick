@@ -30,7 +30,7 @@ module com.io7m.coffeepick.runtime.parser.api
   requires com.io7m.coffeepick.runtime.parser.spi;
   requires com.io7m.coffeepick.runtime;
   requires com.io7m.junreachable.core;
-  requires io.reactivex.rxjava2;
+  requires io.reactivex.rxjava3;
   requires org.slf4j;
 
   exports com.io7m.coffeepick.runtime.parser.api;

@@ -23,7 +23,7 @@ module com.io7m.coffeepick.runtime.parser.spi
 
   requires com.io7m.coffeepick.runtime;
   requires com.io7m.jlexing.core;
-  requires io.reactivex.rxjava2;
+  requires io.reactivex.rxjava3;
 
   exports com.io7m.coffeepick.runtime.parser.spi;
 }

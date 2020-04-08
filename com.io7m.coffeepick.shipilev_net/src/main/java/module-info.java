@@ -32,7 +32,7 @@ module com.io7m.coffeepick.shipilev_net
   requires com.io7m.coffeepick.repository.spi;
   requires com.io7m.coffeepick.runtime.database;
   requires com.io7m.coffeepick.runtime;
-  requires io.reactivex.rxjava2;
+  requires io.reactivex.rxjava3;
   requires java.net.http;
   requires org.apache.commons.compress;
   requires org.slf4j;

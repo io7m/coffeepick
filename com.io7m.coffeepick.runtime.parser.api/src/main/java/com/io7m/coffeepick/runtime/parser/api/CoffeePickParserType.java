@@ -19,7 +19,7 @@ package com.io7m.coffeepick.runtime.parser.api;
 import com.io7m.coffeepick.runtime.parser.spi.ParseError;
 import com.io7m.coffeepick.runtime.parser.spi.ParserFailureException;
 import com.io7m.coffeepick.runtime.parser.spi.ParserResultType;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 import java.io.Closeable;
 import java.io.IOException;

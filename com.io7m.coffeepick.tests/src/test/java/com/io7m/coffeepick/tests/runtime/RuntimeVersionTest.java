@@ -28,6 +28,17 @@ import java.util.stream.Stream;
 
 public final class RuntimeVersionTest
 {
+  private static void badString(final String input)
+  {
+    final var ex = Assertions.assertThrows(
+      IllegalArgumentException.class,
+      () -> {
+        RuntimeVersions.parse(input);
+      });
+
+    Assertions.assertTrue(ex.getMessage().contains(input));
+  }
+
   @Test
   public void testVersionMinimalString0()
     throws IOException
@@ -96,16 +107,5 @@ public final class RuntimeVersionTest
                String.format("testVersionsBad%s", input),
                () -> badString(input))
       );
-  }
-
-  private static void badString(final String input)
-  {
-    final var ex = Assertions.assertThrows(
-      IllegalArgumentException.class,
-      () -> {
-        RuntimeVersions.parse(input);
-      });
-
-    Assertions.assertTrue(ex.getMessage().contains(input));
   }
 }

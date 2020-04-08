@@ -20,7 +20,7 @@ import com.io7m.coffeepick.api.CoffeePickClientProviderType;
 import com.io7m.coffeepick.api.CoffeePickSearch;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryEventType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryProviderRegistryType;
-import io.reactivex.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,7 +86,7 @@ public abstract class CoffeePickClientsContract
           .build());
 
     final var runtimes = op.get(60L, TimeUnit.SECONDS);
-    Assertions.assertEquals(0L, (long) runtimes.size());
+    Assertions.assertEquals(0L, runtimes.size());
   }
 
   @Test

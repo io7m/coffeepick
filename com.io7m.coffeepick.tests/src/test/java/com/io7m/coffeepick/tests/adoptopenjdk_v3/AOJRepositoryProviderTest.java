@@ -20,7 +20,7 @@ import com.io7m.coffeepick.adoptopenjdk_v3.AOJRepositoryProvider;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryContextType;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoryEventType;
 import com.io7m.coffeepick.tests.TestDirectories;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

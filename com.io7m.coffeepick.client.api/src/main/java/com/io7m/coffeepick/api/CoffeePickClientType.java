@@ -20,7 +20,7 @@ import com.io7m.coffeepick.repository.spi.RuntimeRepositoryType;
 import com.io7m.coffeepick.runtime.RuntimeDescription;
 import com.io7m.coffeepick.runtime.parser.spi.FormatDescription;
 import com.io7m.coffeepick.runtime.parser.spi.FormatVersion;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 import java.io.Closeable;
 import java.net.URI;

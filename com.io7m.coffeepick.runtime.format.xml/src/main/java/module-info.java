@@ -31,7 +31,7 @@ module com.io7m.coffeepick.runtime.format.xml
   requires com.io7m.jlexing.core;
   requires com.io7m.junreachable.core;
   requires com.io7m.jxe.core;
-  requires io.reactivex.rxjava2;
+  requires io.reactivex.rxjava3;
   requires java.xml;
   requires org.slf4j;
 

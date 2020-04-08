@@ -16,7 +16,7 @@
 
 package com.io7m.coffeepick.repository.spi;
 
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 import net.jcip.annotations.ThreadSafe;
 import org.osgi.annotation.versioning.ConsumerType;
 

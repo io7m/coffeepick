@@ -30,7 +30,7 @@ module com.io7m.coffeepick.client.api
   requires com.io7m.coffeepick.runtime.parser.api;
   requires com.io7m.coffeepick.runtime.parser.spi;
   requires com.io7m.coffeepick.runtime;
-  requires io.reactivex.rxjava2;
+  requires io.reactivex.rxjava3;
   requires java.net.http;
 
   exports com.io7m.coffeepick.api;

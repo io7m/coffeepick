@@ -71,7 +71,9 @@ public final class CoffeePickParsersTest
           .setStream(stream)
           .build();
 
-      Assertions.assertThrows(ParserFailureException.class, () -> parsers.createParser(request));
+      Assertions.assertThrows(
+        ParserFailureException.class,
+        () -> parsers.createParser(request));
     }
   }
 

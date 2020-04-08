@@ -20,7 +20,7 @@ import com.io7m.coffeepick.api.CoffeePickInventoryEventType;
 import com.io7m.coffeepick.api.CoffeePickInventoryType;
 import com.io7m.coffeepick.client.vanilla.CoffeePickInventory;
 import com.io7m.coffeepick.tests.client.api.CoffeePickInventoryContract;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.subjects.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

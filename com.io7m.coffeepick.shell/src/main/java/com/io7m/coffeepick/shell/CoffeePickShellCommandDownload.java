@@ -21,7 +21,7 @@ import com.io7m.coffeepick.api.CoffeePickCatalogEventRuntimeDownloadFinished;
 import com.io7m.coffeepick.api.CoffeePickCatalogEventRuntimeDownloading;
 import com.io7m.coffeepick.api.CoffeePickCatalogEventType;
 import com.io7m.coffeepick.api.CoffeePickClientType;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import org.jline.builtins.Completers;
 
 import java.io.PrintWriter;

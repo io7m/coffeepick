@@ -52,7 +52,7 @@ public final class RuntimeDescriptionDatabaseTest
     throws IOException
   {
     final var database = RuntimeDescriptionDatabase.open(this.directory);
-    Assertions.assertEquals(0L, (long) database.descriptions().size());
+    Assertions.assertEquals(0L, database.descriptions().size());
   }
 
   @Test
@@ -73,15 +73,15 @@ public final class RuntimeDescriptionDatabaseTest
         .build();
 
     final var database0 = RuntimeDescriptionDatabase.open(this.directory);
-    Assertions.assertEquals(0L, (long) database0.descriptions().size());
+    Assertions.assertEquals(0L, database0.descriptions().size());
 
     database0.add(description);
-    Assertions.assertEquals(1L, (long) database0.descriptions().size());
-    Assertions.assertTrue(database0.descriptions().values().contains(description));
+    Assertions.assertEquals(1L, database0.descriptions().size());
+    Assertions.assertTrue(database0.descriptions().containsValue(description));
 
     final var database1 = RuntimeDescriptionDatabase.open(this.directory);
-    Assertions.assertEquals(1L, (long) database1.descriptions().size());
-    Assertions.assertTrue(database1.descriptions().values().contains(description));
+    Assertions.assertEquals(1L, database1.descriptions().size());
+    Assertions.assertTrue(database1.descriptions().containsValue(description));
   }
 
   @Test
@@ -102,11 +102,11 @@ public final class RuntimeDescriptionDatabaseTest
         .build();
 
     final var database0 = RuntimeDescriptionDatabase.open(this.directory);
-    Assertions.assertEquals(0L, (long) database0.descriptions().size());
+    Assertions.assertEquals(0L, database0.descriptions().size());
 
     database0.add(description);
-    Assertions.assertEquals(1L, (long) database0.descriptions().size());
-    Assertions.assertTrue(database0.descriptions().values().contains(description));
+    Assertions.assertEquals(1L, database0.descriptions().size());
+    Assertions.assertTrue(database0.descriptions().containsValue(description));
 
     Files.walk(this.directory)
       .filter(p -> Files.isRegularFile(p))
@@ -122,6 +122,6 @@ public final class RuntimeDescriptionDatabaseTest
       .forEach(p -> LOG.debug("path: {}", p));
 
     final var database1 = RuntimeDescriptionDatabase.open(this.directory);
-    Assertions.assertEquals(0L, (long) database1.descriptions().size());
+    Assertions.assertEquals(0L, database1.descriptions().size());
   }
 }

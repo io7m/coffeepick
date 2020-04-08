@@ -31,7 +31,7 @@ module com.io7m.coffeepick.jdk_java_net
 
   requires com.io7m.coffeepick.repository.spi;
   requires com.io7m.coffeepick.runtime;
-  requires io.reactivex.rxjava2;
+  requires io.reactivex.rxjava3;
   requires org.slf4j;
 
   provides RuntimeRepositoryProviderType with OJNRepositoryProvider;
