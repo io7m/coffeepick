@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<c:runtime xmlns:c="urn:com.io7m.coffeepick:xml:1.0"
+           configuration="jre"
+           platform="linux"
+           architecture="x64"
+           archive="https://www.example.com/jre.tar.gz"
+           archiveSize="100"
+           repository="urn:example"
+           version="11"
+           vm="hotspot">
+  <c:hash value="2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+          algorithm="SHA-256"/>
+  <c:tags>
+    <c:tag name="large-heap"/>
+    <c:tag name="production"/>
+  </c:tags>
+
+  <c:build number="b23"
+           time="2018-01-01T00:00:00+00:00"/>
+</c:runtime>

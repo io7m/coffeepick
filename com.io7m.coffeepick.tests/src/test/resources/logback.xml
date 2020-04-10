@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration xmlns="http://ch.qos.logback/xml/ns/logback">
+
+  <appender name="STDERR"
+            class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%level %logger: %msg%n</pattern>
+    </encoder>
+    <target>System.err</target>
+  </appender>
+
+  <logger name="com.io7m.coffeepick.shipilev_net.internal.ASFileList"
+          level="DEBUG"/>
+
+  <logger name="net.adoptopenjdk.v3"
+          level="INFO"/>
+
+  <root level="TRACE">
+    <appender-ref ref="STDERR"/>
+  </root>
+
+</configuration>
