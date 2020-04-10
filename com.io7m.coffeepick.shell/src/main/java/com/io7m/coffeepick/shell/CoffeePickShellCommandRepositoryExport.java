@@ -103,6 +103,7 @@ public final class CoffeePickShellCommandRepositoryExport implements CoffeePickS
     return node(this.name());
   }
 
+  // CHECKSTYLE:OFF
   private static final class Parameters
   {
     @Parameter(
@@ -120,6 +121,7 @@ public final class CoffeePickShellCommandRepositoryExport implements CoffeePickS
     @Parameter(description = "<repository>")
     private List<String> rest = new ArrayList<>(1);
 
+    // CHECKSTYLE:ON
     Parameters()
     {
 

@@ -25,6 +25,7 @@ import com.io7m.jade.api.ApplicationDirectories;
 import com.io7m.jade.spi.ApplicationDirectoryConfiguration;
 import org.jline.builtins.Completers.TreeCompleter;
 import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.MaskingCallback;
 import org.jline.reader.UserInterruptException;
@@ -37,8 +38,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -57,14 +60,14 @@ public final class CoffeePickShell
   }
 
   /**
-   * Command line entry point.
+   * Run the shell.
    *
    * @param args The command-line arguments
    *
-   * @throws IOException On I/O errors
+   * @throws IOException On errors
    */
 
-  public static void main(
+  public static void run(
     final String[] args)
     throws IOException
   {
@@ -93,7 +96,7 @@ public final class CoffeePickShell
       LOG.error("parameter error: {}", e.getMessage());
       commander.usage();
       LOG.info("usage: {}", console.stringBuilder().toString());
-      System.exit(1);
+      throw e;
     }
 
     final var root =
@@ -114,7 +117,6 @@ public final class CoffeePickShell
         final var clients = CoffeePickClients.createWith(repositories);
 
         try (var client = clients.newClient(directory)) {
-
           final var commands =
             List.of(
               new CoffeePickShellCommandCatalogList(client, writer),
@@ -131,9 +133,11 @@ public final class CoffeePickShell
               new CoffeePickShellCommandVersion(client, writer)
             );
 
-          final var commands_named =
+          final var commandsNamed =
             commands.stream()
-              .collect(Collectors.toMap(CoffeePickShellCommandType::name, Function.identity()));
+              .collect(Collectors.toMap(
+                CoffeePickShellCommandType::name,
+                Function.identity()));
 
           final var completer =
             new TreeCompleter(
@@ -141,8 +145,10 @@ public final class CoffeePickShell
                 .map(CoffeePickShellCommandType::completer)
                 .collect(Collectors.toList()));
 
-          final var history = new DefaultHistory();
-          final var parser = new DefaultParser();
+          final var history =
+            new DefaultHistory();
+          final var parser =
+            new DefaultParser();
 
           final var reader =
             LineReaderBuilder.builder()
@@ -153,51 +159,63 @@ public final class CoffeePickShell
               .history(history)
               .build();
 
-          while (true) {
-            String line = null;
-
-            try {
-              line = reader.readLine("[coffeepick]$ ", null, (MaskingCallback) null, null);
-            } catch (final UserInterruptException e) {
-              // Ignore
-            } catch (final EndOfFileException e) {
-              return;
-            }
-
-            if (line == null) {
-              continue;
-            }
-
-            line = line.trim();
-            if (line.isEmpty()) {
-              continue;
-            }
-
-            final var parsed = reader.getParser().parse(line, 0);
-            final var command_name = parsed.word();
-            if (!commands_named.containsKey(command_name)) {
-              writer.append("Unrecognized command: ");
-              writer.append(command_name);
-              writer.println();
-              writer.flush();
-              continue;
-            }
-
-            final var command = commands_named.get(command_name);
-            final var future = command.execute(parsed.words());
-
-            try {
-              future.get();
-            } catch (final InterruptedException e) {
-              Thread.currentThread().interrupt();
-            } catch (final ExecutionException e) {
-              writer.append("Error during command execution: ");
-              e.getCause().printStackTrace(writer);
-              writer.println();
-              writer.flush();
-            }
-          }
+          shellLoop(writer, commandsNamed, reader);
         }
+      }
+    }
+  }
+
+  private static void shellLoop(
+    final PrintWriter writer,
+    final Map<String, CoffeePickShellCommandType> commandsNamed,
+    final LineReader reader)
+  {
+    while (true) {
+      String line = null;
+
+      try {
+        line = reader.readLine(
+          "[coffeepick]$ ",
+          null,
+          (MaskingCallback) null,
+          null);
+      } catch (final UserInterruptException e) {
+        // Ignore
+      } catch (final EndOfFileException e) {
+        return;
+      }
+
+      if (line == null) {
+        continue;
+      }
+
+      line = line.trim();
+      if (line.isEmpty()) {
+        continue;
+      }
+
+      final var parsed = reader.getParser().parse(line, 0);
+      final var command_name = parsed.word();
+      if (!commandsNamed.containsKey(command_name)) {
+        writer.append("Unrecognized command: ");
+        writer.append(command_name);
+        writer.println();
+        writer.flush();
+        continue;
+      }
+
+      final var command = commandsNamed.get(command_name);
+      final var future = command.execute(parsed.words());
+
+      try {
+        future.get();
+      } catch (final InterruptedException e) {
+        Thread.currentThread().interrupt();
+      } catch (final ExecutionException e) {
+        writer.append("Error during command execution: ");
+        e.getCause().printStackTrace(writer);
+        writer.println();
+        writer.flush();
       }
     }
   }
@@ -228,6 +246,7 @@ public final class CoffeePickShell
       .build();
   }
 
+  // CHECKSTYLE:OFF
   private static final class Parameters
   {
     @Parameter(
@@ -237,10 +256,10 @@ public final class CoffeePickShell
       names = "--verbose")
     Level log_level = Level.INFO;
 
+    // CHECKSTYLE:ON
     Parameters()
     {
 
     }
   }
-
 }

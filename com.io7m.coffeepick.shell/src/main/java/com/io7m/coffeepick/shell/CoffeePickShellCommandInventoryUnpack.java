@@ -115,6 +115,7 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
     return node(this.name());
   }
 
+  // CHECKSTYLE:OFF
   private static final class Parameters
   {
     @Parameter(
@@ -138,6 +139,7 @@ public final class CoffeePickShellCommandInventoryUnpack implements CoffeePickSh
     @Parameter(description = "<id>")
     private List<String> rest = new ArrayList<>(1);
 
+    // CHECKSTYLE:ON
     Parameters()
     {
 
