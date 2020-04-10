@@ -8,7 +8,7 @@
   <parent>
     <artifactId>com.io7m.coffeepick</artifactId>
     <groupId>com.io7m.coffeepick</groupId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.0</version>
   </parent>
 
   <artifactId>com.io7m.coffeepick.runtime.format.xml</artifactId>
