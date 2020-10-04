@@ -8,10 +8,6 @@
          <img src="https://img.shields.io/maven-central/v/com.io7m.coffeepick/com.io7m.coffeepick.png?style=flat-square"
               alt="Maven Central"/>
       </a>
-      <a href="https://www.codacy.com/app/github_79/coffeepick">
-         <img src="https://img.shields.io/codacy/grade/0ead7b1c75ab43f9921929980d7dda43.png?style=flat-square"
-              alt="Codacy"/>
-      </a>
       <a href="https://codecov.io/gh/io7m/coffeepick">
          <img src="https://img.shields.io/codecov/c/github/io7m/coffeepick.png?style=flat-square"
               alt="Codecov"/>
