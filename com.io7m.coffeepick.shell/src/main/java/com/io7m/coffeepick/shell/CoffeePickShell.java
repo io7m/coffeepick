@@ -22,7 +22,7 @@ import com.beust.jcommander.ParameterException;
 import com.io7m.coffeepick.client.vanilla.CoffeePickClients;
 import com.io7m.coffeepick.repository.spi.RuntimeRepositoriesServiceLoaderProvider;
 import com.io7m.jade.api.ApplicationDirectories;
-import com.io7m.jade.spi.ApplicationDirectoryConfiguration;
+import com.io7m.jade.api.ApplicationDirectoryConfiguration;
 import org.jline.builtins.Completers.TreeCompleter;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
