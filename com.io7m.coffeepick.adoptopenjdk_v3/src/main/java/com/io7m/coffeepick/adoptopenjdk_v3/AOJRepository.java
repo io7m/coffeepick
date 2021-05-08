@@ -64,6 +64,10 @@ import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.function.BooleanSupplier;
 
+/**
+ * An AdoptOpenJDK runtime repository.
+ */
+
 public final class AOJRepository implements RuntimeRepositoryType
 {
   private static final Logger LOG =
@@ -97,6 +101,18 @@ public final class AOJRepository implements RuntimeRepositoryType
     this.description =
       Objects.requireNonNull(inDescription, "description");
   }
+
+  /**
+   * Create a repository.
+   *
+   * @param client   The client
+   * @param provider The repository provider
+   * @param context  The repository context
+   *
+   * @return A repository
+   *
+   * @throws IOException On I/O errors
+   */
 
   public static RuntimeRepositoryType create(
     final AOV3ClientType client,

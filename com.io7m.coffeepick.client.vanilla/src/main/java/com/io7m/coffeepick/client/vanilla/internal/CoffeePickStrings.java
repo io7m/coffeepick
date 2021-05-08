@@ -77,10 +77,23 @@ public final class CoffeePickStrings
     return new CoffeePickStrings(bundle);
   }
 
+  /**
+   * @return The underlying resource bundle
+   */
+
   public ResourceBundle resourceBundle()
   {
     return this.resourceBundle;
   }
+
+  /**
+   * Format a message.
+   *
+   * @param id   The message ID
+   * @param args The message arguments
+   *
+   * @return A formatted message
+   */
 
   public String format(
     final String id,
@@ -98,11 +111,23 @@ public final class CoffeePickStrings
     );
   }
 
+  /**
+   * @param id The string ID
+   *
+   * @return A formatted message
+   */
+
   public String inventoryDelete(
     final String id)
   {
     return this.format("task.inventoryDelete", id);
   }
+
+  /**
+   * @param id The string ID
+   *
+   * @return A formatted message
+   */
 
   public String inventoryVerify(
     final String id)
@@ -110,15 +135,29 @@ public final class CoffeePickStrings
     return this.format("task.inventoryVerify", id);
   }
 
+  /**
+   * @return A formatted message
+   */
+
   public String inventorySearch()
   {
     return this.format("task.inventorySearch");
   }
 
+  /**
+   * @return A formatted message
+   */
+
   public String catalogSearch()
   {
     return this.format("task.catalogSearch");
   }
+
+  /**
+   * @param id The string ID
+   *
+   * @return A formatted message
+   */
 
   public String catalogDownload(
     final String id)
@@ -126,11 +165,24 @@ public final class CoffeePickStrings
     return this.format("task.catalogDownload", id);
   }
 
+  /**
+   * @param id The string ID
+   *
+   * @return A formatted message
+   */
+
   public String inventoryPathOf(
     final String id)
   {
     return this.format("task.inventoryPath", id);
   }
+
+  /**
+   * @param id   The string ID
+   * @param path The unpack path
+   *
+   * @return A formatted message
+   */
 
   public String inventoryUnpack(
     final String id,
@@ -139,21 +191,43 @@ public final class CoffeePickStrings
     return this.format("task.inventoryUnpack", id, path);
   }
 
+  /**
+   * @param uri The URI
+   *
+   * @return A formatted message
+   */
+
   public String repositoryUpdate(final URI uri)
   {
     return this.format("task.repositoryUpdate", uri);
   }
+
+  /**
+   * @return A formatted message
+   */
 
   public String repositoryList()
   {
     return this.format("task.repositoryList");
   }
 
+  /**
+   * @param repository  The repository URI
+   * @param format      The format URI
+   * @param output_path The output path
+   *
+   * @return A formatted message
+   */
+
   public String repositoryExport(
     final URI repository,
     final URI format,
     final Path output_path)
   {
-    return this.format("task.repositoryExport", repository, format, output_path);
+    return this.format(
+      "task.repositoryExport",
+      repository,
+      format,
+      output_path);
   }
 }

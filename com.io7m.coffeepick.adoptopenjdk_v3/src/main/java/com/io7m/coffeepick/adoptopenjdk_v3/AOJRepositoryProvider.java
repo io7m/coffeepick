@@ -27,6 +27,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Objects;
 
+/**
+ * An AdoptOpenJDK repository provider.
+ */
+
 @Component(service = RuntimeRepositoryProviderType.class)
 public final class AOJRepositoryProvider
   implements RuntimeRepositoryProviderType
