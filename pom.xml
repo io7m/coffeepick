@@ -39,7 +39,7 @@
 
   <properties>
     <com.codacy.id>0ead7b1c75ab43f9921929980d7dda43</com.codacy.id>
-    <com.io7m.jade.version>1.0.1</com.io7m.jade.version>
+    <com.io7m.jade.version>1.0.2</com.io7m.jade.version>
     <io7m.api.previousVersion>0.2.0-SNAPSHOT</io7m.api.previousVersion>
     <net.adoptopenjdk.v3.version>0.4.0</net.adoptopenjdk.v3.version>
     <org.immutables.version>2.8.8</org.immutables.version>
