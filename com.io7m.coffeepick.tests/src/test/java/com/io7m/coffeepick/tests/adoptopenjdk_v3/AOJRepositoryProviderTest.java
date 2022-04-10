@@ -24,6 +24,7 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -65,6 +66,7 @@ public final class AOJRepositoryProviderTest
   }
 
   @Test
+  @Disabled("As fun as it would be to run this test... It takes too long.")
   public void testOpen()
     throws Exception
   {
